@@ -28,15 +28,16 @@ ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher �
 
 **Munitions** : aucun compteur à l'écran. R bref = recharger ; R maintenu = l'arme se penche et le compte s'affiche à côté d'elle (X maintenu à la manette). Aucun viseur ni point de visée : seuls les organes de visée comptent.
 
-**Drone FPV — simulateur** (physique à 240 Hz : inertie des moteurs, traînée, effet de sol, tension qui s'affaisse, dégâts d'hélices) :
-- Le drone part posé au sol, moteurs coupés. Il s'arme à la montée des gaz ; X arme / désarme, et le retourne s'il est sur le dos.
-- T change de mode : ANGLE (stabilisé, maintien d'altitude), HORIZON (se remet à plat stick relâché, loopings possibles), ACRO (aucune aide).
-- Clavier en ANGLE : Z/S tangage · Q/D roulis · A/E ou souris lacet · Espace/C monter / descendre.
-- Clavier en HORIZON / ACRO : souris tangage / roulis · Z/S manette des gaz (elle reste en place) · Q/D lacet · C couper les gaz.
-- ↑/↓ inclinaison de la caméra · G rendre la main (le drone tient sa position) · F rappel.
-- Un choc abîme les hélices (vibrations, perte de poussée) ; un impact violent détruit le drone.
+**Drone de reconnaissance « CORBEAU-1 »** (physique : inertie, accélération limitée, traînée, vent, effet de sol, châssis qui s'incline pour accélérer ; caméra sur nacelle stabilisée) :
+- G : lancer le drone depuis la main, puis prendre ou rendre le contrôle (le drone tient sa position).
+- ZQSD déplacement · Espace monter · Ctrl (ou C) descendre · Maj accélérer · souris : cap et inclinaison de la caméra · molette ou +/− : zoom ×1 à ×8 · F : rappel automatique · Échap : quitter le mode drone (un clic reprend).
+- Télémétrie : identité, état, structure, cap, altitude (et hauteur sol), vitesse, batterie (tension, autonomie estimée), liaison (qualité, RSSI, distance, vue directe), caméra (EO, zoom, inclinaison, REC), cibles visibles.
+- Liaison : elle baisse avec la distance et les obstacles ; perdue, le drone revient seul vers l'opérateur. Batterie critique : atterrissage automatique.
+- Dégâts : tirs des joueurs et des bots (qui repèrent et entendent les drones), chocs contre le décor. À 0 % le drone part en chute, puis explose à l'impact (flash, boule de feu, fumée, éclats, débris, onde de choc, brûlure, feu résiduel, son retardé selon la distance, secousse si l'opérateur est proche). Délai de 20 s avant un nouveau drone.
+- L'explosion est un effet visuel et sonore : elle n'inflige aucun dégât.
+- Clavier QWERTY : utilise C plutôt que Ctrl pour descendre (Ctrl+W ferme l'onglet et le navigateur ne permet pas de l'empêcher).
 
-**Manette** (Xbox / PlayStation, disposition standard) : stick gauche bouger · stick droit viser · RT tir · LT visée · A saut · B accroupi · X recharger (maintenu : chargeur) · Y arme suivante · LB/RB se pencher · L3 sprint · R3 inspecter · croix ↑ drone, ↓ lampe, ←/→ arme · Start menu · Select scores. En drone, mode 2 : gaz/lacet à gauche, tangage/roulis à droite · A armer · Y mode de vol · LB/RB caméra.
+**Manette** (Xbox / PlayStation, disposition standard) : stick gauche bouger · stick droit viser · RT tir · LT visée · A saut · B accroupi · X recharger (maintenu : chargeur) · Y arme suivante · LB/RB se pencher · L3 sprint · R3 inspecter · croix ↑ drone, ↓ lampe, ←/→ arme · Start menu · Select scores. En drone : stick gauche déplacement · stick droit caméra · RT/LT monter/descendre · L3 accélérer · croix ←/→ zoom · ↓ rappel · B quitter.
 
 ## Connexion Discord
 Le menu « Opérateur » propose « Se connecter avec Discord » (OAuth2 *implicit grant*, scope `identify` : pseudo et avatar, aucun secret dans le jeu).
