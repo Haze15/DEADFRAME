@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<rect width="256" height="256" rx="44" fill="#0a0b0c"/>
+<defs><clipPath id="k"><rect width="256" height="118"/><rect y="138" width="256" height="118"/></clipPath>
+<clipPath id="b"><rect y="118" width="256" height="20"/></clipPath></defs>
+<path d="M30,74 V30 H74" stroke="#e9e6df" fill="none" stroke-width="9" stroke-linecap="square"/><path d="M30,182 V226 H74" stroke="#e9e6df" fill="none" stroke-width="9" stroke-linecap="square"/><path d="M226,182 V226 H182" stroke="#e9e6df" fill="none" stroke-width="9" stroke-linecap="square"/><path d="M182,30 H226 V74" stroke="#e5291f" fill="none" stroke-width="9" stroke-linecap="square" transform="translate(6,-5) rotate(9 226 30)"/>
+<path d="M10,10 H50 L80,40 V90 L50,120 H10 Z" transform="translate(38.0,70.0) scale(0.9)" fill="none" stroke="#e9e6df" stroke-width="22" stroke-linejoin="miter" stroke-miterlimit="2" />
+<g clip-path="url(#k)"><path d="M82,10 H10 V122 M10,65 H64" transform="translate(140.0,70.0) scale(0.9)" fill="none" stroke="#e9e6df" stroke-width="22" stroke-linejoin="miter" stroke-miterlimit="2" /></g>
+<g clip-path="url(#b)"><g transform="translate(-6,0)"><path d="M82,10 H10 V122 M10,65 H64" transform="translate(140.0,70.0) scale(0.9)" fill="none" stroke="#39d5d0" stroke-width="22" stroke-linejoin="miter" stroke-miterlimit="2" /></g><g transform="translate(12,0)"><path d="M82,10 H10 V122 M10,65 H64" transform="translate(140.0,70.0) scale(0.9)" fill="none" stroke="#e5291f" stroke-width="22" stroke-linejoin="miter" stroke-miterlimit="2" /></g></g>
+<circle cx="52" cy="52" r="9" fill="#e5291f"/>
+</svg>
