@@ -226,9 +226,46 @@ def pack_prims(P, N, UV, MAT, IDX, extra=None):
     return V, IDX.astype(np.uint32).ravel(), prims
 
 
-def convert_static(src, name, outdir, target, tex=1024, fix=None, skip_mats=(), lods=()):
+def soldier_rig(P):
+    """Squelette procédural (le modèle n'en a pas) : poids calculés d'après la position, pose en A.
+    Os : 0 bassin, 1 buste, 2 tête, 3/4 bras G haut/avant, 5/6 bras D, 7/8 jambe G cuisse/tibia, 9/10 jambe D."""
+    x, y = P[:, 0], P[:, 1]
+    ax, n = np.abs(x), len(P)
+    def ss(a, b, v):
+        t = np.clip((v - a) / (b - a), 0, 1)
+        return t * t * (3 - 2 * t)
+    side = (x > 0).astype(int)
+    J = np.zeros((n, 4)); W = np.zeros((n, 4))
+    c = ss(1.0, 1.2, y)
+    J[:, 0] = 1; W[:, 0] = c; W[:, 1] = 1 - c
+    h = ss(1.50, 1.58, y) * (ax < .17)
+    m = h > 0
+    J[m, 0] = 2; J[m, 1] = 1; W[m, 0] = h[m]; W[m, 1] = 1 - h[m]
+    s_, t_ = ss(.80, .95, y), ss(.53, .41, y)
+    thigh, shin = 7 + 2 * side, 8 + 2 * side
+    m = (y < .95) & (y >= .6)
+    J[m, 0] = thigh[m]; J[m, 1] = 0; W[m, 0] = 1 - s_[m]; W[m, 1] = s_[m]
+    m = y < .6
+    J[m, 0] = shin[m]; J[m, 1] = thigh[m]; W[m, 0] = t_[m]; W[m, 1] = 1 - t_[m]
+    inner = np.where(y < 1.3, .29, .29 - (y - 1.3) * .2)
+    a = ss(-.05, .05, ax - inner)
+    hand = (y < .98) & (ax > .31)
+    a = np.where(hand, 1., np.where(y < .98, 0., a))
+    a = np.where((y > .70) & (y < 1.53), a, 0.)
+    e = ss(1.18, 1.06, y)
+    m = a > 0
+    body = np.where(c > .5, 1, 0)
+    J[m, 0] = (4 + 2 * side)[m]; J[m, 1] = (3 + 2 * side)[m]; J[m, 2] = body[m]; J[m, 3] = 0
+    W[m, 0] = (a * e)[m]; W[m, 1] = (a * (1 - e))[m]; W[m, 2] = (1 - a)[m]; W[m, 3] = 0
+    return np.concatenate([J, W / W.sum(1, keepdims=True)], 1)
+
+
+def convert_static(src, name, outdir, target, tex=1024, fix=None, skip_mats=(), lods=(), cut=None, rig=None):
     g = GLB(src)
     P, N, UV, MAT, IDX, mats = gather_static(g, skip_mats)
+    if cut is not None:  # supprime les triangles dans une boîte (espace d'origine)
+        inb = np.all((P >= np.array(cut[0])) & (P <= np.array(cut[1])), 1)
+        IDX = IDX[~inb[IDX].any(1)]
     if fix is not None:  # matrice 4x4 : espace modèle -> espace jeu (mètres, -Z = avant, Y = haut)
         F = np.asarray(fix, float)
         P = P @ F[:3, :3].T + F[:3, 3]
@@ -247,8 +284,8 @@ def convert_static(src, name, outdir, target, tex=1024, fix=None, skip_mats=(), 
                     lo = mid
                 else:
                     hi = mid; p, n, uv, mat, idx = r
-        V, I, prims = pack_prims(p, n, uv, mat, idx)
-        meta = {'skinned': False, 'stride': 8, 'prims': prims, 'bbox': [p.min(0).round(4).tolist(), p.max(0).round(4).tolist()],
+        V, I, prims = pack_prims(p, n, uv, mat, idx, rig(p) if rig else None)
+        meta = {'skinned': bool(rig), 'stride': 16 if rig else 8, 'rig': 11 if rig else 0, 'prims': prims, 'bbox': [p.min(0).round(4).tolist(), p.max(0).round(4).tolist()],
                 'mats': export_textures(g, mats, name, outdir, tex) if suffix == '' else res[0][1]['mats'],
                 'credit': g.j['asset'].get('extras', {})}
         sz = write_dfm(f'{outdir}/{name}{suffix}.dfm', meta, [('vtx', V), ('idx', I)])
@@ -385,11 +422,12 @@ if __name__ == '__main__':
     if 'soldier' in which:
         S = 1.8 / .98
         convert_static(U + '40bcf9f8-modern_tactical_soldier.glb', 'soldier', out, 36000, 1024,
-                       fix=[[0, 0, S, 0], [0, S, 0, .49 * S], [-S, 0, 0, 0], [0, 0, 0, 1]])  # face à -Z, pieds à y=0, 1,80 m
+                       fix=[[0, 0, S, 0], [0, S, 0, .49 * S], [-S, 0, 0, 0], [0, 0, 0, 1]], rig=soldier_rig)  # face à -Z, pieds à y=0, 1,80 m
     if 'pistol' in which:
         convert_static(U + 'ccae6623-pistol_43_tactical__free_lowpoly.glb', 'pistol', out, 99999, 1024)
     if 'hk416' in which:
-        convert_static(U + 'hk416_full_reworked.glb', 'hk416', out, 110000, 1024, lods=[('_lod', 3500)], skip_mats=('Glass',))
+        convert_static(U + 'hk416_full_reworked.glb', 'hk416', out, 110000, 1024, lods=[('_lod', 3500)], skip_mats=('Glass',),
+                       cut=([-1, .0298, .0105], [1, 1, .0278]))  # retire la hausse rabattable qui masquait le viseur holographique
     if 'aks74' in which:
         convert_skinned(U + '817a8f72-stalker_aks-74_reanimation.glb', 'aks74', out, 1024, skip_mats=('wpn_upgrade_S', 'wpn_vog_S'))
     if 'akm' in which:

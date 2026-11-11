@@ -10,8 +10,8 @@ try:
         pg = b.new_page(viewport={'width': W, 'height': H}); logs=[]
         pg.on('console', lambda m: logs.append(m.type+': '+m.text) if m.type in('error','warning') and 'ReadPixels' not in m.text else None); pg.on('pageerror', lambda e: logs.append('PAGEERROR '+str(e)))
         pg.goto('http://localhost:7804/'); pg.wait_for_timeout(1500)
-        pg.evaluate("()=>{DF.CFG.scale=1;DF.CFG.bots=3;window.dispatchEvent(new Event('resize'))}"); pg.click('#go'); pg.wait_for_timeout(1500)
-        pg.evaluate("()=>{DF.me.pos=[-6,0,-8];DF.me.vel=[0,0,0];DF.setLook(.6,0);window.__hold=setInterval(()=>{if(window.__f)window.__f()},16)}")
+        pg.evaluate("()=>{DF.CFG.scale=1;DF.CFG.bots=1;window.dispatchEvent(new Event('resize'))}"); pg.click('#go'); pg.wait_for_timeout(1500)
+        pg.evaluate("()=>{DF.me.pos=[-6,0,-8];window.__hold=setInterval(()=>{if(window.__f)window.__f()},16)}")
         for i, st in enumerate(steps):
             pg.evaluate('(c)=>{window.__f=new Function(c);window.__f()}', st['js']); pg.wait_for_timeout(st.get('wait',900)); pg.screenshot(path=f'/tmp/w_{i}.png')
         print('\n'.join(logs[:12])); b.close()

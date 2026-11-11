@@ -10,9 +10,17 @@ FPS « bodycam » : caméra de poitrine fisheye, visée libre sans viseur, drone
   - Premier lancement : autoriser le pare-feu ; SmartScreen peut avertir (exe non signé) → « Informations complémentaires » → « Exécuter quand même ».
   - Options : `DEADFRAME.exe -port 9000 -noopen` (serveur dédié).
 
+## Cartes
+Dépôt industriel · Hôpital abandonné · Tranchées · Hôtel — choix dans le menu (en multijoueur, c'est l'hôte qui choisit).
+
 ## Commandes (clavier AZERTY)
 ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher · clic gauche tir · clic droit visée · R recharger · 1–4 arme (HK416, AKS-74, AKM, P43) · V inspecter l'arme · F lampe · G drone · Tab scores · Échap menu.
-Drone : ZQSD, Espace/C altitude, G reprendre la main, F rappel.
+
+**Drone FPV** (physique de quadricoptère) : Z/S tangage · Q/D roulis · A/E ou souris lacet · Espace/C gaz · T bascule ASSISTÉ (stabilisé, maintien d'altitude) / ACRO (taux purs, gaz manuels) · G rendre la main · F rappel. Un choc à plus de ~30 km/h détruit le drone.
+
+**Manette** (Xbox / PlayStation, disposition standard) : stick gauche bouger · stick droit viser · RT tir · LT visée · A saut · B accroupi · X recharger · Y arme suivante (mode de vol en drone) · LB/RB se pencher · L3 sprint · R3 inspecter · croix ↑ drone, ↓ lampe, ←/→ arme · Start menu · Select scores. En drone : mode 2 (gaz/lacet à gauche, tangage/roulis à droite).
+
+Le point rouge à l'écran montre où pointe réellement le canon (désactivable dans le menu : « Point de visée »).
 
 ## Structure
 | Chemin | Rôle |
@@ -32,7 +40,7 @@ GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o download/DEADFR
 
 ## Limites connues
 - Rendu stylisé (décors en blocs, textures procédurales, pas d'ombres portées).
-- Le soldat n'a pas de squelette : marche simulée par déformation des jambes.
+- Le soldat n'a pas de squelette d'origine : un squelette de 11 os est généré automatiquement (`tools/convert.py`) et animé par le jeu (marche, visée, accroupi) ; les épaules se déforment un peu.
 - AKM : seul le fusil est utilisé (les bras du fichier d'origine sont inexploitables) ; l'AKS-74 a ses bras et animations d'origine.
 - Réseau : relais simple, dégâts déclarés par le tireur (pas d'anti-triche). Par Internet : rediriger le port 7777 ou VPN type LAN.
 

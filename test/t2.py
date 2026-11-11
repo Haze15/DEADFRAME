@@ -21,6 +21,8 @@ try:
         A.wait_for_timeout(2500)
         print('A', A.evaluate('()=>({on:DF.online,host:DF.host,players:Object.values(DF.players).map(p=>[p.name,p.alive]),bots:DF.bots.length})'))
         print('B', B.evaluate('()=>({on:DF.online,host:DF.host,players:Object.values(DF.players).map(p=>[p.name,p.alive]),bots:DF.bots.map(b=>[b.alive,Math.round(b.pos[0]),Math.round(b.pos[2])])})'))
+        (A if A.evaluate('()=>DF.host') else B).evaluate('()=>DF.loadMap(3)'); A.wait_for_timeout(2500)
+        print('carte A/B', A.evaluate('()=>DF.map'), B.evaluate('()=>DF.map'))
         # place A face à B dans une zone dégagée ; bots éloignés gelés via hp
         A.evaluate('()=>{DF.me.pos=[30,0,36];DF.me.vel=[0,0,0];DF.setLook(Math.PI/2,0)}')   # regarde vers -x
         B.evaluate('()=>{DF.me.pos=[36,0,39.5];DF.me.vel=[0,0,0]}')
