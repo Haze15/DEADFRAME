@@ -1,0 +1,79 @@
+# Bot « DEADFRAME Updates » : publie dans Discord chaque push sur main et chaque release.
+# Secrets à créer dans le dépôt (Settings → Secrets and variables → Actions) :
+#   DISCORD_WEBHOOK_UPDATES  → webhook du salon #github-updates (chaque commit)
+#   DISCORD_WEBHOOK_PATCH    → webhook du salon #patch-notes (releases) — facultatif,
+#                              sinon les releases partent aussi dans #github-updates
+name: Discord updates
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Envoyer vers Discord
+        env:
+          HOOK_UPDATES: ${{ secrets.DISCORD_WEBHOOK_UPDATES }}
+          HOOK_PATCH: ${{ secrets.DISCORD_WEBHOOK_PATCH }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPO: ${{ github.repository }}
+          SERVER: ${{ github.server_url }}
+        run: |
+          set -euo pipefail
+          EV="$GITHUB_EVENT_PATH"
+          AVATAR="https://raw.githubusercontent.com/${REPO}/main/logo/DEADFRAME-icon.png"
+          SITE="https://$(echo "${REPO%%/*}" | tr 'A-Z' 'a-z').github.io/${REPO#*/}/"
+
+          if [ "$EVENT_NAME" = "release" ]; then
+            HOOK="${HOOK_PATCH:-$HOOK_UPDATES}"
+            BODY=$(jq -n --slurpfile e "$EV" --arg avatar "$AVATAR" --arg site "$SITE" '
+              $e[0].release as $r |
+              {
+                username: "DEADFRAME Updates",
+                avatar_url: $avatar,
+                content: "📦 **Nouvelle version disponible !**",
+                embeds: [{
+                  title: ("DEADFRAME " + ($r.name // $r.tag_name)),
+                  url: $r.html_url,
+                  color: 15018784,
+                  description: (($r.body // "Pas de notes de version.") | .[0:3800]),
+                  fields: [
+                    {name: "Jouer dans le navigateur", value: $site, inline: true},
+                    {name: "Multijoueur (Windows)", value: ($r.html_url), inline: true}
+                  ],
+                  footer: {text: "Tag " + $r.tag_name},
+                  timestamp: $r.published_at
+                }]
+              }')
+          elif [ "$EVENT_NAME" = "push" ]; then
+            HOOK="$HOOK_UPDATES"
+            COUNT=$(jq '.commits | length' "$EV")
+            [ "$COUNT" -eq 0 ] && { echo "Aucun commit."; exit 0; }
+            BODY=$(jq -n --slurpfile e "$EV" --arg avatar "$AVATAR" '
+              $e[0] as $p |
+              {
+                username: "DEADFRAME Updates",
+                avatar_url: $avatar,
+                embeds: [{
+                  title: ("🔧 " + ($p.commits | length | tostring) + " modification(s) sur " + ($p.ref | sub("refs/heads/"; ""))),
+                  url: $p.compare,
+                  color: 3856345,
+                  description: ([$p.commits[-10:][] |
+                    "[`" + .id[0:7] + "`](" + .url + ") " + (.message | split("\n")[0] | .[0:120]) + " — " + .author.name
+                  ] | join("\n")),
+                  footer: {text: $p.repository.full_name},
+                  timestamp: $p.head_commit.timestamp
+                }]
+              }')
+          else
+            HOOK="$HOOK_UPDATES"
+            BODY=$(jq -n --arg avatar "$AVATAR" '{username: "DEADFRAME Updates", avatar_url: $avatar, content: "✅ Le bot DEADFRAME Updates est bien branché."}')
+          fi
+
+          if [ -z "$HOOK" ]; then echo "::error::Secret DISCORD_WEBHOOK_UPDATES manquant"; exit 1; fi
+          curl -fsS -H "Content-Type: application/json" -d "$BODY" "$HOOK"
