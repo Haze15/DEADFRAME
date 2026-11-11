@@ -10,6 +10,16 @@ FPS « bodycam » : caméra de poitrine fisheye, visée libre sans viseur, drone
   - Premier lancement : autoriser le pare-feu ; SmartScreen peut avertir (exe non signé) → « Informations complémentaires » → « Exécuter quand même ».
   - Options : `DEADFRAME.exe -port 9000 -noopen` (serveur dédié).
 
+## Menu principal
+- **DEPLOY** : zone d'opération (la scène en arrière-plan suit la carte choisie), nombre d'hostiles, adresse réseau à donner aux amis, bouton Déployer (ou Entrée).
+- **LOADOUT** : arme en main à chaque insertion (les quatre restent accessibles en jeu avec 1–4) et dotation fixe.
+- **OPERATORS** : indicatif, niveau, grade, états de service, connexion Discord.
+- **MISSIONS** : 12 contrats permanents suivis sur toutes les parties (éliminations par arme, par carte, tirs à la tête, série, temps de vol du drone), chacun récompensé en XP.
+- **SETTINGS** : affichage, contrôles, audio, touches, crédits.
+- **QUIT** : en partie, « Quitter la partie » ramène au menu ; « Quitter le jeu » ferme la fenêtre et, avec `DEADFRAME.exe`, arrête aussi le serveur (uniquement depuis le PC qui l'héberge).
+- Progression : 100 XP par élimination, +50 à la tête, plus les contrats. Grades de Recrue (niv. 1) à Major (niv. 42). Enregistrée dans le navigateur (localStorage) : elle ne suit pas d'un navigateur ou d'un PC à l'autre.
+- Navigation : souris, ↑/↓ + Entrée, ou croix de la manette + A.
+
 ## Cartes
 Dépôt industriel · Hôpital abandonné · Tranchées · Hôtel — choix dans le menu (en multijoueur, c'est l'hôte qui choisit).
 

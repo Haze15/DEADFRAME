@@ -281,6 +281,19 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]any{"urls": lanURLs(), "players": n})
 	})
 	mux.Handle("/assets/", http.FileServer(http.FS(assetsFS)))
+	// QUIT depuis le menu : arrête le serveur, uniquement à la demande du joueur local (pas des autres joueurs du réseau)
+	mux.HandleFunc("/quit", func(w http.ResponseWriter, r *http.Request) {
+		host, _, _ := net.SplitHostPort(r.RemoteAddr)
+		ip := net.ParseIP(host)
+		origin := r.Header.Get("Origin")
+		if r.Method != http.MethodPost || ip == nil || !ip.IsLoopback() || (origin != "" && origin != "http://"+r.Host) {
+			http.Error(w, "refusé", http.StatusForbidden)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+		fmt.Println("  Arrêt demandé depuis le menu. À bientôt.")
+		go func() { time.Sleep(300 * time.Millisecond); os.Exit(0) }()
+	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)

@@ -12,5 +12,8 @@ Les modèles ont été modifiés pour le jeu : conversion au format `.dfm`, déc
 | Arme 3 (AKM) | AKM reload animation | Vlasov Daniil | https://sketchfab.com/3d-models/akm-reload-animation-5e5b027e946c45658eea4342876645f8 |
 | Arme 4 (P43) | Pistol 43 Tactical \| Free Lowpoly | Vlasov Daniil | https://sketchfab.com/3d-models/pistol-43-tactical-free-lowpoly-ec43fa0124084f739887e322646912bf |
 
+## Polices
+Barlow, Barlow Condensed (Jeremy Tribby) et IBM Plex Mono (IBM) — SIL Open Font License 1.1, chargées depuis Google Fonts. Sans connexion internet, le jeu utilise Bahnschrift (Windows) ou la police système.
+
 ## Code, logo, carte, sons
 Créés pour DEADFRAME (moteur WebGL2 sans dépendance, audio procédural).

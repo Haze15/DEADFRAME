@@ -5,6 +5,8 @@
 <title>DEADFRAME</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="%%ICON%%">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{--bone:#e9e6df;--red:#e5291f;--bg:#0a0b0c;--dim:#8d8a83;--ui:"Bahnschrift","DIN Condensed","Roboto Condensed","Arial Narrow",system-ui,sans-serif;--mono:Consolas,"SF Mono",Menlo,"DejaVu Sans Mono",monospace}
 *{box-sizing:border-box}
@@ -34,90 +36,234 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #score th{color:var(--dim);font-size:11px;letter-spacing:.15em}
 #score td:nth-child(n+2),#score th:nth-child(n+2){text-align:right;width:70px}
 #score tr.me td{color:#fff;background:#ffffff0d}
-#menu{position:fixed;inset:0;display:grid;grid-template-columns:minmax(300px,400px) 1fr;background:linear-gradient(90deg,#0a0b0cf5 0,#0a0b0ce6 400px,#0a0b0c8c 62%,#0a0b0c59 100%);overflow:hidden}
-.side{display:flex;flex-direction:column;padding:34px 30px 22px;border-right:1px solid #ffffff14;min-height:0;overflow:auto}
-.side svg.logo{width:100%;height:auto;display:block;margin:0 0 2px -6px}
-.tag{font:400 11px var(--mono);letter-spacing:.3em;color:var(--dim);text-transform:uppercase;margin-bottom:30px}
-#tabs{display:flex;flex-direction:column;gap:2px;margin-bottom:auto}
-#tabs button{all:unset;cursor:pointer;font:600 19px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:#a09c94;padding:10px 12px;border-left:3px solid transparent;transition:color .12s,background .12s}
-#tabs button:hover{color:var(--bone);background:#ffffff08}
-#tabs button.on{color:#fff;border-left-color:var(--red);background:#ffffff0d}
-#tabs button:focus-visible,.mapc:focus-visible,.dcb:focus-visible{outline:2px solid var(--bone);outline-offset:2px}
-#go{display:block;width:100%;margin-top:26px;padding:17px;background:var(--red);border:0;color:#fff;font:700 20px var(--ui);letter-spacing:.32em;cursor:pointer;text-transform:uppercase}
-#go:hover{background:#ff3a2e}
-#go:focus-visible{outline:2px solid #fff;outline-offset:3px}
-#net{margin-top:12px;font:11px var(--mono);color:var(--dim);line-height:1.7;user-select:text;-webkit-user-select:text;min-height:38px}
-#net b{color:var(--bone);font-weight:400}
-#net .on{color:#5fd38a}
-.main{padding:40px 44px;overflow:auto;min-height:0}
-.tab{display:none;max-width:820px}
-.tab.on{display:block}
-.tab h2{font:400 12px var(--mono);letter-spacing:.28em;color:var(--dim);margin:0 0 18px;text-transform:uppercase;border-bottom:1px solid #ffffff1c;padding-bottom:10px}
-.tab h2+p,.hint{color:#b9b5ad;font-size:14px;line-height:1.6;margin:0 0 16px;max-width:62ch}
-.hint{font:12px/1.7 var(--mono);color:var(--dim);user-select:text;-webkit-user-select:text}
-.hint b{color:var(--bone);font-weight:400}
-.maps{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-bottom:26px}
-.mapc{all:unset;cursor:pointer;display:block;box-sizing:border-box;background:#0a0b0cc7;border:1px solid #ffffff22;padding:16px 16px 14px;position:relative;min-height:128px}
-.mapc:hover{border-color:#ffffff66}
-.mapc.on{border-color:var(--red);box-shadow:inset 3px 0 0 var(--red)}
-.mapc i{font:normal 10px var(--mono);letter-spacing:.2em;color:var(--dim)}
-.mapc.on i{color:var(--red)}
-.mapc b{display:block;font:600 22px var(--ui);letter-spacing:.06em;text-transform:uppercase;margin:6px 0 6px}
-.mapc span{font-size:13px;line-height:1.45;color:#b9b5ad;display:block}
-label.row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:11px 0;font-size:16px;letter-spacing:.03em;max-width:520px}
-label.row span.v{font:12px var(--mono);color:var(--dim);width:46px;text-align:right}
-input[type=text]{background:#00000080;border:1px solid #ffffff30;color:var(--bone);font:15px var(--mono);padding:9px 11px;width:220px;letter-spacing:.08em;outline:none}
+/* ================= MENU PRINCIPAL =================
+   Direction : équipement militaire réel. Plaques anthracite, filets fins, typographie condensée,
+   kaki pour l'information active, rouge sombre réservé à l'action (déployer) et à la sélection. */
+:root{--k0:#0a0b0a;--k1:#101211;--k2:#171a18;--k3:#1f2320;--ln:#2a2e2b;--ln2:#3a3f3b;--tx:#dddbd3;--tx2:#a3a59e;--tx3:#6d716b;--st:#8b9294;--kh:#6f6d4b;--kh2:#a09d72;--bl:#83201a;--bl2:#a2281e;
+ --cond:"Barlow Condensed","Bahnschrift Condensed","Bahnschrift","Roboto Condensed","Arial Narrow",sans-serif;--body:"Barlow","Bahnschrift","Segoe UI",system-ui,sans-serif;--data:"IBM Plex Mono",Consolas,"DejaVu Sans Mono",monospace;
+ --grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .55 0 0 0 0 .56 0 0 0 0 .54 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+ --brush:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='120'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='.003 .55' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .6 0 0 0 0 .62 0 0 0 0 .6 0 0 0 .055 0'/></filter><rect width='100%' height='100%' filter='url(%23b)'/></svg>")}
+#menu{position:fixed;inset:0;z-index:5;display:grid;grid-template-rows:52px minmax(0,1fr) 66px;font-family:var(--cond);color:var(--tx)}
+#menu.off{display:none}
+#menu button{font-family:inherit}
+#menu :focus-visible{outline:1px solid var(--kh2);outline-offset:3px}
+.mm-scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(9,10,9,.95) 0,rgba(9,10,9,.88) 340px,rgba(9,10,9,.58) 54%,rgba(9,10,9,.06) 76%),linear-gradient(0deg,rgba(9,10,9,.75) 0,rgba(9,10,9,0) 24%)}
+/* bandeaux haut et bas : les informations système, hors de l'image */
+.mm-bar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 44px;background:var(--k0) var(--brush);font:500 11px/1 var(--data);letter-spacing:.14em;text-transform:uppercase;color:var(--tx2);white-space:nowrap}
+.mm-top{border-bottom:1px solid var(--ln)}
+.mm-bot{border-top:1px solid var(--ln)}
+.mm-bar .grp{display:flex;align-items:center;gap:22px;min-width:0}
+.mm-bar .sep{width:1px;height:16px;background:var(--ln2)}
+.led{display:inline-block;width:7px;height:7px;margin-right:9px;background:var(--tx3);vertical-align:0}
+.led.ok{background:#6f8a4f}.led.wait{background:var(--kh2);animation:ledw 1.2s steps(2) infinite}
+@keyframes ledw{50%{opacity:.25}}
+.mm-top b,.mm-bot b{color:var(--tx);font-weight:500}
+/* carte opérateur (bas gauche) */
+.mm-op{display:flex;align-items:center;gap:14px}
+.mm-op svg{width:30px;height:30px;flex:none}
+.mm-op .cs{font:700 21px/1 var(--cond);letter-spacing:.08em;color:#efede6}
+.mm-op .rk{margin-top:5px;color:var(--tx2)}
+.mm-op .xp{width:150px}
+.xpb{height:3px;background:var(--ln2);margin-top:6px;overflow:hidden}
+.xpb i{display:block;height:100%;background:var(--kh2);transform-origin:left;transform:scaleX(var(--v,0));transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.mm-op .xp span{display:block;margin-top:6px;color:var(--tx3);letter-spacing:.1em}
+/* corps */
+.mm-body{position:relative;display:grid;grid-template-columns:286px minmax(0,560px) 1fr;column-gap:40px;padding:34px 44px 30px;min-height:0}
+.mm-left{display:flex;flex-direction:column;min-height:0}
+.mm-logo svg.logo{display:block;width:266px;height:auto;margin-left:-14px}
+.mm-logo svg [stroke="#39d5d0"]{stroke:#6e7578}
+.mm-logo svg [stroke="#e5291f"]{stroke:var(--bl2)}
+.mm-logo svg [fill="#e5291f"]{fill:var(--bl2)}
+.mm-sub{font:500 10.5px var(--data);letter-spacing:.3em;color:var(--tx3);margin:4px 0 0 2px}
+.mm-nav{display:flex;flex-direction:column;margin-top:44px}
+.mm-nav button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;align-items:baseline;gap:16px;padding:8px 0 8px 20px;color:var(--tx2);font:600 31px/1 var(--cond);letter-spacing:.1em;text-transform:uppercase;transition:color .14s}
+.mm-nav button em{font:500 11px/1 var(--data);font-style:normal;color:var(--tx3);letter-spacing:.06em;width:20px;transition:color .14s}
+.mm-nav button span{display:inline-block;transition:transform .18s cubic-bezier(.2,.7,.2,1)}
+.mm-nav button::before{content:"";position:absolute;left:0;top:50%;width:3px;height:0;background:var(--kh2);transform:translateY(-50%);transition:height .16s cubic-bezier(.2,.7,.2,1),background .16s}
+.mm-nav button:hover{color:var(--tx)}
+.mm-nav button:hover span{transform:translateX(5px)}
+.mm-nav button:hover::before{height:12px}
+.mm-nav button.on{color:#f2f0e9}
+.mm-nav button.on em{color:var(--kh2)}
+.mm-nav button.on::before{height:23px;background:var(--bl2)}
+.mm-nav button:active span{transform:translateX(7px)}
+.mm-nav .q{margin-top:26px;font-size:20px;letter-spacing:.16em;color:var(--tx3)}
+.mm-nav .q::after{content:"";position:absolute;left:20px;top:-14px;width:120px;height:1px;background:var(--ln2)}
+.mm-hint{margin-top:auto;font:500 10.5px/1.9 var(--data);letter-spacing:.12em;color:var(--tx3);text-transform:uppercase}
+.mm-hint kbd{font:inherit;color:var(--tx2);border:1px solid var(--ln2);padding:1px 5px;margin-right:4px}
+/* panneau */
+.mm-panel{position:relative;align-self:start;max-height:100%;overflow:auto;background:rgba(16,18,17,.93) var(--grain);border:1px solid var(--ln);border-top:2px solid var(--kh);scrollbar-width:thin;scrollbar-color:var(--ln2) transparent}
+.mm-panel::-webkit-scrollbar{width:6px}.mm-panel::-webkit-scrollbar-thumb{background:var(--ln2)}
+.pane{display:none;padding:24px 28px 28px}
+.pane.on{display:block;animation:paneIn .26s cubic-bezier(.2,.7,.2,1) both}
+@keyframes paneIn{from{opacity:0;transform:translateY(8px)}}
+.ph{margin-bottom:22px}
+.ph em{display:block;font:500 11px var(--data);font-style:normal;letter-spacing:.2em;color:var(--tx3)}
+.ph h2{margin:6px 0 0;font:700 38px/1 var(--cond);letter-spacing:.05em;text-transform:uppercase;color:#f1efe8}
+.ph p{margin:10px 0 0;font:400 15px/1.5 var(--body);color:var(--tx2);max-width:52ch}
+.lbl{display:flex;align-items:center;gap:12px;margin:22px 0 10px;font:500 10.5px var(--data);letter-spacing:.22em;text-transform:uppercase;color:var(--tx3)}
+.lbl::after{content:"";flex:1;height:1px;background:var(--ln)}
+.lbl b{color:var(--tx2);font-weight:500}
+.txt{font:400 14.5px/1.6 var(--body);color:var(--tx2);margin:0 0 12px}
+.txt b{color:var(--tx);font-weight:500}
+.data{font:400 11.5px/1.8 var(--data);letter-spacing:.06em;color:var(--tx3);user-select:text;-webkit-user-select:text}
+.data b{color:var(--tx2);font-weight:500}
+/* zones d'opération */
+.ops{list-style:none;margin:0;padding:0;border-top:1px solid var(--ln)}
+.ops button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:8px;height:46px;padding:0 14px 0 16px;border-bottom:1px solid var(--ln);position:relative;transition:background .12s}
+.ops button::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .12s}
+.ops em{font:500 11px var(--data);font-style:normal;color:var(--tx3)}
+.ops b{font:600 21px/1 var(--cond);letter-spacing:.07em;text-transform:uppercase;color:var(--tx2);transition:color .12s,transform .16s;display:inline-block}
+.ops i{font:500 10px var(--data);font-style:normal;letter-spacing:.14em;color:var(--tx3)}
+.ops button:hover{background:var(--k3)}.ops button:hover b{color:var(--tx);transform:translateX(3px)}
+.ops button.on{background:#1b1e1c}.ops button.on::before{background:var(--bl2)}.ops button.on b{color:#f2f0e9}.ops button.on em,.ops button.on i{color:var(--kh2)}
+.opd{padding:14px 16px 2px;border-bottom:1px solid var(--ln);min-height:96px}
+/* réglages linéaires */
+.fld{display:grid;grid-template-columns:1fr 200px 52px;align-items:center;gap:16px;min-height:42px;border-bottom:1px solid var(--ln);font:500 17px var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--tx)}
+.fld .v{font:500 12px var(--data);color:var(--tx2);text-align:right}
+.fld.wide{grid-template-columns:1fr 252px}
+#menu input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:20px;background:transparent;margin:0;cursor:pointer}
+#menu input[type=range]::-webkit-slider-runnable-track{height:2px;background:linear-gradient(90deg,var(--kh2) var(--p,0%),var(--ln2) var(--p,0%))}
+#menu input[type=range]::-moz-range-track{height:2px;background:var(--ln2)}#menu input[type=range]::-moz-range-progress{height:2px;background:var(--kh2)}
+#menu input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:18px;margin-top:-8px;background:var(--tx);border:0;border-radius:0;transition:background .12s}
+#menu input[type=range]::-moz-range-thumb{width:9px;height:18px;background:var(--tx);border:0;border-radius:0}
+#menu input[type=range]:hover::-webkit-slider-thumb{background:#fff}
+#menu input[type=text]{all:unset;box-sizing:border-box;width:100%;height:34px;padding:0 10px;background:var(--k0);border:1px solid var(--ln2);font:500 14px var(--data);letter-spacing:.1em;color:var(--tx);user-select:text;-webkit-user-select:text;transition:border-color .12s}
+#menu input[type=text]:focus{border-color:var(--kh2)}
+#menu input[type=text]:disabled{opacity:.5}
 #iname{text-transform:uppercase}
-input[type=text]:focus{border-color:var(--bone)}
-input[type=range]{flex:1;max-width:220px;accent-color:#e5291f}
-select{background:#00000080;border:1px solid #ffffff30;color:var(--bone);font:15px var(--ui);padding:7px 9px}
-.keys{font-size:15px;line-height:2.05;color:#cfccc5}
-.keys kbd{font:12px var(--mono);border:1px solid #ffffff40;padding:2px 7px;margin-right:3px;color:var(--bone);background:#ffffff0a}
-.keys h3{font:400 11px var(--mono);letter-spacing:.25em;color:var(--dim);margin:20px 0 4px;text-transform:uppercase}
-.dcb{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:#5865f2;color:#fff;font:600 16px var(--ui);letter-spacing:.06em;padding:11px 18px;box-sizing:border-box}
-.dcb:hover{background:#6a76ff}
-.dcb[disabled]{opacity:.45;cursor:not-allowed}
-#dcme{display:none;align-items:center;gap:12px;margin:0 0 14px;font-size:17px}
-#dcme img{width:44px;height:44px;border-radius:50%;background:#222}
-#dcme small{display:block;font:11px var(--mono);color:var(--dim);letter-spacing:.1em}
-.wp{display:grid;grid-template-columns:150px 1fr;gap:6px 22px;align-items:center;padding:14px 0;border-bottom:1px solid #ffffff12;max-width:640px}
-.wp b{font:600 22px var(--ui);letter-spacing:.06em}
-.wp small{display:block;font:11px var(--mono);color:var(--dim);letter-spacing:.1em;margin-top:2px}
-.bar{display:grid;grid-template-columns:86px 1fr 46px;gap:10px;align-items:center;font:11px var(--mono);color:var(--dim);letter-spacing:.08em;margin:3px 0}
-.bar div{height:4px;background:#ffffff1a}
-.bar div i{display:block;height:100%;background:var(--bone)}
-.bar em{font-style:normal;color:var(--bone);text-align:right}
-.credl{font-size:14px;line-height:1.9;color:#cfccc5;max-width:70ch;user-select:text;-webkit-user-select:text}
-.credl b{color:#fff;font-weight:600}
-@keyframes mIn{from{opacity:0}to{opacity:1}}
-@keyframes mSide{from{transform:translateX(-36px);opacity:0}to{transform:none;opacity:1}}
-@keyframes mUp{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
-@keyframes mGlitch{0%,91%,100%{transform:none;filter:none}92%{transform:translateX(-5px) skewX(-6deg);filter:drop-shadow(5px 0 0 #e5291f) drop-shadow(-4px 0 0 #39d5d0)}94%{transform:translateX(4px);filter:drop-shadow(-6px 0 0 #e5291f)}96%{transform:translateX(-2px) skewX(3deg);filter:drop-shadow(3px 0 0 #39d5d0)}98%{transform:none}}
-@keyframes mScan{from{transform:translateY(-100%)}to{transform:translateY(100vh)}}
-@keyframes mShine{0%,62%{transform:translateX(-130%) skewX(-20deg)}100%{transform:translateX(330%) skewX(-20deg)}}
-@keyframes mPulse{0%,100%{box-shadow:0 0 0 0 #e5291f66}50%{box-shadow:0 0 0 9px #e5291f00}}
-@keyframes mBar{from{width:0}}
-#menu{animation:mIn .45s ease-out}
-#menu::after{content:"";position:absolute;left:0;right:0;top:0;height:120px;pointer-events:none;background:linear-gradient(#ffffff00,#ffffff09 60%,#ffffff14 98%,#ffffff00);animation:mScan 7s linear infinite}
-.side{animation:mSide .5s cubic-bezier(.2,.8,.2,1) both}
-.side svg.logo{animation:mGlitch 5.5s steps(1) infinite 1.2s}
-#tabs button{animation:mSide .45s cubic-bezier(.2,.8,.2,1) both;position:relative;transition:color .15s,background .15s,padding-left .18s}
-#tabs button:nth-child(1){animation-delay:.08s}#tabs button:nth-child(2){animation-delay:.13s}#tabs button:nth-child(3){animation-delay:.18s}#tabs button:nth-child(4){animation-delay:.23s}#tabs button:nth-child(5){animation-delay:.28s}#tabs button:nth-child(6){animation-delay:.33s}
-#tabs button:hover,#tabs button.on{padding-left:20px}
-#go{position:relative;overflow:hidden;animation:mUp .5s .4s both,mPulse 2.4s 1.2s infinite;transition:background .15s,letter-spacing .2s}
-#go:hover{letter-spacing:.4em}
-#go::after{content:"";position:absolute;top:0;bottom:0;left:0;width:34%;background:linear-gradient(90deg,#ffffff00,#ffffff55,#ffffff00);animation:mShine 3.6s ease-in-out infinite}
-.tab.on{animation:mUp .32s cubic-bezier(.2,.8,.2,1) both}
-.tab.on .mapc,.tab.on .wp,.tab.on label.row{animation:mUp .4s cubic-bezier(.2,.8,.2,1) both}
-.tab.on .mapc:nth-child(2),.tab.on .wp:nth-child(2){animation-delay:.06s}.tab.on .mapc:nth-child(3),.tab.on .wp:nth-child(3){animation-delay:.12s}.tab.on .mapc:nth-child(4),.tab.on .wp:nth-child(4){animation-delay:.18s}
-.mapc{transition:transform .18s,border-color .18s,background .18s;overflow:hidden}
-.mapc:hover{transform:translateY(-3px);background:#141618e0}
-.mapc::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform .25s}
-.mapc:hover::after,.mapc.on::after{transform:scaleX(1)}
-.tab.on .bar div i{animation:mBar .7s cubic-bezier(.2,.8,.2,1) both .15s}
-.dcb{transition:background .15s,transform .15s}.dcb:hover{transform:translateY(-2px)}
-@media(prefers-reduced-motion:reduce){#menu,#menu *,#menu::after,#go::after{animation:none!important;transition:none!important}}
-@media(max-width:820px){#menu{grid-template-columns:1fr;overflow:auto}.side{border-right:0;padding:22px 20px 10px;overflow:visible}#tabs{flex-direction:row;flex-wrap:wrap;margin-bottom:8px}#tabs button{font-size:15px;padding:7px 9px;border-left:0;border-bottom:3px solid transparent}#tabs button.on{border-bottom-color:var(--red)}.main{padding:16px 20px 40px;overflow:visible}.tag{margin-bottom:14px}}
+#menu select{all:unset;box-sizing:border-box;width:100%;height:34px;padding:0 30px 0 10px;background:var(--k0) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0h10L5 6z' fill='%23a3a59e'/></svg>") no-repeat right 11px center;border:1px solid var(--ln2);font:500 15px var(--cond);letter-spacing:.06em;color:var(--tx);cursor:pointer}
+#menu select option{background:#111;color:#ddd}
+.chk{all:unset;cursor:pointer;width:16px;height:16px;border:1px solid var(--tx2);display:inline-block;position:relative}
+.chk:checked::after{content:"";position:absolute;inset:3px;background:var(--kh2)}
+/* action principale */
+.cta{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;justify-content:space-between;width:100%;height:60px;margin-top:22px;padding:0 18px 0 22px;background:var(--bl);color:#f4f0e7;font:700 25px/1 var(--cond);letter-spacing:.24em;text-transform:uppercase;transition:background .12s,box-shadow .12s}
+.cta:hover{background:var(--bl2);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.cta:active{transform:translateY(1px)}
+.cta kbd{font:500 10.5px var(--data);letter-spacing:.12em;border:1px solid rgba(244,240,231,.35);padding:5px 8px;color:rgba(244,240,231,.85)}
+.cta.alt{background:transparent;border:1px solid var(--ln2);color:var(--tx);height:52px;font-size:21px}
+.cta.alt:hover{border-color:var(--tx2);background:var(--k3);box-shadow:none}
+.cta[hidden]{display:none}
+#net{margin-top:16px}
+#net .on{color:#8fa874}
+/* équipement */
+.lo{border-top:1px solid var(--ln)}
+.wpn{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:118px 1fr 66px;gap:18px;align-items:center;padding:14px 14px 14px 16px;border-bottom:1px solid var(--ln);position:relative;transition:background .12s}
+.wpn::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .12s}
+.wpn:hover{background:var(--k3)}
+.wpn.on{background:#1b1e1c}.wpn.on::before{background:var(--bl2)}
+.wpn b{display:block;font:700 25px/1 var(--cond);letter-spacing:.05em;color:var(--tx)}
+.wpn small{display:block;margin-top:5px;font:500 10.5px var(--data);letter-spacing:.12em;color:var(--tx3)}
+.wpn .st{font:500 10.5px var(--data);letter-spacing:.14em;color:var(--tx3);text-align:right}
+.wpn.on .st{color:var(--kh2)}
+.sbs{display:grid;gap:5px}
+.sb{display:grid;grid-template-columns:62px 1fr 66px;gap:10px;align-items:center;font:500 9.5px var(--data);letter-spacing:.14em;color:var(--tx3)}
+.sb div{height:3px;background:var(--ln2);overflow:hidden}
+.sb div i{display:block;height:100%;background:var(--st);transform-origin:left;transform:scaleX(var(--v))}
+.wpn.on .sb div i{background:var(--tx)}
+.sb em{font-style:normal;color:var(--tx2);text-align:right;white-space:nowrap}
+.pane.on .sb div i{animation:sbIn .6s cubic-bezier(.2,.7,.2,1) both}
+@keyframes sbIn{from{transform:scaleX(0)}}
+.kit{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ln);border-left:1px solid var(--ln)}
+.kit div{padding:12px 14px;border-right:1px solid var(--ln);border-bottom:1px solid var(--ln)}
+.kit b{display:block;font:600 17px/1.1 var(--cond);letter-spacing:.06em;text-transform:uppercase}
+.kit span{display:block;margin-top:5px;font:400 12.5px/1.45 var(--body);color:var(--tx3)}
+/* opérateur */
+.idc{display:grid;grid-template-columns:64px 1fr;gap:18px;align-items:center;padding:4px 0 18px;border-bottom:1px solid var(--ln)}
+.idc svg{width:64px;height:64px}
+.idc .cs{font:700 34px/1 var(--cond);letter-spacing:.07em;color:#f2f0e9}
+.idc .rk{margin-top:6px;font:500 11.5px var(--data);letter-spacing:.14em;color:var(--kh2);text-transform:uppercase}
+.idc .xpb{margin-top:12px;height:4px}
+.idc .nx{margin-top:7px;font:400 11px var(--data);letter-spacing:.08em;color:var(--tx3)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-left:1px solid var(--ln);border-top:1px solid var(--ln)}
+.stats div{padding:12px 14px 11px;border-right:1px solid var(--ln);border-bottom:1px solid var(--ln)}
+.stats b{display:block;font:600 27px/1 var(--cond);color:var(--tx);font-variant-numeric:tabular-nums}
+.stats span{display:block;margin-top:6px;font:500 9.5px var(--data);letter-spacing:.1em;color:var(--tx3);text-transform:uppercase}
+.dcb{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 16px;border:1px solid var(--ln2);font:600 16px var(--cond);letter-spacing:.12em;text-transform:uppercase;color:var(--tx);transition:border-color .12s,background .12s}
+.dcb::before{content:"";width:8px;height:8px;background:#5865f2}
+.dcb:hover{border-color:var(--tx2);background:var(--k3)}
+.dcb[disabled]{opacity:.4;cursor:not-allowed}
+#dcme{display:none;align-items:center;gap:12px;margin:0 0 12px;font:600 19px var(--cond);letter-spacing:.06em}
+#dcme img{width:36px;height:36px;background:var(--k3);filter:grayscale(.35)}
+#dcme small{display:block;font:500 10px var(--data);color:var(--tx3);letter-spacing:.14em}
+/* contrats */
+.ct{list-style:none;margin:0;padding:0;border-top:1px solid var(--ln)}
+.ct li{display:grid;grid-template-columns:18px 1fr 104px 76px;gap:16px;align-items:center;padding:12px 14px 12px 16px;border-bottom:1px solid var(--ln);transition:background .12s}
+.ct li:hover{background:var(--k3)}
+.ct .bx{width:14px;height:14px;border:1px solid var(--tx3)}
+.ct li.ok .bx{border-color:var(--kh2);background:linear-gradient(var(--kh2),var(--kh2)) center/8px 8px no-repeat}
+.ct b{display:block;font:600 19px/1.1 var(--cond);letter-spacing:.05em;text-transform:uppercase}
+.ct span{display:block;margin-top:3px;font:400 13px/1.4 var(--body);color:var(--tx3)}
+.ct .pr{font:500 11px var(--data);color:var(--tx2);text-align:right}
+.ct .pr .xpb{margin-top:6px;height:2px}
+.ct .rw{font:500 11px var(--data);letter-spacing:.04em;color:var(--kh2);text-align:right;white-space:nowrap}
+.ct li.ok b,.ct li.ok .pr{color:var(--tx3)}.ct li.ok .rw{color:var(--tx3);text-decoration:line-through}
+/* réglages */
+.sub{display:flex;flex-wrap:wrap;gap:0 2px;border-bottom:1px solid var(--ln);margin:-4px 0 6px}
+.sub button{all:unset;cursor:pointer;padding:9px 8px 10px;font:600 14.5px var(--cond);letter-spacing:.07em;text-transform:uppercase;color:var(--tx3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s,border-color .12s}
+.sub button:hover{color:var(--tx)}.sub button.on{color:var(--tx);border-bottom-color:var(--kh2)}
+.sp{display:none}.sp.on{display:block;animation:paneIn .2s both}
+.keys{font:400 14.5px/2.1 var(--body);color:var(--tx2)}
+.keys kbd{font:500 11px var(--data);border:1px solid var(--ln2);background:var(--k0);padding:2px 7px;margin-right:3px;color:var(--tx)}
+.keys h3{font:500 10.5px var(--data);letter-spacing:.22em;color:var(--tx3);margin:16px 0 2px;text-transform:uppercase}
+.credl{font:400 14.5px/1.85 var(--body);color:var(--tx2);user-select:text;-webkit-user-select:text}
+.credl b{color:var(--tx);font-weight:500}
+/* chargement initial et insertion */
+#boot{position:fixed;inset:0;z-index:20;background:var(--k0) var(--grain);display:flex;align-items:center;justify-content:center;transition:opacity .6s}
+#boot.done{opacity:0;pointer-events:none}
+#boot .bx{width:min(440px,84vw)}
+#boot .t{font:700 30px/1 var(--cond);letter-spacing:.32em;color:#efede6}
+#boot .s{margin-top:8px;font:500 10.5px var(--data);letter-spacing:.24em;color:var(--tx3)}
+#boot .pb{margin-top:26px;height:2px;background:var(--ln)}
+#boot .pb i{display:block;height:100%;width:0;background:var(--kh2);transition:width .25s}
+#boot .pc{display:flex;justify-content:space-between;margin-top:9px;font:500 10.5px var(--data);letter-spacing:.14em;color:var(--tx2)}
+#boot ol{list-style:none;margin:18px 0 0;padding:0;height:132px;overflow:hidden;font:400 11px/1.75 var(--data);color:var(--tx3);letter-spacing:.04em;display:flex;flex-direction:column;justify-content:flex-end}
+#boot li{animation:logIn .25s both;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#boot li b{color:#8fa874;font-weight:500}#boot li.ko b{color:var(--bl2)}
+@keyframes logIn{from{opacity:0;transform:translateX(-6px)}}
+#ins{position:fixed;inset:0;z-index:15;background:#050605;display:none;align-items:center;justify-content:center;pointer-events:none}
+#ins.go{display:flex;animation:insOut 1.5s cubic-bezier(.4,0,.2,1) both}
+@keyframes insOut{0%,32%{opacity:1}100%{opacity:0}}
+#ins div{text-align:center;animation:insTx 1.5s both}
+@keyframes insTx{0%{opacity:0;transform:translateY(4px)}15%,40%{opacity:1;transform:none}70%,100%{opacity:0}}
+#ins em{display:block;font:500 11px var(--data);font-style:normal;letter-spacing:.3em;color:var(--tx3)}
+#ins b{display:block;margin-top:10px;font:700 34px/1 var(--cond);letter-spacing:.2em;color:#efede6;text-transform:uppercase}
+/* entrée du menu : chaque bloc arrive dans l'ordre de lecture */
+#menu.in .mm-top,#menu.in .mm-bot{animation:barIn .5s cubic-bezier(.2,.7,.2,1) both}
+#menu.in .mm-bot{animation-name:barInB}
+@keyframes barIn{from{transform:translateY(-100%)}}@keyframes barInB{from{transform:translateY(100%)}}
+#menu.in .mm-logo{animation:fadeL .6s .12s cubic-bezier(.2,.7,.2,1) both}
+#menu.in .mm-nav button{animation:fadeL .45s cubic-bezier(.2,.7,.2,1) both}
+#menu.in .mm-nav button:nth-child(1){animation-delay:.22s}#menu.in .mm-nav button:nth-child(2){animation-delay:.26s}#menu.in .mm-nav button:nth-child(3){animation-delay:.30s}#menu.in .mm-nav button:nth-child(4){animation-delay:.34s}#menu.in .mm-nav button:nth-child(5){animation-delay:.38s}#menu.in .mm-nav button:nth-child(6){animation-delay:.44s}
+#menu.in .mm-panel{animation:fadeU .5s .36s cubic-bezier(.2,.7,.2,1) both}
+@keyframes fadeL{from{opacity:0;transform:translateX(-12px)}}@keyframes fadeU{from{opacity:0;transform:translateY(10px)}}
+@media(prefers-reduced-motion:reduce){#menu *,#menu.in *,#boot *,#ins,#ins *{animation:none!important;transition:none!important}}
+@media(max-width:1180px){.mm-body{grid-template-columns:230px minmax(0,1fr);column-gap:30px}.mm-logo svg.logo{width:220px}.mm-nav button{font-size:26px}}
+@media(max-width:820px){
+ html,body{overflow:auto}
+ #menu{position:fixed;overflow:auto;display:flex;flex-direction:column}
+ #menu.off{display:none}
+ .mm-scrim{position:fixed;background:rgba(9,10,9,.8)}
+ .mm-bar{padding:10px 18px;flex-wrap:wrap;white-space:normal;row-gap:8px}
+ .mm-top .grp:last-child,#mmDc,.mm-top .sep{display:none}
+ .mm-bar span{white-space:nowrap}
+ .ph h2{font-size:30px}.cta{font-size:20px;letter-spacing:.18em}
+ .ops button{grid-template-columns:38px 1fr;height:auto;min-height:46px;padding-top:8px;padding-bottom:8px}.ops i{display:none}
+ .mm-body{display:flex;flex-direction:column;flex:1 0 auto;min-height:auto;padding:18px 16px 22px;gap:16px}
+ .mm-logo svg.logo{width:200px;margin-left:-10px}
+ .mm-nav{flex-direction:row;flex-wrap:wrap;margin-top:16px;gap:2px 6px}
+ .mm-nav button{font-size:19px;padding:6px 8px 8px 12px;gap:8px}.mm-nav button em{display:none}
+ .mm-nav .q{margin-top:0;font-size:19px}.mm-nav .q::after{display:none}
+ .mm-hint{display:none}
+ .mm-panel{max-height:none;overflow:visible;align-self:stretch}
+ .mm-bot{flex-wrap:wrap}
+ .pane{padding:18px 16px 22px}
+ .fld{grid-template-columns:1fr 140px 44px}.fld.wide{grid-template-columns:1fr 170px}
+ .wpn{grid-template-columns:1fr;gap:10px}.wpn .st{text-align:left}
+ .kit,.stats{grid-template-columns:1fr 1fr}
+ .ct li{grid-template-columns:16px 1fr 70px;gap:10px}.ct .rw{grid-column:2}
+ .mm-op .xp{width:110px}
+}
 #err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:30px;font-size:18px;background:#0a0b0c}
 </style>
 </head>
@@ -133,64 +279,122 @@ select{background:#00000080;border:1px solid #ffffff30;color:var(--bone);font:15
   <div id="msg"></div>
   <div id="score"></div>
 </div>
-<div id="menu">
- <aside class="side">
-  %%LOGO%%
-  <div class="tag">Bodycam tactical shooter</div>
-  <nav id="tabs" aria-label="Menu">
-   <button data-t="play" class="on">Déploiement</button><button data-t="op">Opérateur</button><button data-t="arms">Arsenal</button><button data-t="set">Réglages</button><button data-t="keys">Commandes</button><button data-t="cred">Crédits</button>
-  </nav>
-  <button id="go">Entrer en zone</button>
-  <div id="net"></div>
- </aside>
- <main class="main">
-  <section class="tab on" id="t-play">
-   <h2>Zone d'opération</h2>
-   <div class="maps" id="maps"></div>
-   <select id="imap" hidden><option value="0"></option><option value="1"></option><option value="2"></option><option value="3"></option></select>
-   <h2>Opposition</h2>
-   <label class="row">Bots hostiles <input type="range" id="ibots" min="0" max="10" step="1"><span class="v" id="vbots"></span></label>
-   <div class="hint">Match à mort : chacun pour soi, les bots sont hostiles à tous. En multijoueur, la carte et les bots sont réglés par l'hôte.</div>
+<div id="menu" class="off">
+ <div class="mm-scrim"></div>
+ <header class="mm-bar mm-top">
+  <div class="grp"><span id="mmNet"><i class="led wait"></i>CONNEXION…</span><span class="sep"></span><span id="mmDc">DISCORD · NON LIÉ</span></div>
+  <div class="grp"><span id="mmClock">--:--:--</span><span class="sep"></span><span id="mmVer"></span></div>
+ </header>
+ <div class="mm-body">
+  <div class="mm-left">
+   <div class="mm-logo">%%LOGO%%<div class="mm-sub">BODYCAM · TACTICAL SHOOTER</div></div>
+   <nav class="mm-nav" id="tabs" aria-label="Menu principal">
+    <button data-t="deploy"><em>01</em><span>Deploy</span></button>
+    <button data-t="loadout"><em>02</em><span>Loadout</span></button>
+    <button data-t="operators"><em>03</em><span>Operators</span></button>
+    <button data-t="missions"><em>04</em><span>Missions</span></button>
+    <button data-t="settings"><em>05</em><span>Settings</span></button>
+    <button data-t="quit" class="q"><em></em><span>Quit</span></button>
+   </nav>
+   <div class="mm-hint"><kbd>↑</kbd><kbd>↓</kbd>naviguer &nbsp; <kbd>Entrée</kbd>déployer<br><span id="padn"></span></div>
+  </div>
+  <section class="mm-panel" id="mmPanel">
+
+   <div class="pane" id="t-deploy">
+    <header class="ph"><em>01 — DÉPLOIEMENT</em><h2>Zone d'opération</h2><p>Match à mort, chacun pour soi. Les hostiles ouvrent le feu sur tout le monde.</p></header>
+    <ol class="ops" id="maps"></ol>
+    <div class="opd" id="opd"></div>
+    <div class="lbl">Opposition</div>
+    <label class="fld">Hostiles (bots) <input type="range" id="ibots" min="0" max="10" step="1"><span class="v" id="vbots"></span></label>
+    <button class="cta" id="go"><span>Déployer</span><kbd>ENTRÉE</kbd></button>
+    <div class="lbl">Réseau</div>
+    <div class="data" id="net"></div>
+    <select id="imap" hidden><option value="0"></option><option value="1"></option><option value="2"></option><option value="3"></option></select>
+   </div>
+
+   <div class="pane" id="t-loadout">
+    <header class="ph"><em>02 — ÉQUIPEMENT</em><h2>Arme au déploiement</h2><p>L'arme choisie est en main à chaque insertion. Les quatre restent accessibles en zone avec 1 à 4.</p></header>
+    <div class="lo" id="arms"></div>
+    <div class="lbl">Dotation fixe</div>
+    <div class="kit">
+     <div><b>Caméra corporelle</b><span>Grand angle, enregistrement continu. Pas de réticule, pas de compteur.</span></div>
+     <div><b>Lampe tactique</b><span>Montée sur le gilet. Touche F.</span></div>
+     <div><b>Drone FPV</b><span>Quadrirotor, batterie 1 500 mAh, reconnaissance. Touche G.</span></div>
+    </div>
+   </div>
+
+   <div class="pane" id="t-operators">
+    <header class="ph"><em>03 — OPÉRATEUR</em><h2>Dossier</h2></header>
+    <div class="idc" id="opCard"></div>
+    <div class="lbl">Identité</div>
+    <label class="fld wide">Indicatif <input type="text" id="iname" maxlength="12" spellcheck="false" autocomplete="off"></label>
+    <div class="lbl">États de service <b>· ce navigateur</b></div>
+    <div class="stats" id="opStats"></div>
+    <div class="lbl">Discord</div>
+    <div id="dcme"><img id="dcav" alt=""><div><span id="dcname"></span><small>COMPTE LIÉ</small></div></div>
+    <button class="dcb" id="dcbtn">Se connecter avec Discord</button>
+    <label class="fld wide" style="margin-top:10px">ID d'application <input type="text" id="idc" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="non configuré"></label>
+    <p class="data" id="dchint" style="margin-top:10px"></p>
+   </div>
+
+   <div class="pane" id="t-missions">
+    <header class="ph"><em>04 — MISSIONS</em><h2>Contrats</h2><p>Objectifs permanents, suivis sur toutes tes parties. Chaque contrat rempli rapporte de l'expérience.</p></header>
+    <ol class="ct" id="contracts"></ol>
+    <p class="data" style="margin-top:14px">Expérience : <b>100</b> par élimination, <b>+50</b> à la tête. Progression enregistrée dans ce navigateur.</p>
+   </div>
+
+   <div class="pane" id="t-settings">
+    <header class="ph"><em>05 — PARAMÈTRES</em><h2>Réglages</h2></header>
+    <div class="sub" id="subs"><button data-s="vid" class="on">Affichage</button><button data-s="ctl">Contrôles</button><button data-s="aud">Audio</button><button data-s="keys">Touches</button><button data-s="cred">Crédits</button></div>
+    <div class="sp on" id="s-vid">
+     <label class="fld wide">Qualité <select id="iq"><option value="0">Auto (60 i/s)</option><option value="0.6">Basse</option><option value="0.85">Normale</option><option value="1.15">Haute</option></select></label>
+     <label class="fld">Fisheye <input type="range" id="ifish" min="0" max="0.3" step="0.01"><span class="v" id="vfish"></span></label>
+    </div>
+    <div class="sp" id="s-ctl">
+     <label class="fld">Sensibilité <input type="range" id="isens" min="0.3" max="2.5" step="0.05"><span class="v" id="vsens"></span></label>
+     <p class="data" id="padst" style="margin-top:12px"></p>
+    </div>
+    <div class="sp" id="s-aud">
+     <label class="fld">Volume général <input type="range" id="ivol" min="0" max="1" step="0.05"><span class="v" id="vvol"></span></label>
+    </div>
+    <div class="sp keys" id="s-keys">
+     <h3>À pied — clavier AZERTY</h3>
+     <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> déplacement &nbsp; <kbd>Maj</kbd> sprint &nbsp; <kbd>Espace</kbd> saut &nbsp; <kbd>C</kbd> accroupi &nbsp; <kbd>A</kbd><kbd>E</kbd> se pencher<br>
+     <kbd>Clic G</kbd> tir &nbsp; <kbd>Clic D</kbd> visée &nbsp; <kbd>R</kbd> recharger — maintenu : vérifier le chargeur &nbsp; <kbd>1</kbd>–<kbd>4</kbd> / molette : arme &nbsp; <kbd>V</kbd> inspecter<br>
+     <kbd>F</kbd> lampe &nbsp; <kbd>G</kbd> drone &nbsp; <kbd>Tab</kbd> scores &nbsp; <kbd>Échap</kbd> menu
+     <h3>Drone FPV</h3>
+     Mode ANGLE : <kbd>Z</kbd><kbd>S</kbd> tangage &nbsp; <kbd>Q</kbd><kbd>D</kbd> roulis &nbsp; <kbd>A</kbd><kbd>E</kbd> / souris lacet &nbsp; <kbd>Espace</kbd><kbd>C</kbd> monter / descendre<br>
+     Modes HORIZON et ACRO : souris tangage / roulis &nbsp; <kbd>Z</kbd><kbd>S</kbd> manette des gaz &nbsp; <kbd>Q</kbd><kbd>D</kbd> lacet &nbsp; <kbd>C</kbd> couper les gaz<br>
+     <kbd>T</kbd> mode de vol &nbsp; <kbd>X</kbd> armer / désarmer / retourner &nbsp; <kbd>↑</kbd><kbd>↓</kbd> caméra &nbsp; <kbd>G</kbd> rendre la main &nbsp; <kbd>F</kbd> rappel
+     <h3>Manette — Xbox / PlayStation</h3>
+     Stick gauche déplacement · stick droit visée · <kbd>RT</kbd> tir · <kbd>LT</kbd> visée · <kbd>A</kbd> saut · <kbd>B</kbd> accroupi · <kbd>X</kbd> recharger (maintenu : chargeur) · <kbd>Y</kbd> arme<br>
+     <kbd>LB</kbd><kbd>RB</kbd> se pencher · <kbd>L3</kbd> sprint · <kbd>R3</kbd> inspecter · croix <kbd>↑</kbd> drone <kbd>↓</kbd> lampe · <kbd>Start</kbd> menu · <kbd>Select</kbd> scores<br>
+     Menu : croix <kbd>↑</kbd><kbd>↓</kbd> naviguer · <kbd>A</kbd> déployer. Drone en mode 2 · <kbd>Y</kbd> mode de vol · <kbd>A</kbd> armer · <kbd>LB</kbd><kbd>RB</kbd> caméra.
+    </div>
+    <div class="sp credl" id="s-cred">
+     Modèles 3D — Sketchfab, licence CC BY 4.0, modifiés pour le jeu :<br>
+     <b>Modern Tactical Soldier</b> — ItsKrish7<br><b>HK416 Full ReWorked</b> — MojoLeeDa<br><b>STALKER AKS-74 ReAnimation</b>, <b>AKM reload animation</b>, <b>Pistol 43 Tactical</b> — Vlasov Daniil<br><br>
+     Polices : Barlow, Barlow Condensed, IBM Plex Mono (SIL Open Font License).<br>
+     Moteur WebGL2, cartes, animations, audio procédural, interface et logo : réalisés pour DEADFRAME. Détail et liens : CREDITS.md du dépôt.
+    </div>
+   </div>
+
+   <div class="pane" id="t-quit">
+    <header class="ph"><em>— QUITTER</em><h2 id="qTitle">Quitter</h2><p id="qText"></p></header>
+    <button class="cta alt" id="qLeave" hidden><span>Quitter la partie</span><kbd>MENU</kbd></button>
+    <button class="cta" id="qQuit"><span>Quitter le jeu</span><kbd>FERMER</kbd></button>
+    <p class="data" id="qNote" style="margin-top:14px"></p>
+   </div>
+
   </section>
-  <section class="tab" id="t-op">
-   <h2>Identité</h2>
-   <div id="dcme"><img id="dcav" alt=""><div><span id="dcname"></span><small>CONNECTÉ AVEC DISCORD</small></div></div>
-   <label class="row">Indicatif <input type="text" id="iname" maxlength="12" spellcheck="false" autocomplete="off"></label>
-   <h2 style="margin-top:28px">Discord</h2>
-   <p><button class="dcb" id="dcbtn">Se connecter avec Discord</button></p>
-   <label class="row">ID d'application <input type="text" id="idc" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="non configuré"></label>
-   <div class="hint" id="dchint"></div>
-  </section>
-  <section class="tab" id="t-arms"><h2>Arsenal</h2><div id="arms"></div><div class="hint" style="margin-top:14px">Aucun viseur à l'écran : le clic droit aligne les organes de visée sur l'axe de tir. Aucun compteur non plus : maintiens R pour vérifier ton chargeur.</div></section>
-  <section class="tab" id="t-set">
-   <h2>Image</h2>
-   <label class="row">Qualité <select id="iq"><option value="0">Automatique (vise 60 i/s)</option><option value="0.6">Basse</option><option value="0.85">Normale</option><option value="1.15">Haute</option></select></label>
-   <label class="row">Fisheye <input type="range" id="ifish" min="0" max="0.3" step="0.01"><span class="v" id="vfish"></span></label>
-   <h2 style="margin-top:28px">Contrôle et son</h2>
-   <label class="row">Sensibilité (souris et stick) <input type="range" id="isens" min="0.3" max="2.5" step="0.05"><span class="v" id="vsens"></span></label>
-   <label class="row">Volume <input type="range" id="ivol" min="0" max="1" step="0.05"><span class="v" id="vvol"></span></label>
-  </section>
-  <section class="tab" id="t-keys"><h2>Commandes</h2><div class="keys">
-   <h3>À pied — clavier AZERTY</h3>
-   <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> se déplacer &nbsp; <kbd>Maj</kbd> sprint &nbsp; <kbd>Espace</kbd> saut &nbsp; <kbd>C</kbd> s'accroupir &nbsp; <kbd>A</kbd><kbd>E</kbd> se pencher<br>
-   <kbd>Clic G</kbd> tirer &nbsp; <kbd>Clic D</kbd> viser &nbsp; <kbd>R</kbd> recharger, maintenu : vérifier le chargeur &nbsp; <kbd>1</kbd>–<kbd>4</kbd> ou molette : arme &nbsp; <kbd>V</kbd> inspecter<br>
-   <kbd>F</kbd> lampe &nbsp; <kbd>G</kbd> drone &nbsp; <kbd>Tab</kbd> scores &nbsp; <kbd>Échap</kbd> menu
-   <h3>Drone FPV</h3>
-   Mode ANGLE : <kbd>Z</kbd><kbd>S</kbd> tangage &nbsp; <kbd>Q</kbd><kbd>D</kbd> roulis &nbsp; <kbd>A</kbd><kbd>E</kbd> ou souris : lacet &nbsp; <kbd>Espace</kbd><kbd>C</kbd> monter / descendre<br>
-   Modes HORIZON et ACRO : souris tangage / roulis &nbsp; <kbd>Z</kbd><kbd>S</kbd> manette des gaz (elle reste en place) &nbsp; <kbd>Q</kbd><kbd>D</kbd> lacet &nbsp; <kbd>C</kbd> couper les gaz<br>
-   <kbd>T</kbd> mode de vol &nbsp; <kbd>X</kbd> armer / désarmer / retourner &nbsp; <kbd>↑</kbd><kbd>↓</kbd> inclinaison caméra &nbsp; <kbd>G</kbd> rendre la main (vol stationnaire) &nbsp; <kbd>F</kbd> rappel
-   <h3>Manette (Xbox / PlayStation)</h3>
-   Stick gauche bouger · stick droit viser · <kbd>RT</kbd> tir · <kbd>LT</kbd> visée · <kbd>A</kbd> saut · <kbd>B</kbd> accroupi · <kbd>X</kbd> recharger · <kbd>Y</kbd> arme<br>
-   <kbd>LB</kbd><kbd>RB</kbd> se pencher · <kbd>L3</kbd> sprint · <kbd>R3</kbd> inspecter · croix <kbd>↑</kbd> drone <kbd>↓</kbd> lampe · <kbd>Start</kbd> menu · <kbd>Select</kbd> scores<br>
-   Drone en mode 2 : gaz et lacet à gauche, tangage et roulis à droite · <kbd>Y</kbd> mode de vol · <kbd>A</kbd> armer · <kbd>LB</kbd><kbd>RB</kbd> caméra. <kbd>X</kbd> maintenu à pied : vérifier le chargeur.<br><span id="padn" style="color:#5fd38a"></span>
-  </div></section>
-  <section class="tab" id="t-cred"><h2>Crédits</h2><div class="credl">
-   Modèles 3D — Sketchfab, licence CC BY 4.0, modifiés pour le jeu :<br>
-   <b>Modern Tactical Soldier</b> — ItsKrish7<br><b>HK416 Full ReWorked</b> — MojoLeeDa<br><b>STALKER AKS-74 ReAnimation</b>, <b>AKM reload animation</b>, <b>Pistol 43 Tactical</b> — Vlasov Daniil<br><br>
-   Moteur WebGL2, cartes, animations, audio procédural, logo : réalisés pour DEADFRAME.<br>Détail et liens : fichier CREDITS.md du dépôt.
-  </div></section>
- </main>
+ </div>
+ <footer class="mm-bar mm-bot">
+  <div class="mm-op" id="mmOp"></div>
+  <div class="grp"><span>Secteur <b id="mmSector"></b></span><span class="sep"></span><span id="mmMode">Match à mort</span></div>
+ </footer>
 </div>
+<div id="boot"><div class="bx"><div class="t">DEADFRAME</div><div class="s">INITIALISATION DU SYSTÈME</div><div class="pb"><i id="bootBar"></i></div><div class="pc"><span id="bootStep">WEBGL2</span><span id="bootPct">0 %</span></div><ol id="bootLog"></ol></div></div>
+<div id="ins"><div><em id="insSub"></em><b id="insName"></b></div></div>
 <div id="err"></div>
 <script>
 'use strict';
@@ -200,7 +404,7 @@ const gl=cv.getContext('webgl2',{antialias:false,alpha:false,powerPreference:'hi
 if(!gl){$('err').style.display='flex';$('err').textContent='WebGL2 est requis pour DEADFRAME (navigateur ou carte graphique non compatible).';throw new Error('no webgl2')}
 
 /* ================= réglages ================= */
-const CFG={sens:1,fish:.17,scale:0,bots:6,name:'',vol:.8,map:0,dcid:'',dc:null};
+const CFG={sens:1,fish:.17,scale:0,bots:6,name:'',vol:.8,map:0,dcid:'',dc:null,loadout:0};
 try{Object.assign(CFG,JSON.parse(localStorage.getItem('deadframe')||'{}'))}catch(e){}
 const saveCfg=()=>{try{localStorage.setItem('deadframe',JSON.stringify(CFG))}catch(e){}};
 if(!CFG.name)CFG.name='UNIT-'+(100+Math.random()*900|0);
@@ -531,7 +735,7 @@ const cubeVAO=gl.createVertexArray();gl.bindVertexArray(cubeVAO);
 const quadVAO=gl.createVertexArray();
 function cube(m,col,type=4){gl.uniformMatrix4fv(PW.u.uM,false,m);gl.uniform3fv(PW.u.uCol,col);gl.uniform1f(PW.u.uType,type);gl.drawArrays(gl.TRIANGLES,0,36)}
 /* ---- modèles 3D (.dfm) : maillages texturés, statiques ou skinnés ---- */
-const MODELS={},WHITE=[1,1,1],NOLEG=[0,0,0,0];
+const MODELS={},TEXP=[],WHITE=[1,1,1],NOLEG=[0,0,0,0];
 const whiteTex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,whiteTex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([150,150,150,255]));
 // un fichier d'asset : soit embarqué dans la page (version « page unique »), soit téléchargé depuis assets/
 async function assetBuf(file){const el=document.getElementById('asset:'+file);if(el){const b=atob(el.textContent),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);el.textContent='';return u.buffer}
@@ -539,14 +743,14 @@ async function assetBuf(file){const el=document.getElementById('asset:'+file);if
 async function loadModel(name){try{
  const buf=await assetBuf(name+'.dfm'),jl=new DataView(buf).getUint32(0,true);
  const meta=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,jl))),base=4+jl,f32=k=>new Float32Array(buf,base+meta[k][0],meta[k][1]);
- const m={name,skinned:meta.skinned,prims:meta.prims,bbox:meta.bbox,mats:meta.mats,tex:meta.mats.map(()=>whiteTex)};
+ const m={name,bytes:buf.byteLength,skinned:meta.skinned,prims:meta.prims,bbox:meta.bbox,mats:meta.mats,tex:meta.mats.map(()=>whiteTex)};
  m.vao=gl.createVertexArray();gl.bindVertexArray(m.vao);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,f32('vtx'),gl.STATIC_DRAW);
  const st=meta.stride*4;gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,st,0);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,st,12);gl.enableVertexAttribArray(2);gl.vertexAttribPointer(2,2,gl.FLOAT,false,st,24);
  if(m.skinned){gl.enableVertexAttribArray(3);gl.vertexAttribPointer(3,4,gl.FLOAT,false,st,32);gl.enableVertexAttribArray(4);gl.vertexAttribPointer(4,4,gl.FLOAT,false,st,48)}
  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint32Array(buf,base+meta.idx[0],meta.idx[1]),gl.STATIC_DRAW);gl.bindVertexArray(null);
  const used=new Set(m.prims.map(p=>p.mat));
- m.mats.forEach((mt,i)=>{if(!mt.tex||!used.has(i))return;assetBuf(mt.tex).then(b=>createImageBitmap(new Blob([b],{type:'image/jpeg'}))).then(img=>{const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.generateMipmap(gl.TEXTURE_2D);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);m.tex[i]=t}).catch(()=>{})});
+ m.mats.forEach((mt,i)=>{if(!mt.tex||!used.has(i))return;TEXP.push(assetBuf(mt.tex).then(b=>createImageBitmap(new Blob([b],{type:'image/jpeg'}))).then(img=>{const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);m.tex[i]=t}).catch(()=>{}))});
  if(m.skinned&&meta.rig){m.joints={length:meta.rig};m.jm=new Float32Array(meta.rig*16);for(let k=0;k<meta.rig;k++)m.jm.set(M.id(),k*16);
   m.jtex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,m.jtex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,meta.rig*4,1,0,gl.RGBA,gl.FLOAT,m.jm);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)}
  else if(m.skinned){const n=meta.parents.length;m.parents=meta.parents;m.joints=meta.joints;m.rest=f32('rest').slice();m.ibm=f32('ibm').slice();m.pose=m.rest.slice();m.world=new Float32Array(n*16);m.jm=new Float32Array(m.joints.length*16);
@@ -638,12 +842,12 @@ const camS={pos:[0,12,0],yaw:0,pitch:-.4,roll:0,fov:1.2,k:.17};
 const listenPos=()=>camS.pos;
 
 /* ---- réseau ---- */
-let ws=null,online=false,myId=0,hostId=0,netInfo=null;
+let quitting=false,ws=null,online=false,myId=0,hostId=0,netInfo=null;
 const isHost=()=>!online||hostId===myId;
 function send(o){if(online&&ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
 function connect(){if(location.protocol!=='http:')return;try{ws=new WebSocket('ws://'+location.host+'/ws')}catch(e){return}
  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(_){return}try{onNet(m.f,m.d)}catch(err){console.error(err)}};
- ws.onclose=()=>{const was=online;online=false;ws=null;for(const k in players)delete players[k];myId=0;me.id=0;if(was)feed('<i>Connexion au serveur perdue</i> — mode solo');updNet();setTimeout(connect,3000)};
+ ws.onclose=()=>{if(quitting)return;const was=online;online=false;ws=null;for(const k in players)delete players[k];myId=0;me.id=0;if(was)feed('<i>Connexion au serveur perdue</i> — mode solo');updNet();setTimeout(connect,3000)};
  ws.onerror=()=>{};
  fetch('/info').then(r=>r.json()).then(j=>{netInfo=j;updNet()}).catch(()=>{})}
 const nameOf=id=>id===myId||id===me.id?me.name:typeof id==='string'?(bots.find(b=>b.id===id)||{}).name||'BOT':(players[id]||{}).name||'#'+id;
@@ -660,7 +864,7 @@ function onNet(f,d){
   if(d.dr){if(d.to===myId&&me.drone)killDrone('DRONE ABATTU')}
   else if(d.to===myId)hurt(d.dmg,by);
   else if(typeof d.to==='string'&&isHost()){const b=bots.find(b=>b.id===d.to);if(b)hurtBot(b,d.dmg,by)}}
- else if(d.t==='kill'){feedKill(d.k,d.v);if(d.k===myId)me.kills++;if(isHost()&&typeof d.k==='string'){const b=bots.find(b=>b.id===d.k);if(b)b.k++}}
+ else if(d.t==='kill'){feedKill(d.k,d.v);if(d.k===myId){me.kills++;creditKill(d.v)}if(isHost()&&typeof d.k==='string'){const b=bots.find(b=>b.id===d.k);if(b)b.k++}}
  else if(d.t==='b'){if(!isHost()&&f===hostId)syncBots(d.l)}
 }
 function syncBots(l){while(bots.length<l.length)bots.push(mkBot(bots.length));bots.length=l.length;
@@ -671,10 +875,12 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 function feed(html){const d=document.createElement('div');d.innerHTML=html;const f=$('feed');f.appendChild(d);while(f.children.length>6)f.firstChild.remove();setTimeout(()=>{d.style.opacity=0;setTimeout(()=>d.remove(),700)},6000)}
 function feedKill(k,v){feed(esc(nameOf(k))+' <i>▸</i> '+esc(nameOf(v)))}
 let tipT=0;function tip(s,t=3){$('tip').textContent=s;$('tip').style.opacity=.9;tipT=t}
-function updNet(){const n=$('net');
- if(online){const c=Object.keys(players).length+1;let s='<span class="on">● SERVEUR LAN ACTIF</span> — '+c+' joueur'+(c>1?'s':'')+' connecté'+(c>1?'s':'');
-  if(netInfo&&netInfo.urls&&netInfo.urls.length)s+='<br>Tes amis rejoignent avec : <b>'+netInfo.urls.map(esc).join('</b> ou <b>')+'</b>';n.innerHTML=s}
- else n.innerHTML=location.protocol==='http:'?'Connexion au serveur…':'MODE SOLO contre les bots — pour le multijoueur, lance <b>DEADFRAME.exe</b>'}
+function updNet(){const n=$('net'),t=$('mmNet');if(!n||!t)return;
+ if(online){const c=Object.keys(players).length+1;
+  n.innerHTML='<span class="on">■ SERVEUR LAN ACTIF</span> — <b>'+c+'</b> opérateur'+(c>1?'s connectés':' connecté')+(isHost()?' · tu es l\'hôte':'')+(netInfo&&netInfo.urls&&netInfo.urls.length?'<br>Adresse pour tes amis (même réseau) : <b>'+netInfo.urls.map(esc).join('</b> ou <b>')+'</b>':'');
+  t.innerHTML='<i class="led ok"></i>EN LIGNE · LAN · <b>'+c+'</b> OP'}
+ else if(location.protocol==='http:'&&!quitting){n.innerHTML='Connexion au serveur de jeu…';t.innerHTML='<i class="led wait"></i>CONNEXION…'}
+ else{n.innerHTML='Mode solo contre les bots. Pour jouer à plusieurs, lance <b>DEADFRAME.exe</b> : il affiche l\'adresse à donner à tes amis.';t.innerHTML='<i class="led"></i>HORS LIGNE · SOLO'}}
 function scoreboard(){const rows=[{n:me.name,k:me.kills,d:me.deaths,me:1,av:CFG.dc&&CFG.dc.av?CFG.dc.id+'/'+CFG.dc.av:null}];for(const id in players){const p=players[id];rows.push({n:p.name,k:p.kills||0,d:p.deaths||0,av:p.av})}for(const b of bots)rows.push({n:b.name+' ·bot',k:b.k,d:b.d});
  rows.sort((a,b)=>b.k-a.k||a.d-b.d);$('score').innerHTML='<h3>DEADFRAME — MATCH À MORT '+(online?'· EN LIGNE':'· SOLO')+'</h3><table><tr><th>OPÉRATEUR</th><th>ÉLIM.</th><th>MORTS</th></tr>'+rows.map(r=>'<tr'+(r.me?' class="me"':'')+'><td>'+(r.av?'<img src="https://cdn.discordapp.com/avatars/'+r.av+'.png?size=32" width="18" height="18" style="border-radius:50%;vertical-align:-4px;margin-right:8px" alt="">':'')+esc(r.n)+'</td><td>'+r.k+'</td><td>'+r.d+'</td></tr>').join('')+'</table>'}
 let hudT=0;
@@ -701,9 +907,9 @@ function rayChars(o,d,maxT,skip){let best=null,bt=maxT,bm=1;const test=e=>{if(!e
  for(const id in players)test(players[id]);for(const b of bots)test(b);return best?{e:best,t:bt,m:bm}:null}
 function pickSpawn(){let cand=spawns.map(s=>{let dmin=1e9;const chk=e=>{if(e.alive)dmin=Math.min(dmin,Math.hypot(e.pos[0]-s[0],e.pos[2]-s[1]))};chk(me);for(const id in players)chk(players[id]);for(const b of bots)chk(b);return{s,d:dmin}});
  cand.sort((a,b)=>b.d-a.d);return cand[(rnd()*Math.min(5,cand.length))|0].s}
-function spawnMe(){const s=pickSpawn();me.pos=[s[0],0,s[1]];me.vel=[0,0,0];me.hp=100;me.alive=true;me.fall=0;me.yaw=me.cy=Math.atan2(s[0],s[1]);me.pitch=me.cp=0;me.ammo=WPN.map(w=>w.mag);me.res=WPN.map(w=>w.res);me.reload=0;me.w=0;me.lastHurt=-99;showMsg('')}
+function spawnMe(){const s=pickSpawn();me.pos=[s[0],0,s[1]];me.vel=[0,0,0];me.hp=100;me.alive=true;me.fall=0;me.yaw=me.cy=Math.atan2(s[0],s[1]);me.pitch=me.cp=0;me.ammo=WPN.map(w=>w.mag);me.res=WPN.map(w=>w.res);me.reload=0;me.w=clamp(CFG.loadout|0,0,WPN.length-1);vmA.w=-1;me.lastHurt=-99;showMsg('')}
 function hurt(dmg,by){if(!me.alive)return;me.hp-=dmg;me.lastHurt=now;me.shake=Math.min(2,me.shake+.9);sndHit();rumble(180,.9);if(me.inDrone){exitDrone();tip('OPÉRATEUR TOUCHÉ — liaison drone coupée')}
- if(me.hp<=0){me.hp=0;me.alive=false;me.deaths++;me.respawn=4.5;me.fall=0;if(me.drone)killDrone();feedKill(by,myId);send({t:'kill',k:by,v:myId});if(typeof by==='string'&&isHost()){const b=bots.find(b=>b.id===by);if(b)b.k++}
+ if(me.hp<=0){me.hp=0;me.alive=false;me.deaths++;PROF.deaths++;me.streak=0;profSave(true);me.respawn=4.5;me.fall=0;if(me.drone)killDrone();feedKill(by,myId);send({t:'kill',k:by,v:myId});if(typeof by==='string'&&isHost()){const b=bots.find(b=>b.id===by);if(b)b.k++}
   showMsg('SIGNAL PERDU<small>ÉLIMINÉ PAR '+esc(nameOf(by))+' — REDÉPLOIEMENT…</small>')}}
 
 /* ---- bots ---- */
@@ -715,7 +921,7 @@ function targets(){const t=[];if(me.alive&&started)t.push(me);for(const id in pl
 function alertBots(pos){for(const b of bots)if(b.alive&&!b.tgt&&Math.hypot(b.pos[0]-pos[0],b.pos[2]-pos[2])<38&&rnd()<.75){b.last=[pos[0],pos[2]];b.path=[];b.look=0}}
 function hurtBot(b,dmg,by){if(!b.alive)return;b.hp-=dmg;
  if(!b.tgt){const a=by===myId?me:players[by];if(a){b.last=[a.pos[0],a.pos[2]];b.path=[];b.tyaw=Math.atan2(-(a.pos[0]-b.pos[0]),-(a.pos[2]-b.pos[2]));b.look=0}}
- if(b.hp<=0){b.alive=false;b.d++;b.resp=5+rnd()*3;b.fall=0;feedKill(by,b.id);send({t:'kill',k:by,v:b.id});if(by===myId)me.kills++}}
+ if(b.hp<=0){b.alive=false;b.d++;b.resp=5+rnd()*3;b.fall=0;feedKill(by,b.id);send({t:'kill',k:by,v:b.id});if(by===myId){me.kills++;creditKill(b.id)}}}
 function botFire(b,c,dist){const f=dirOf(b.yaw,b.pitch),o=[b.pos[0]+f[0]*.6,b.pos[1]+1.33,b.pos[2]+f[2]*.6];
  let p=.6-dist*.011-(c.spd||0)*.045-(c.crouch>.5?.1:0)-(c===me&&me.lean?0.08:0);p=clamp(p,.06,.68);
  const chest=[c.pos[0],c.pos[1]+(c.crouch>.5?.8:1.2),c.pos[2]];let e;
@@ -815,7 +1021,7 @@ function droneUpdate(dt){const d=me.drone;if(!d)return;d.t+=dt;if(d.msgT>0)d.msg
  if(crash>11||d.dmg>=1&&crash>4){sndImp(d.pos);for(let i=0;i<14;i++)parts.push({pos:d.pos.slice(),vel:[(rnd()-.5)*6,rnd()*4,(rnd()-.5)*6],life:.4+rnd()*.5,col:[6,4,1.5],s:.03,em:1,g:9});killDrone('DRONE DÉTRUIT — impact à '+Math.round(crash*3.6)+' km/h');return}
  if(crash>2.2){sndImp(d.pos);rumble(120,.6);if(crash>6&&d.armed){d.armed=false;droneMsg(d,'CRASH — MOTEURS COUPÉS')}}
  if(d.armed&&d.onG&&d.thr<=DR.idle+.01){d.gT+=dt;if(d.gT>2.5&&pil)droneArm(d,false)}else d.gT=0;
- d.st=[ro,pi,clamp(ya,-1,1),d.mode===0?(th+1)/2:d.lever];
+ d.st=[ro,pi,clamp(ya,-1,1),d.mode===0?(th+1)/2:d.lever];if(d.armed&&!d.onG)PROF.drone+=dt;
  d.pos[1]=Math.min(d.pos[1],70);d.pos[0]=clamp(d.pos[0],-62,62);d.pos[2]=clamp(d.pos[2],-62,62);
  const amps=d.armed?2+62*Math.pow(d.mot,1.5):.3;d.mah+=amps*dt/3.6;d.bat=clamp(1-d.mah/DR.cap,0,1);d.volt=4*(3.3+.9*d.bat)-1.1*d.mot;
  d.sigT-=dt;if(d.sigT<=0){d.sigT=.3;const dv=sub(d.pos,[me.pos[0],me.pos[1]+1.5,me.pos[2]]),l=len(dv)||1;d.los=rayWorld([me.pos[0],me.pos[1]+1.5,me.pos[2]],mulS(dv,1/l),l).hit?.62:1}
@@ -832,7 +1038,7 @@ function fire(){const w=WPN[me.w];if(me.cool>0||me.reload>0)return;
  const rw=rayWorld(o,d,300);let end=add(o,mulS(d,rw.t)),rc=rayChars(o,d,rw.t,null),hitDrone=null;
  for(const id in players){const p=players[id];if(p.drone){const q=p.drone,t=rayBox(o,d,[q[0]-.35,q[1]-.2,q[2]-.35,q[0]+.35,q[1]+.2,q[2]+.35],rc?rc.t:rw.t);if(t>=0){hitDrone=p;end=add(o,mulS(d,t))}}}
  if(hitDrone){send({t:'hit',to:hitDrone.id,dr:1,dmg:0});impact(end,[0,1,0])}
- else if(rc){end=add(o,mulS(d,rc.t));const dmg=w.dmg*rc.m;impact(end,[0,1,0],true);
+ else if(rc){end=add(o,mulS(d,rc.t));const dmg=w.dmg*rc.m;lastHit[rc.e.id]={w:me.w,head:rc.m>3};impact(end,[0,1,0],true);
   if(rc.e.kind==='b'){if(isHost())hurtBot(rc.e,dmg,myId);else send({t:'hit',to:rc.e.id,dmg})}else send({t:'hit',to:rc.e.id,dmg})}
  else if(rw.hit)impact(end,rw.n);
  const mz=gun.muzzle||o;shotFx(mz,end,!!w.rifle,true);me.flash=.045;send({t:'sh',o:mz.map(v=>+v.toFixed(2)),e:end.map(v=>+v.toFixed(2)),w:me.w});
@@ -957,7 +1163,7 @@ let gain=1.6,lastCamYaw=0,lastCamPitch=0,fpsAcc=0,fpsN=0,slowT=0;
 function computeCam(dt){
  const t=now;let k=CFG.fish,cfov=1.08;
  if(DBG.cam){camS.pos=DBG.cam.p;camS.yaw=DBG.cam.y;camS.pitch=DBG.cam.pi;camS.roll=0;k=0;cfov=1.1}
- else if(!started){const a=t*.05;camS.pos=[Math.sin(a)*34,15+Math.sin(t*.13)*2,Math.cos(a)*34];camS.yaw=a;camS.pitch=-.42;camS.roll=Math.sin(t*.3)*.02;k=.22}
+ else if(!started){stageCam(t);k=.05;cfov=.9}
  else if(me.inDrone&&me.drone){const d=me.drone,tl=d.tilt,qc=qmul(d.q,[Math.sin(tl/2),0,0,Math.cos(tl/2)]),f=qrot(qc,[0,0,-1]),u=qrot(qc,[0,1,0]);
   camS.pos=add(d.pos,qrot(d.q,[0,.02,-.12]));camS.yaw=Math.abs(f[1])>.999?d.yaw:Math.atan2(-f[0],-f[2]);camS.pitch=Math.asin(clamp(f[1],-1,1));
   const r0=rightOf(camS.yaw),u0=cross(r0,dirOf(camS.yaw,camS.pitch));camS.roll=Math.atan2(-dot(u,r0),dot(u,u0))+Math.sin(t*47)*(.0012+.012*d.dmg)*(1+d.mot*3);k=Math.max(.26,CFG.fish);cfov=1.3}
@@ -986,10 +1192,11 @@ function render(dt){
  const nLights=n,env=MAPS[curMap]||MAPS[0];
  const spots=[];const firstPerson=started&&me.alive&&!me.inDrone;
  if(started&&me.alive&&me.fl){if(firstPerson)spots.push({p:add(add(camS.pos,mulS(U,-.16)),mulS(F,.05)),d:F,z:-1,own:1});else{const f=dirOf(me.yaw,me.pitch);spots.push({p:[me.pos[0]+f[0]*.3,me.pos[1]+1.3,me.pos[2]+f[2]*.3],d:f,z:zoneOf([me.pos[0],1,me.pos[2]])})}}
+ if(!started&&!DBG.cam)stageLights(spots);
  const oth=[];const addS=e=>{if(e.alive&&e.fl)oth.push(e)};for(const id in players)addS(players[id]);for(const b of bots)addS(b);
  oth.sort((a,b)=>len(sub(a.pos,camS.pos))-len(sub(b.pos,camS.pos)));
  for(const e of oth){if(spots.length>=4)break;const f=dirOf(e.yaw,e.pitch||0),cr=e.crouch>.5?.42:0;spots.push({p:[e.pos[0]+f[0]*.3,e.pos[1]+1.3-cr,e.pos[2]+f[2]*.3],d:f,z:zoneOf([e.pos[0],e.pos[1]+1,e.pos[2]])})}
- for(let i=0;i<4;i++){const s=spots[i];if(s){fSP.set(s.p,i*3);fSD.set(s.d,i*3);fSC.set(s.own?[3.4,3.2,2.8,.80]:[3,2.9,2.5,.84],i*4);fSZ[i]=s.z}else{fSC.set([0,0,0,2],i*4);fSZ[i]=-1}}
+ for(let i=0;i<4;i++){const s=spots[i];if(s){fSP.set(s.p,i*3);fSD.set(s.d,i*3);fSC.set(s.c||(s.own?[3.4,3.2,2.8,.80]:[3,2.9,2.5,.84]),i*4);fSZ[i]=s.z}else{fSC.set([0,0,0,2],i*4);fSZ[i]=-1}}
  // --- passe scène
  gl.bindFramebuffer(gl.FRAMEBUFFER,fbScene);gl.viewport(0,0,RW,RH);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
  for(const PR of[PM,PW]){gl.useProgram(PR.p);const u=PR.u;gl.uniformMatrix4fv(u.uVP,false,VP);gl.uniform3fv(u.uCam,camS.pos);gl.uniform1f(u.uTime,t);gl.uniform1f(u.uExp,2.4);
@@ -1000,6 +1207,7 @@ function render(dt){
  cube(mm(M.trs(camS.pos[0],camS.pos[1],camS.pos[2]),M.scl(300,300,300)),[0,0,0],6);
  for(const id in players){const p=players[id];drawChar(p);if(p.drone)drawDrone(p.drone,p.drone[3],t)}
  for(const b of bots)if(b.alive||b.fall<1||b.resp>0)drawChar(b);
+ if(!started&&!DBG.cam)drawChar(menuOp);
  if(started&&!firstPerson)drawChar(me);
  if(me.drone&&!me.inDrone)drawDrone(me.drone.pos,me.drone.yaw,me.drone.armed?t*(1+me.drone.mot*2):0,me.drone.q);
  for(const d of decals){const a=Math.abs(d.n[0])>.5?[.012,.07,.07]:Math.abs(d.n[1])>.5?[.07,.012,.07]:[.07,.07,.012];cube(mm(M.trs(d.p[0],d.p[1],d.p[2]),M.scl(a[0],a[1],a[2])),[.012,.012,.012])}
@@ -1071,7 +1279,7 @@ function overlay(){const w=ov.width,h=ov.height;o2.clearRect(0,0,w,h);if(!starte
 
 /* ================= boucle ================= */
 let lastT=0,netAcc=0,botAcc=0;
-function update(dt){
+function update(dt){if(started&&playing)PROF.time+=dt;
  if(started&&isHost())for(const b of bots)botUpdate(b,dt);
  else for(const b of bots){const k=Math.min(1,dt*12),ox=b.pos[0],oz=b.pos[2];for(let i=0;i<3;i++)b.pos[i]+=(b.tpos[i]-b.pos[i])*k;b.yaw+=angd(b.tyaw,b.yaw)*k;b.spd=Math.hypot(b.pos[0]-ox,b.pos[2]-oz)/Math.max(dt,1e-4);b.walk+=b.spd*dt*2.4;if(!b.alive)b.fall=Math.min(1,b.fall+dt*3)}
  for(const id in players){const p=players[id],k=Math.min(1,dt*12),ox=p.pos[0],oz=p.pos[2];for(let i=0;i<3;i++)p.pos[i]+=(p.tpos[i]-p.pos[i])*k;p.yaw+=angd(p.tyaw,p.yaw)*k;p.pitch+=(p.tpitch-p.pitch)*k;p.spd=Math.hypot(p.pos[0]-ox,p.pos[2]-oz)/Math.max(dt,1e-4);p.walk+=p.spd*dt*2.4;if(!p.alive)p.fall=Math.min(1,p.fall+dt*3)}
@@ -1092,11 +1300,11 @@ function frame(ms){requestAnimationFrame(frame);const t=ms/1000,raw=t-lastT;let 
  pollPad(dt);update(dt);computeCam(dt);render(dt);autoExposure(dt);overlay();updHud(dt)}
 
 /* ================= entrées / menu ================= */
-function setMenu(on){$('menu').style.display=on?'grid':'none';$('go').textContent=started?'Reprendre':'Entrer en zone';$('hud').style.display=started?'block':'none';playing=!on&&started}
+function setMenu(on){const m=$('menu');m.classList.toggle('off',!on);if(on){$('go').firstElementChild.textContent=started?'Reprendre':'Déployer';uiRefresh()}$('hud').style.display=started?'block':'none';playing=!on&&started}
 let noLock=false;
 function enter(){initAudio();if(AC&&AC.state==='suspended')AC.resume();
  me.name=(($('iname').value||'').trim().toUpperCase().slice(0,12))||CFG.name;CFG.name=me.name;saveCfg();
- if(!started){started=true;setBots(CFG.bots);spawnMe();tip('Clic droit pour viser · maintiens R pour vérifier le chargeur · G déploie le drone',7)}else if(isHost())setBots(CFG.bots);
+ if(!started){started=true;setBots(CFG.bots);spawnMe();PROF.deploys++;profSave(true);insertion();tip('Clic droit pour viser · maintiens R pour vérifier le chargeur · G déploie le drone',7)}else if(isHost())setBots(CFG.bots);
  setMenu(false);try{const p=cv.requestPointerLock();if(p&&p.catch)p.catch(()=>{noLock=true})}catch(e){noLock=true}}
 $('go').addEventListener('click',enter);
 document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement!==cv&&started&&!noLock)setMenu(true)});
@@ -1121,6 +1329,7 @@ function act(code){ // actions ponctuelles (clavier et manette)
 addEventListener('keydown',e=>{
  if(e.target&&e.target.tagName==='INPUT'&&e.target.type==='text'){if(e.code==='Enter')enter();return}
  if(e.code==='Escape'&&started&&playing&&noLock){setMenu(true);return}
+ if(!playing&&menuKey(e))return;
  if(!playing)return;if(['Tab','Space','KeyQ','KeyE','KeyF','KeyG','KeyR','KeyT','KeyV','KeyX','ArrowUp','ArrowDown'].includes(e.code)||e.code.startsWith('Digit'))e.preventDefault();
  if(e.repeat)return;keys[e.code]=true;
  if(e.code==='Tab'){scoreboard();$('score').style.display='block'}
@@ -1133,11 +1342,11 @@ function rumble(ms,s){try{const a=pad.g&&pad.g.vibrationActuator;if(a&&a.playEff
 function pollPad(dt){let g=null;try{for(const p of(navigator.getGamepads?navigator.getGamepads():[]))if(p&&p.connected&&p.axes.length>=4&&p.buttons.length>=10){g=p;break}}catch(e){}
  pad.g=g;pad.fireEdge=false;
  if(!g){if(pad.on){pad.on=false;pad.lx=pad.ly=pad.rx=pad.ry=pad.lean=0;pad.fire=pad.ads=pad.jump=pad.crouch=pad.sprint=false}return}
- if(!pad.on){pad.on=true;pad.prev=[];if(started)tip('MANETTE CONNECTÉE');const pn=$('padn');if(pn)pn.textContent='● manette détectée — appuie sur A / ✕ pour entrer'}
+ if(!pad.on){pad.on=true;pad.prev=[];if(started)tip('MANETTE CONNECTÉE');const pn=$('padn');if(pn)pn.textContent='MANETTE DÉTECTÉE · A : DÉPLOYER'}
  const dz=v=>{const a=Math.abs(v);return a<.14?0:Math.sign(v)*(a-.14)/.86},b=i=>!!(g.buttons[i]&&(g.buttons[i].pressed||g.buttons[i].value>.45)),edge=i=>b(i)&&!pad.prev[i];
  pad.lx=dz(g.axes[0]);pad.ly=dz(g.axes[1]);pad.rx=dz(g.axes[2]);pad.ry=dz(g.axes[3]);
  if(edge(9)){if(playing){setMenu(true);if(document.exitPointerLock)document.exitPointerLock()}else enter()}
- else if(!playing&&edge(0))enter();
+ else if(!playing){if(edge(12))menuStep(-1);if(edge(13))menuStep(1);if(edge(0)&&uiSec==='deploy')enter()}
  else if(playing){
   pad.fireEdge=edge(7);pad.fire=b(7);pad.ads=b(6);pad.jump=b(0);if(me.inDrone&&edge(0))act('KeyX');pad.lean=(b(5)?1:0)-(b(4)?1:0);
   if(edge(1))pad.crouch=!pad.crouch;if(edge(10))pad.sprint=true;if(Math.hypot(pad.lx,pad.ly)<.5)pad.sprint=false;
@@ -1153,12 +1362,127 @@ const bind=(id,key,vid,fmt,cb)=>{const el=$(id);el.value=CFG[key];const up=()=>{
 $('iname').value=CFG.name;
 bind('ibots','bots','vbots',v=>v);bind('isens','sens','vsens',v=>v.toFixed(2));bind('ifish','fish','vfish',v=>Math.round(v/.3*100)+'%');
 bind('ivol','vol','vvol',v=>Math.round(v*100)+'%',()=>{if(master)master.gain.value=CFG.vol});bind('iq','scale',null,null,resize);
-// onglets, cartes, arsenal
-document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+b.dataset.t))}));
-function drawMaps(){$('maps').innerHTML=MAPS.map((m,i)=>'<button class="mapc'+(i===curMap?' on':'')+'" data-i="'+i+'"><i>'+m.tag+'</i><b>'+esc(m.n)+'</b><span>'+m.d+'</span></button>').join('');
- $('maps').querySelectorAll('.mapc').forEach(c=>c.addEventListener('click',()=>{const i=+c.dataset.i;if(!isHost()){$('net').innerHTML='La carte est choisie par l\'hôte de la partie.';return}CFG.map=i;saveCfg();loadMap(i)}))}
-$('arms').innerHTML=WPN.map((w,i)=>{const bar=(l,v,t)=>'<div class="bar">'+l+'<div><i style="width:'+Math.round(clamp(v,0,1)*100)+'%"></i></div><em>'+t+'</em></div>',rpm=Math.round(60/w.cd);
- return'<div class="wp"><div><b>'+w.n+'</b><small>'+w.cal+' · TOUCHE '+(i+1)+'</small></div><div>'+bar('DÉGÂTS',w.dmg/50,w.dmg)+bar('CADENCE',rpm/800,w.auto?rpm+'/min':'semi')+bar('RECUL',w.rec/.04,Math.round(w.rec*1000))+bar('CHARGEUR',w.mag/30,w.mag)+'</div></div>'}).join('');
+/* ================= MENU PRINCIPAL =================
+   Sections : DEPLOY (zone, opposition, réseau) · LOADOUT (arme d'insertion) · OPERATORS (dossier, progression, Discord)
+   MISSIONS (contrats suivis) · SETTINGS (affichage, contrôles, audio, touches, crédits) · QUIT (quitter la partie / le jeu). */
+const GAME_VERSION='0.7.0',GAME_BUILD='2026.11.11',SECS=['deploy','loadout','operators','missions','settings','quit'];
+let uiSec='deploy';
+const fmtN=n=>Math.round(n).toLocaleString('fr-FR'),p2=n=>String(n).padStart(2,'0');
+const fmtDur=t=>{t=Math.floor(t);return t<60?t+' s':t<3600?Math.floor(t/60)+' min':Math.floor(t/3600)+' h '+p2(Math.floor(t%3600/60))};
+function uiSnd(k){if(!AC)return;if(k==='hover')noise(.022,.018,5200,2600,0,'bandpass',6);else{noise(.07,.03,2400,1300,0,'bandpass',3);thump(.045,170,80,.05)}}
+function showSec(t,quiet){if(!SECS.includes(t))return;uiSec=t;
+ document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ document.querySelectorAll('#mmPanel .pane').forEach(p=>p.classList.toggle('on',p.id==='t-'+t));
+ $('mmPanel').scrollTop=0;uiRefresh();if(!quiet)uiSnd('sel')}
+function menuStep(d){showSec(SECS[(SECS.indexOf(uiSec)+d+SECS.length)%SECS.length])}
+function menuKey(e){if($('menu').classList.contains('off'))return false;const tg=e.target&&e.target.tagName;if(tg==='INPUT'||tg==='SELECT'||tg==='TEXTAREA')return false;
+ if(e.code==='ArrowDown'||e.code==='ArrowUp'){e.preventDefault();menuStep(e.code==='ArrowDown'?1:-1);return true}
+ if((e.code==='Enter'||e.code==='NumpadEnter')&&uiSec==='deploy'&&(tg!=='BUTTON'||e.target.dataset.t==='deploy')){e.preventDefault();enter();return true}
+ return false}
+document.querySelectorAll('#tabs button').forEach(b=>{b.addEventListener('click',()=>showSec(b.dataset.t));b.addEventListener('mouseenter',()=>uiSnd('hover'))});
+document.querySelectorAll('#subs button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#subs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('#t-settings .sp').forEach(x=>x.classList.toggle('on',x.id==='s-'+b.dataset.s));uiSnd('sel')}));
+$('menu').addEventListener('pointerdown',()=>{initAudio();if(AC&&AC.state==='suspended')AC.resume()});
+function uiRefresh(){if(uiSec==='operators')drawOperator();if(uiSec==='missions')drawContracts();if(uiSec==='quit')drawQuit();if(uiSec==='deploy')drawMaps();drawOpBar();updNet()}
+
+/* ---- progression de l'opérateur : persistante dans ce navigateur (localStorage) ---- */
+const RANKS=[[1,'Recrue'],[3,'Soldat'],[5,'Soldat de 1re classe'],[8,'Caporal'],[12,'Caporal-chef'],[16,'Sergent'],[21,'Sergent-chef'],[27,'Adjudant'],[34,'Adjudant-chef'],[42,'Major']];
+const PROF={xp:0,kills:0,deaths:0,heads:0,deploys:0,time:0,drone:0,best:0,wk:[0,0,0,0],mk:[0,0,0,0],done:{}};
+try{const sv=JSON.parse(localStorage.getItem('deadframe_profile')||'{}');for(const k in PROF)if(k in sv&&typeof sv[k]===typeof PROF[k])PROF[k]=sv[k]}catch(e){}
+let profT=0;function profSave(now_){if(!now_&&performance.now()-profT<4000)return;profT=performance.now();try{localStorage.setItem('deadframe_profile',JSON.stringify(PROF))}catch(e){}}
+addEventListener('pagehide',()=>profSave(true));document.addEventListener('visibilitychange',()=>{if(document.hidden)profSave(true)});
+const lvlXP=l=>150*l*(l-1),level=xp=>{let l=1;while(lvlXP(l+1)<=xp)l++;return l},rankOf=l=>{let i=0;RANKS.forEach((r,k)=>{if(l>=r[0])i=k});return{i,name:RANKS[i][1]}};
+const CONTRACTS=[
+ {id:'first',n:'Premier contact',d:'Élimine un hostile.',goal:1,xp:150,v:p=>p.kills},
+ {id:'k50',n:'Vétéran',d:'50 éliminations au total.',goal:50,xp:1500,v:p=>p.kills},
+ {id:'head',n:'Précision',d:'10 éliminations par un tir à la tête.',goal:10,xp:800,v:p=>p.heads},
+ {id:'streak',n:'Série',d:'5 éliminations sans mourir.',goal:5,xp:700,v:p=>p.best},
+ {id:'hk',n:'HK416',d:'20 éliminations au HK416.',goal:20,xp:600,v:p=>p.wk[0]},
+ {id:'ak',n:'Kalachnikov',d:'20 éliminations à l\'AKS-74 ou à l\'AKM.',goal:20,xp:600,v:p=>p.wk[1]+p.wk[2]},
+ {id:'p43',n:'Arme de poing',d:'8 éliminations au P43.',goal:8,xp:600,v:p=>p.wk[3]},
+ {id:'m0',n:'Dépôt industriel',d:'15 éliminations sur cette carte.',goal:15,xp:400,v:p=>p.mk[0]},
+ {id:'m1',n:'Hôpital abandonné',d:'15 éliminations sur cette carte.',goal:15,xp:400,v:p=>p.mk[1]},
+ {id:'m2',n:'Tranchées',d:'15 éliminations sur cette carte.',goal:15,xp:400,v:p=>p.mk[2]},
+ {id:'m3',n:'Hôtel',d:'15 éliminations sur cette carte.',goal:15,xp:400,v:p=>p.mk[3]},
+ {id:'fly',n:'Pilote',d:'5 minutes de vol de drone, moteurs armés.',goal:300,xp:500,v:p=>Math.floor(p.drone),f:v=>Math.floor(v/60)+':'+p2(v%60)}];
+function checkContracts(){let any=false;for(const c of CONTRACTS)if(!PROF.done[c.id]&&c.v(PROF)>=c.goal){PROF.done[c.id]=1;PROF.xp+=c.xp;any=true;if(started)feed('<i>CONTRAT REMPLI</i> — '+esc(c.n)+' · +'+c.xp+' XP')}return any}
+const lastHit={};
+function creditKill(vid){const h=lastHit[vid]||{w:me.w,head:false},l0=level(PROF.xp);delete lastHit[vid];
+ PROF.kills++;PROF.xp+=100;if(h.head){PROF.heads++;PROF.xp+=50}PROF.wk[h.w]=(PROF.wk[h.w]||0)+1;if(curMap>=0)PROF.mk[curMap]=(PROF.mk[curMap]||0)+1;
+ me.streak=(me.streak||0)+1;PROF.best=Math.max(PROF.best,me.streak);checkContracts();
+ const l1=level(PROF.xp);if(l1>l0)feed('<i>PROMOTION</i> — niveau '+l1+' · '+rankOf(l1).name);profSave(true)}
+setInterval(()=>{if(checkContracts())profSave(true);else profSave()},5000);
+function insignia(i,sz){const c='#a09d72',d='#5b5f59';let g='<rect x="1.5" y="1.5" width="29" height="29" fill="#0d0f0e" stroke="'+d+'" stroke-width="1"/>';
+ const chev=y=>'<path d="M8 '+y+' L16 '+(y-4.5)+' L24 '+y+'" fill="none" stroke="'+c+'" stroke-width="2.6" stroke-linejoin="miter"/>',rock=y=>'<path d="M8 '+y+' Q16 '+(y+4.5)+' 24 '+y+'" fill="none" stroke="'+c+'" stroke-width="2.3"/>';
+ if(i===0)g+='<rect x="10" y="15" width="12" height="2.2" fill="'+d+'"/>';
+ else if(i<=3){for(let k=0;k<i;k++)g+=chev(13+k*5.2-(i-1)*2.6)}
+ else if(i<=5){for(let k=0;k<3;k++)g+=chev(10+k*4.6);for(let k=0;k<i-3;k++)g+=rock(21+k*4)}
+ else{const n=i-5;for(let k=0;k<n;k++)g+='<rect x="9" y="'+(16-n*2.6+k*5.2)+'" width="14" height="3" fill="'+c+'"/>'}
+ return '<svg viewBox="0 0 32 32" width="'+sz+'" height="'+sz+'" aria-hidden="true">'+g+'</svg>'}
+function drawOpBar(){const l=level(PROF.xp),r=rankOf(l),a=lvlXP(l),b=lvlXP(l+1);
+ $('mmOp').innerHTML=insignia(r.i,30)+'<div><div class="cs">'+esc(me.name)+'</div><div class="rk">NIV <b>'+l+'</b> · '+esc(r.name.toUpperCase())+'</div></div><div class="xp"><div class="xpb"><i style="--v:'+((PROF.xp-a)/(b-a)).toFixed(3)+'"></i></div><span>'+fmtN(PROF.xp-a)+' / '+fmtN(b-a)+' XP</span></div>'}
+function drawOperator(){const P=PROF,l=level(P.xp),r=rankOf(l),a=lvlXP(l),b=lvlXP(l+1),nr=RANKS[r.i+1];
+ $('opCard').innerHTML=insignia(r.i,64)+'<div><div class="cs">'+esc(me.name)+'</div><div class="rk">'+esc(r.name)+' · niveau '+l+'</div><div class="xpb"><i style="--v:'+((P.xp-a)/(b-a)).toFixed(3)+'"></i></div><div class="nx">'+fmtN(P.xp-a)+' / '+fmtN(b-a)+' XP avant le niveau '+(l+1)+(nr?' · grade suivant : '+esc(nr[1])+' au niveau '+nr[0]:'')+'</div></div>';
+ const kd=(P.deaths?P.kills/P.deaths:P.kills).toFixed(2);
+ $('opStats').innerHTML=[[fmtN(P.kills),'Éliminations'],[fmtN(P.deaths),'Morts'],[kd,'Ratio É / M'],[fmtN(P.heads),'Tirs à la tête'],[P.best,'Meilleure série'],[fmtN(P.deploys),'Déploiements'],[fmtDur(P.time),'Temps en zone'],[fmtDur(P.drone),'Vol de drone']].map(c=>'<div><b>'+c[0]+'</b><span>'+c[1]+'</span></div>').join('')}
+function drawContracts(){const rows=CONTRACTS.map(c=>{const v=Math.min(c.goal,c.v(PROF));return{c,v,ok:!!PROF.done[c.id]}}).sort((a,b)=>(a.ok-b.ok)||(b.v/b.c.goal-a.v/a.c.goal));
+ $('contracts').innerHTML=rows.map(({c,v,ok})=>'<li class="'+(ok?'ok':'')+'"><i class="bx"></i><div><b>'+esc(c.n)+'</b><span>'+esc(c.d)+'</span></div><div class="pr">'+(c.f?c.f(v)+' / '+c.f(c.goal):v+' / '+c.goal)+'<div class="xpb"><i style="--v:'+(v/c.goal).toFixed(3)+'"></i></div></div><div class="rw">+'+fmtN(c.xp)+' XP</div></li>').join('')}
+// zones d'opération (appelée aussi par loadMap)
+function drawMaps(){const el=$('maps');if(!el)return;
+ el.innerHTML=MAPS.map((m,i)=>'<li><button class="'+(i===curMap?'on':'')+'" data-i="'+i+'"><em>'+String.fromCharCode(65+i)+'-0'+(i+1)+'</em><b>'+esc(m.n)+'</b><i>'+m.tag+'</i></button></li>').join('');
+ el.querySelectorAll('button').forEach(b=>{b.addEventListener('mouseenter',()=>uiSnd('hover'));b.addEventListener('click',()=>{const i=+b.dataset.i;if(i===curMap)return;
+  if(!isHost()){$('opd').insertAdjacentHTML('beforeend','<p class="data"><b>La carte est choisie par l\'hôte de la partie.</b></p>');return}CFG.map=i;saveCfg();uiSnd('sel');loadMap(i)})});
+ const m=MAPS[curMap]||MAPS[0];
+ $('opd').innerHTML='<p class="txt">'+m.d+'</p><div class="data">SURFACE <b>82 × 82 M</b> · INSERTIONS <b>'+spawns.length+'</b> · ESPACES CLOS <b>'+zones.length+'</b> · SOURCES LUMINEUSES <b>'+lights.length+'</b></div>';
+ $('mmSector').textContent=m.n.toUpperCase()}
+// équipement
+$('arms').innerHTML=WPN.map((w,i)=>{const rpm=Math.round(60/w.cd),sb=(l,v,t)=>'<div class="sb">'+l+'<div><i style="--v:'+clamp(v,0,1).toFixed(3)+'"></i></div><em>'+t+'</em></div>';
+ return'<button class="wpn" data-i="'+i+'"><div><b>'+w.n+'</b><small>'+w.cal+'<br>'+(w.auto?'AUTO':'SEMI-AUTO')+' · TOUCHE '+(i+1)+'</small></div><div class="sbs">'+sb('DÉGÂTS',w.dmg/50,w.dmg)+sb('CADENCE',rpm/800,w.auto?rpm+' CPM':'SEMI')+sb('RECUL',w.rec/.04,Math.round(w.rec*1000))+sb('CHARGEUR',w.mag/30,w.mag+' + '+w.res)+'</div><div class="st"></div></button>'}).join('');
+function markArms(){$('arms').querySelectorAll('.wpn').forEach(b=>{const on=+b.dataset.i===(CFG.loadout|0);b.classList.toggle('on',on);b.querySelector('.st').textContent=on?'ÉQUIPÉE':'CHOISIR'})}
+$('arms').querySelectorAll('.wpn').forEach(b=>{b.addEventListener('mouseenter',()=>uiSnd('hover'));b.addEventListener('click',()=>{CFG.loadout=+b.dataset.i;saveCfg();markArms();uiSnd('sel');if(started&&me.alive&&!me.inDrone)switchW(CFG.loadout)})});markArms();
+// quitter
+const isLocalServer=()=>location.protocol==='http:'&&/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+function drawQuit(){const o=online?Object.keys(players).length:0;$('qLeave').hidden=!started;$('qQuit').hidden=false;
+ $('qTitle').textContent=started?'Quitter la partie ?':'Quitter DEADFRAME ?';
+ $('qText').textContent=started?'Quitter la partie te ramène au menu et remet le tableau des scores à zéro. Ta progression est conservée.':'Ta progression est enregistrée dans ce navigateur.';
+ $('qNote').innerHTML=isLocalServer()?'Quitter le jeu arrête aussi le serveur DEADFRAME.exe'+(o?' : <b>'+o+' joueur'+(o>1?'s seront déconnectés':' sera déconnecté')+'</b>.':'.'):'Si le navigateur refuse de fermer cet onglet, ferme-le toi-même.'}
+function leaveMatch(){if(!started)return;started=false;me.alive=false;me.inDrone=false;me.drone=null;me.kills=me.deaths=0;me.streak=0;
+ if(isHost()&&online)send({t:'b',l:[]});setBots(0);tracers.length=parts.length=0;showMsg('');$('score').style.display='none';profSave(true);setMenu(true);showSec('deploy',true)}
+function quitGame(){profSave(true);const end=msg=>{try{window.close()}catch(e){}setTimeout(()=>{$('qTitle').textContent='Session terminée';$('qText').textContent=msg;$('qQuit').hidden=$('qLeave').hidden=true;$('qNote').textContent=''},250)};
+ if(isLocalServer()){quitting=true;fetch('/quit',{method:'POST'}).then(r=>{if(!r.ok)quitting=false;end(r.ok?'Le serveur est arrêté. Tu peux fermer cette fenêtre.':'Le serveur a refusé l\'arrêt : ferme sa fenêtre de console.')}).catch(()=>end('Le serveur est arrêté. Tu peux fermer cette fenêtre.'))}
+ else end('Tu peux fermer cet onglet.')}
+$('qLeave').addEventListener('click',()=>{uiSnd('sel');leaveMatch()});$('qQuit').addEventListener('click',()=>{uiSnd('sel');quitGame()});
+// insertion : fondu au noir masquant l'apparition
+function insertion(){const el=$('ins'),d=new Date(),m=MAPS[curMap]||MAPS[0];$('insSub').textContent='INSERTION · '+p2(d.getHours())+':'+p2(d.getMinutes())+' · '+m.tag;$('insName').textContent=m.n;
+ el.classList.remove('go');void el.offsetWidth;el.classList.add('go');clearTimeout(insertion.t);insertion.t=setTimeout(()=>el.classList.remove('go'),1600)}
+// bandeaux : horloge, version, Discord, manette
+$('mmVer').textContent='v'+GAME_VERSION+' · BUILD '+GAME_BUILD;
+function uiTick(){const d=new Date();$('mmClock').textContent=p2(d.getHours())+':'+p2(d.getMinutes())+':'+p2(d.getSeconds());
+ $('mmDc').innerHTML=CFG.dc?'DISCORD · <b>'+esc(CFG.dc.name.toUpperCase())+'</b>':'DISCORD · NON LIÉ';
+ $('padst').textContent=pad.on&&pad.g?'Manette détectée : '+String(pad.g.id).slice(0,60):'Aucune manette détectée. Branche-la puis appuie sur un bouton.'}
+setInterval(uiTick,1000);
+// curseurs : remplissage de la piste
+function rangeFill(r){r.style.setProperty('--p',((r.value-r.min)/(r.max-r.min)*100)+'%')}
+document.querySelectorAll('#menu input[type=range]').forEach(r=>{r.addEventListener('input',()=>rangeFill(r));rangeFill(r)});
+$('iname').addEventListener('input',e=>{const v=e.target.value.trim().toUpperCase().slice(0,12);if(v){me.name=v;CFG.name=v;saveCfg();drawOpBar()}});
+
+/* ---- plateau du menu : un opérateur posé dans la carte, filmé par une caméra lente ---- */
+// p : position (x,z) · y : orientation · o : décalage du cadrage (l'opérateur à droite du panneau) · d : distance · s : décalage latéral
+const STAGES=[{p:[1.8,1.8],y:-2.36,o:2.05,d:3.7,s:.9},{p:[8,24.6],y:Math.PI,o:1.95,d:3.3,s:.9},{p:[8,-2],y:0,o:2,d:3.6,s:.9},{p:[2,24.2],y:Math.PI,o:1.95,d:3.2,s:.9}];
+const menuOp={id:'menu-op',kind:'p',name:'',pos:[0,0,0],yaw:0,pitch:-.3,alive:true,spd:0,walk:0,crouch:0,fl:0,i:7,hp:100};
+function stageCam(t){const S=STAGES[curMap]||STAGES[0],op=menuOp;op.pos=[S.p[0],0,S.p[1]];op.yaw=S.y;op.pitch=-.3+Math.sin(t*.37)*.025;
+ const F=dirOf(S.y,0),Rr=rightOf(S.y),dd=S.d+Math.sin(t*.19)*.16,sd=S.s+Math.sin(t*.11)*.18,hh=1.4+Math.sin(t*.15)*.035;
+ const cp=[op.pos[0]+F[0]*dd+Rr[0]*sd,hh,op.pos[2]+F[2]*dd+Rr[2]*sd],tg=[op.pos[0]+Rr[0]*S.o,1.22,op.pos[2]+Rr[2]*S.o],dv=sub(tg,cp);
+ camS.pos=cp;camS.yaw=Math.atan2(-dv[0],-dv[2]);camS.pitch=Math.atan2(dv[1],Math.hypot(dv[0],dv[2]));camS.roll=Math.sin(t*.23)*.004}
+function stageLights(spots){const op=menuOp,ch=[op.pos[0],1.35,op.pos[2]],R=rightOf(camS.yaw),F=dirOf(op.yaw,0);
+ const key=add(add(camS.pos,mulS(R,-1.6)),[0,1.5,0]),rim=[op.pos[0]-F[0]*2.4-R[0]*1.2,3.1,op.pos[2]-F[2]*2.4-R[2]*1.2],nd=v=>mulS(v,1/len(v));
+ spots.push({p:key,d:nd(sub(ch,key)),z:-1,c:[2.1,1.95,1.7,.93]});spots.push({p:rim,d:nd(sub([op.pos[0],1.5,op.pos[2]],rim)),z:-1,c:[1.1,1.2,1.35,.9]})}
+
+/* ---- chargement initial : progression réelle (shaders, carte, modèles) ---- */
+const MODEL_LIST=['soldier','soldier_lod','hk416','hk416_lod','aks74','akm','pistol'];let bootN=0,bootOver=false;const bootTotal=MODEL_LIST.length+3;
+function bootLog(txt,ok){const li=document.createElement('li');if(ok===false)li.className='ko';li.innerHTML='<b>'+(ok===false?'ÉCHEC':'OK')+'</b> &nbsp;'+txt;const ol=$('bootLog');ol.appendChild(li);while(ol.children.length>7)ol.firstChild.remove();
+ bootN++;const pc=Math.min(100,Math.round(bootN/bootTotal*100));$('bootBar').style.width=pc+'%';$('bootPct').textContent=pc+' %';$('bootStep').textContent=txt.split(' — ')[0].toUpperCase()}
+function bootDone(){if(bootOver)return;bootOver=true;$('bootStep').textContent='PRÊT';$('boot').classList.add('done');$('menu').classList.add('in');setTimeout(()=>{$('boot').style.display='none'},700)}
+
 // --- connexion Discord (OAuth2 « implicit grant », scope identify : pseudo + avatar, aucun secret côté jeu)
 const DISCORD_CLIENT_ID='';   // ID de l'application Discord du jeu (Developer Portal → OAuth2). Vide = à saisir dans le menu.
 const dcRedirect=location.origin+location.pathname,dcId=()=>(DISCORD_CLIENT_ID||CFG.dcid||'').replace(/\D/g,''),dcOk=/^https?:$/.test(location.protocol)&&window.top===window.self;
@@ -1174,13 +1498,16 @@ $('dcbtn').addEventListener('click',()=>{if(CFG.dc){CFG.dc=null;saveCfg();dcShow
  if(!st||st!==h.get('state')){$('net').innerHTML='Connexion Discord refusée (état invalide).';return}
  fetch('https://discord.com/api/users/@me',{headers:{Authorization:(h.get('token_type')||'Bearer')+' '+tok}}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(u=>{
   CFG.dc={id:String(u.id).replace(/\D/g,''),name:String(u.global_name||u.username||'').slice(0,32),av:/^[a-z0-9_]+$/.test(u.avatar||'')?u.avatar:''};
-  const cs=CFG.dc.name.toUpperCase().replace(/[^A-Z0-9 _\-]/g,'').trim().slice(0,12);if(cs){CFG.name=cs;me.name=cs;$('iname').value=cs}saveCfg();dcShow();document.querySelector('#tabs button[data-t=op]').click()}).catch(()=>{$('net').innerHTML='Discord : impossible de récupérer le profil.'})})();
+  const cs=CFG.dc.name.toUpperCase().replace(/[^A-Z0-9 _\-]/g,'').trim().slice(0,12);if(cs){CFG.name=cs;me.name=cs;$('iname').value=cs}saveCfg();dcShow();showSec('operators')}).catch(()=>{$('net').innerHTML='Discord : impossible de récupérer le profil.'})})();
 dcShow();
 
 
-['soldier','soldier_lod','hk416','hk416_lod','aks74','akm','pistol'].forEach(loadModel);
-loadMap(CFG.map|0);resize();updNet();connect();setMenu(true);requestAnimationFrame(frame);
-window.DF={MODELS,DBG,vmA,vmPlay,loadMap,MAPS,pad,act,get map(){return curMap},gun,me,bots,players,CFG,enter,get online(){return online},get host(){return isHost()},nav:{nodeOK,adj,NG},spawns,freeAt,boxes,fire,keys,launchDrone,camS,WPN,gunRef:gun,setLook(y,p){me.yaw=me.cy=y;me.pitch=me.cp=p}};
+bootLog('Shaders — monde, modèles, capteur, accumulation compilés');
+loadMap(CFG.map|0);{let nn=0;for(let i=0;i<NG*NG;i++)if(adj[i]&&adj[i].length)nn++;bootLog('Carte '+(MAPS[curMap]||MAPS[0]).n+' — '+fmtN(boxes.length)+' volumes · '+fmtN(nn)+' nœuds de navigation')}
+Promise.all(MODEL_LIST.map(n=>loadModel(n).then(()=>{const m=MODELS[n];bootLog(m?'Modèle '+n+' — '+fmtN(m.prims.reduce((a,p)=>a+p.count,0)/3)+' triangles · '+(m.bytes/1048576).toFixed(1)+' Mo':'Modèle '+n+' — indisponible, remplacé par des volumes simples',!!m)}))).then(()=>Promise.all(TEXP)).then(()=>{bootLog('Textures — '+TEXP.length+' chargées sur le GPU');requestAnimationFrame(()=>requestAnimationFrame(bootDone))});
+setTimeout(bootDone,20000);
+resize();updNet();connect();showSec('deploy',true);setMenu(true);uiTick();requestAnimationFrame(frame);
+window.DF={PROF,showSec,leaveMatch,STAGES,menuOp,MODELS,DBG,vmA,vmPlay,loadMap,MAPS,pad,act,get map(){return curMap},gun,me,bots,players,CFG,enter,get online(){return online},get host(){return isHost()},nav:{nodeOK,adj,NG},spawns,freeAt,boxes,fire,keys,launchDrone,camS,WPN,gunRef:gun,setLook(y,p){me.yaw=me.cy=y;me.pitch=me.cp=p}};
 </script>
 </body>
 </html>
