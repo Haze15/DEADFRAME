@@ -422,7 +422,7 @@ if __name__ == '__main__':
     if 'soldier' in which:
         S = 1.8 / .98
         convert_static(U + '40bcf9f8-modern_tactical_soldier.glb', 'soldier', out, 36000, 1024,
-                       fix=[[0, 0, S, 0], [0, S, 0, .49 * S], [-S, 0, 0, 0], [0, 0, 0, 1]], rig=soldier_rig)  # face à -Z, pieds à y=0, 1,80 m
+                       fix=[[0, 0, S, 0], [0, S, 0, .49 * S], [-S, 0, 0, 0], [0, 0, 0, 1]], rig=soldier_rig, lods=[('_lod', 6000)])  # face à -Z, pieds à y=0, 1,80 m
     if 'pistol' in which:
         convert_static(U + 'ccae6623-pistol_43_tactical__free_lowpoly.glb', 'pistol', out, 99999, 1024)
     if 'hk416' in which:

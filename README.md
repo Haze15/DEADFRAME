@@ -22,6 +22,22 @@ ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher �
 
 Le point rouge à l'écran montre où pointe réellement le canon (désactivable dans le menu : « Point de visée »).
 
+## Connexion Discord
+Le menu « Opérateur » propose « Se connecter avec Discord » (OAuth2 *implicit grant*, scope `identify` : pseudo et avatar, aucun secret dans le jeu).
+1. Créer une application sur https://discord.com/developers/applications.
+2. Dans OAuth2 → Redirects, ajouter l'adresse exacte du jeu : `https://haze15.github.io/DEADFRAME/` et/ou `http://localhost:7777/`.
+3. Coller l'ID d'application (Client ID) dans le menu, ou le mettre dans la constante `DISCORD_CLIENT_ID` de `src/game.html` pour que tous les joueurs l'aient.
+Limites : le pseudo n'est pas vérifié par le serveur de jeu (un joueur peut toujours taper un autre indicatif) ; ne fonctionne pas dans une page intégrée (iframe).
+
+## Performances
+Qualité « Automatique » : la résolution interne s'ajuste pour viser 60 i/s (affichée en haut à droite avec les i/s). Seules les lumières proches de la caméra sont calculées, les personnages lointains passent sur un modèle allégé, ceux hors champ ne sont pas dessinés.
+
+## Modèles libres repérés pour une future refonte (à télécharger puis à fournir, ils ne sont pas dans le dépôt)
+- Quaternius — Universal Animation Library (CC0, glTF, locomotion 8 directions, sprint, morts…) : https://quaternius.com/packs/universalanimationlibrary.html
+- Styloo — Guns Asset Pack (CC0, glTF) : https://styloo.itch.io/guns-asset-pack
+- Poly Pizza — FPS pack (bras FPS riggés et animés) : https://poly.pizza/bundle/FPS-pack-QKgLgzmIZ2
+- Kenney — Building Kit et Modular Buildings (CC0, glTF) : https://kenney-assets.itch.io/building-kit · https://kenney-assets.itch.io/modular-buildings
+
 ## Structure
 | Chemin | Rôle |
 |---|---|
