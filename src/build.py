@@ -13,6 +13,11 @@ logo = logo.replace('id="keep"', 'id="lk"').replace('#keep', '#lk').replace('id=
 icon_svg = open(f'{dist}/DEADFRAME-icon.svg', 'rb').read()
 html = html.replace('%%LOGO%%', logo).replace('%%ICON%%', 'data:image/svg+xml;base64,' + base64.b64encode(icon_svg).decode())
 open(f'{ROOT}/index.html', 'w', encoding='utf-8').write(html)
+# version « page unique » : tous les assets embarqués en base64 (pour une page hébergée sans fichiers annexes)
+emb = ''.join(f'<script type="application/octet-stream" id="asset:{f}">{base64.b64encode(open(f"{ROOT}/assets/{f}","rb").read()).decode()}</script>\n' for f in sorted(os.listdir(f'{ROOT}/assets')))
+os.makedirs(f'{ROOT}/page', exist_ok=True)
+open(f'{ROOT}/page/index.html', 'w', encoding='utf-8').write(html.replace('<script>\n\'use strict\';', emb + '<script>\n\'use strict\';', 1))
+print('page unique:', os.path.getsize(f'{ROOT}/page/index.html') // 1024, 'KB')
 
 # ---- icône : entrées PNG multi-tailles
 src = Image.open(f'{dist}/DEADFRAME-icon.png').convert('RGBA')

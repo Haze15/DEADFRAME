@@ -422,8 +422,11 @@ function cube(m,col,type=4){gl.uniformMatrix4fv(PW.u.uM,false,m);gl.uniform3fv(P
 /* ---- modèles 3D (.dfm) : maillages texturés, statiques ou skinnés ---- */
 const MODELS={},WHITE=[1,1,1],NOLEG=[0,0,0,0];
 const whiteTex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,whiteTex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([150,150,150,255]));
+// un fichier d'asset : soit embarqué dans la page (version « page unique »), soit téléchargé depuis assets/
+async function assetBuf(file){const el=document.getElementById('asset:'+file);if(el){const b=atob(el.textContent),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);el.textContent='';return u.buffer}
+ const r=await fetch('assets/'+file);if(!r.ok)throw new Error(r.status);return r.arrayBuffer()}
 async function loadModel(name){try{
- const r=await fetch('assets/'+name+'.dfm');if(!r.ok)throw new Error(r.status);const buf=await r.arrayBuffer(),jl=new DataView(buf).getUint32(0,true);
+ const buf=await assetBuf(name+'.dfm'),jl=new DataView(buf).getUint32(0,true);
  const meta=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,jl))),base=4+jl,f32=k=>new Float32Array(buf,base+meta[k][0],meta[k][1]);
  const m={name,skinned:meta.skinned,prims:meta.prims,bbox:meta.bbox,mats:meta.mats,tex:meta.mats.map(()=>whiteTex)};
  m.vao=gl.createVertexArray();gl.bindVertexArray(m.vao);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,f32('vtx'),gl.STATIC_DRAW);
@@ -431,7 +434,7 @@ async function loadModel(name){try{
  if(m.skinned){gl.enableVertexAttribArray(3);gl.vertexAttribPointer(3,4,gl.FLOAT,false,st,32);gl.enableVertexAttribArray(4);gl.vertexAttribPointer(4,4,gl.FLOAT,false,st,48)}
  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint32Array(buf,base+meta.idx[0],meta.idx[1]),gl.STATIC_DRAW);gl.bindVertexArray(null);
  const used=new Set(m.prims.map(p=>p.mat));
- m.mats.forEach((mt,i)=>{if(!mt.tex||!used.has(i))return;fetch('assets/'+mt.tex).then(r=>r.blob()).then(b=>createImageBitmap(b)).then(img=>{const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.generateMipmap(gl.TEXTURE_2D);
+ m.mats.forEach((mt,i)=>{if(!mt.tex||!used.has(i))return;assetBuf(mt.tex).then(b=>createImageBitmap(new Blob([b],{type:'image/jpeg'}))).then(img=>{const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.generateMipmap(gl.TEXTURE_2D);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);m.tex[i]=t}).catch(()=>{})});
  if(m.skinned){const n=meta.parents.length;m.parents=meta.parents;m.joints=meta.joints;m.rest=f32('rest').slice();m.ibm=f32('ibm').slice();m.pose=m.rest.slice();m.world=new Float32Array(n*16);m.jm=new Float32Array(m.joints.length*16);
   m.order=[];const done=new Uint8Array(n);while(m.order.length<n){for(let i=0;i<n;i++)if(!done[i]&&(m.parents[i]<0||done[m.parents[i]])){done[i]=1;m.order.push(i)}}
