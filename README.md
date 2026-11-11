@@ -16,11 +16,17 @@ Dépôt industriel · Hôpital abandonné · Tranchées · Hôtel — choix dans
 ## Commandes (clavier AZERTY)
 ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher · clic gauche tir · clic droit visée · R recharger · 1–4 arme (HK416, AKS-74, AKM, P43) · V inspecter l'arme · F lampe · G drone · Tab scores · Échap menu.
 
-**Drone FPV** (physique de quadricoptère) : Z/S tangage · Q/D roulis · A/E ou souris lacet · Espace/C gaz · T bascule ASSISTÉ (stabilisé, maintien d'altitude) / ACRO (taux purs, gaz manuels) · G rendre la main · F rappel. Un choc à plus de ~30 km/h détruit le drone.
+**Munitions** : aucun compteur à l'écran. R bref = recharger ; R maintenu = l'arme se penche et le compte s'affiche à côté d'elle (X maintenu à la manette). Aucun viseur ni point de visée : seuls les organes de visée comptent.
 
-**Manette** (Xbox / PlayStation, disposition standard) : stick gauche bouger · stick droit viser · RT tir · LT visée · A saut · B accroupi · X recharger · Y arme suivante (mode de vol en drone) · LB/RB se pencher · L3 sprint · R3 inspecter · croix ↑ drone, ↓ lampe, ←/→ arme · Start menu · Select scores. En drone : mode 2 (gaz/lacet à gauche, tangage/roulis à droite).
+**Drone FPV — simulateur** (physique à 240 Hz : inertie des moteurs, traînée, effet de sol, tension qui s'affaisse, dégâts d'hélices) :
+- Le drone part posé au sol, moteurs coupés. Il s'arme à la montée des gaz ; X arme / désarme, et le retourne s'il est sur le dos.
+- T change de mode : ANGLE (stabilisé, maintien d'altitude), HORIZON (se remet à plat stick relâché, loopings possibles), ACRO (aucune aide).
+- Clavier en ANGLE : Z/S tangage · Q/D roulis · A/E ou souris lacet · Espace/C monter / descendre.
+- Clavier en HORIZON / ACRO : souris tangage / roulis · Z/S manette des gaz (elle reste en place) · Q/D lacet · C couper les gaz.
+- ↑/↓ inclinaison de la caméra · G rendre la main (le drone tient sa position) · F rappel.
+- Un choc abîme les hélices (vibrations, perte de poussée) ; un impact violent détruit le drone.
 
-Le point rouge à l'écran montre où pointe réellement le canon (désactivable dans le menu : « Point de visée »).
+**Manette** (Xbox / PlayStation, disposition standard) : stick gauche bouger · stick droit viser · RT tir · LT visée · A saut · B accroupi · X recharger (maintenu : chargeur) · Y arme suivante · LB/RB se pencher · L3 sprint · R3 inspecter · croix ↑ drone, ↓ lampe, ←/→ arme · Start menu · Select scores. En drone, mode 2 : gaz/lacet à gauche, tangage/roulis à droite · A armer · Y mode de vol · LB/RB caméra.
 
 ## Connexion Discord
 Le menu « Opérateur » propose « Se connecter avec Discord » (OAuth2 *implicit grant*, scope `identify` : pseudo et avatar, aucun secret dans le jeu).
