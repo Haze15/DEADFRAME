@@ -28,16 +28,17 @@ ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher �
 
 **Munitions** : aucun compteur à l'écran. R bref = recharger ; R maintenu = l'arme se penche et le compte s'affiche à côté d'elle (X maintenu à la manette). Aucun viseur ni point de visée : seuls les organes de visée comptent.
 
-**Drone de reconnaissance « CORBEAU-1 »** (physique : inertie, accélération limitée, traînée, vent, effet de sol, châssis qui s'incline pour accélérer ; caméra sur nacelle stabilisée) :
-- G : lancer le drone depuis la main, puis prendre ou rendre le contrôle (le drone tient sa position).
-- ZQSD déplacement · Espace monter · Ctrl (ou C) descendre · Maj accélérer · souris : cap et inclinaison de la caméra · molette ou +/− : zoom ×1 à ×8 · F : rappel automatique · Échap : quitter le mode drone (un clic reprend).
-- Télémétrie : identité, état, structure, cap, altitude (et hauteur sol), vitesse, batterie (tension, autonomie estimée), liaison (qualité, RSSI, distance, vue directe), caméra (EO, zoom, inclinaison, REC), cibles visibles.
-- Liaison : elle baisse avec la distance et les obstacles ; perdue, le drone revient seul vers l'opérateur. Batterie critique : atterrissage automatique.
-- Dégâts : tirs des joueurs et des bots (qui repèrent et entendent les drones), chocs contre le décor. À 0 % le drone part en chute, puis explose à l'impact (flash, boule de feu, fumée, éclats, débris, onde de choc, brûlure, feu résiduel, son retardé selon la distance, secousse si l'opérateur est proche). Délai de 20 s avant un nouveau drone.
-- L'explosion est un effet visuel et sonore : elle n'inflige aucun dégât.
-- Clavier QWERTY : utilise C plutôt que Ctrl pour descendre (Ctrl+W ferme l'onglet et le navigateur ne permet pas de l'empêcher).
+**Drone FPV « CORBEAU-1 » — simulateur physique**
+- Physique de quadrirotor intégrée à 240 Hz : 4 moteurs indépendants avec montée et descente en régime, poussée proportionnelle au carré de leur vitesse ; roulis et tangage naissent des écarts de poussée, le lacet de la réaction des hélices. Gravité 9,81 m/s², inertie et effet gyroscopique, traînée calculée sur la vitesse par rapport à l'air (plus forte à plat qu'en piqué), vent et turbulences, effet de sol, perte de poussée dans son propre souffle en descente verticale. En virage, la poussée inclinée ne porte plus tout le poids : le drone perd de l'altitude si on ne remet pas des gaz.
+- **ANGLE** (stabilisé) : les manches commandent l'inclinaison (55° max) et le drone se remet à plat seul. Gaz au neutre = poussée de vol stationnaire à plat, avec une légère tenue de la vitesse verticale (qui ne compense pas les virages).
+- **ACRO** (manuel) : les manches commandent les vitesses de rotation (jusqu'à 630°/s), rien n'est stabilisé, les gaz sont manuels et restent en place. C'est le mode des saltos et tonneaux (comptés à l'écran et dans le contrat « Voltigeur »).
+- Clavier : G lancer / prendre / rendre la main · T mode ANGLE/ACRO · Z/S tangage · Q/D roulis · A/E lacet · Espace/Ctrl gaz · Maj plein gaz · souris : lacet + caméra (ANGLE) ou tangage + roulis (ACRO) · ↑/↓ inclinaison caméra · molette zoom · X retourner un drone sur le dos · F rappel · Échap quitter.
+- Manette (mode 2) : stick gauche gaz/lacet (neutre = stationnaire) · stick droit tangage/roulis · RT plein gaz · Y mode · A retourner · LB/RB caméra · croix ←/→ zoom · ↓ rappel · B quitter.
+- Caméra FPV solidaire du châssis (inclinaison réglable), vibrations selon la charge des moteurs et les dégâts, flou et champ qui s'élargissent avec la vitesse, souffle du vent qui monte avec la vitesse, son de chacun des 4 moteurs.
+- Pilote automatique (décollage, stationnaire quand on rend la main, retour si liaison perdue ou rappel, atterrissage sur batterie critique) : il passe par la même physique. Chocs : dégâts, et destruction au-delà d'environ 40 km/h d'impact.
+- Clavier QWERTY : utilise C plutôt que Ctrl pour baisser les gaz (Ctrl+W ferme l'onglet).
 
-**Manette** (Xbox / PlayStation, disposition standard) : stick gauche bouger · stick droit viser · RT tir · LT visée · A saut · B accroupi · X recharger (maintenu : chargeur) · Y arme suivante · LB/RB se pencher · L3 sprint · R3 inspecter · croix ↑ drone, ↓ lampe, ←/→ arme · Start menu · Select scores. En drone : stick gauche déplacement · stick droit caméra · RT/LT monter/descendre · L3 accélérer · croix ←/→ zoom · ↓ rappel · B quitter.
+**Manette** (Xbox / PlayStation, disposition standard) : stick gauche bouger · stick droit viser · RT tir · LT visée · A saut · B accroupi · X recharger (maintenu : chargeur) · Y arme suivante · LB/RB se pencher · L3 sprint · R3 inspecter · croix ↑ drone, ↓ lampe, ←/→ arme · Start menu · Select scores.
 
 ## Connexion Discord
 Le menu « Opérateur » propose « Se connecter avec Discord » (OAuth2 *implicit grant*, scope `identify` : pseudo et avatar, aucun secret dans le jeu).
