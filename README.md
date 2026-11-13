@@ -8,6 +8,7 @@ FPS « bodycam » : caméra de poitrine fisheye, visée libre sans viseur, drone
 - **En ligne (Internet)** : ouvrir la page GitHub Pages (`https://haze15.github.io/DEADFRAME/`) ou directement l'adresse du serveur hébergé. Le jeu rejoint automatiquement le serveur public ; une autre adresse peut être saisie dans DEPLOY → « Serveur en ligne ». Tout le monde joue dans la même partie (16 joueurs max) ; le premier connecté est l'hôte (carte et bots).
 - **Réseau local** : `download/DEADFRAME.exe` (Windows 64 bits) démarre un serveur sur le port 7777, ouvre le jeu et affiche l'adresse à donner aux amis du même réseau. Premier lancement : autoriser le pare-feu ; SmartScreen peut avertir (exe non signé).
 - La page publiée dans Claude reste en solo : elle ne peut pas ouvrir de connexion vers un autre site.
+- **Téléphone et tablette** : même page, commandes tactiles automatiques (à tenir en paysage). Joystick gauche : se déplacer (poussé à fond vers l'avant : sprint) · glisser sur la moitié droite : viser · TIR (se fait aussi glisser pour viser) · VISÉE, ACCR. (bascules) · SAUT · RECH. (maintenu : vérifier le chargeur) · ARME · DRONE · LAMPE · MENU. En drone : joystick gauche gaz / lacet (en ACRO les gaz restent où on les laisse, comme sur une radio), joystick droit tangage / roulis, boutons MODE, RETOURNER, RAPPEL, SORTIR. Réglage dans SETTINGS → Contrôles → « Commandes tactiles » (auto / toujours / jamais).
 
 ## Serveur hébergé (Render, gratuit)
 Le fichier `render.yaml` décrit le service : Render construit le serveur Go (le jeu est intégré dans le binaire) à chaque push sur `main`.
@@ -20,9 +21,9 @@ Le fichier `render.yaml` décrit le service : Render construit le serveur Go (le
 
 ## Menu principal
 - **DEPLOY** : zone d'opération (la scène en arrière-plan suit la carte choisie), nombre d'hostiles, adresse réseau à donner aux amis, bouton Déployer (ou Entrée).
-- **LOADOUT** : arme en main à chaque insertion (les quatre restent accessibles en jeu avec 1–4) et dotation fixe.
+- **LOADOUT** : arme en main à chaque insertion (les cinq restent accessibles en jeu avec 1–5) et dotation fixe.
 - **OPERATORS** : indicatif, niveau, grade, états de service, connexion Discord.
-- **MISSIONS** : 12 contrats permanents suivis sur toutes les parties (éliminations par arme, par carte, tirs à la tête, série, temps de vol du drone), chacun récompensé en XP.
+- **MISSIONS** : 13 contrats permanents suivis sur toutes les parties (éliminations par arme, par carte, tirs à la tête, série, temps de vol du drone), chacun récompensé en XP.
 - **SETTINGS** : affichage, contrôles, audio, touches, crédits.
 - **QUIT** : en partie, « Quitter la partie » ramène au menu ; « Quitter le jeu » ferme la fenêtre et, avec `DEADFRAME.exe`, arrête aussi le serveur (uniquement depuis le PC qui l'héberge).
 - Progression : 100 XP par élimination, +50 à la tête, plus les contrats. Grades de Recrue (niv. 1) à Major (niv. 42). Enregistrée dans le navigateur (localStorage) : elle ne suit pas d'un navigateur ou d'un PC à l'autre.
@@ -32,14 +33,21 @@ Le fichier `render.yaml` décrit le service : Render construit le serveur Go (le
 Dépôt industriel · Hôpital abandonné · Tranchées · Hôtel — choix dans le menu (en multijoueur, c'est l'hôte qui choisit).
 
 ## Commandes (clavier AZERTY)
-ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher · clic gauche tir · clic droit visée · R recharger · 1–4 arme (HK416, AKS-74, AKM, P43) · V inspecter l'arme · F lampe · G drone · Tab scores · Échap menu.
+ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher · clic gauche tir · clic droit visée · R recharger · 1–5 arme (HK416, AKS-74, AKM, P43, LUNARIS) · V inspecter l'arme · F lampe · G drone · Tab scores · Échap menu.
 
 **Munitions** : aucun compteur à l'écran. R bref = recharger ; R maintenu = l'arme se penche et le compte s'affiche à côté d'elle (X maintenu à la manette). Aucun viseur ni point de visée : seuls les organes de visée comptent.
 
+**Armes** : HK416, AKS-74 (bras et animations d'origine), AKM, P43, et le fusil de précision **LUNARIS** (.338, 5 coups, un tir au buste est mortel). Le HK416, l'AKM, le P43 et le LUNARIS sont tenus par les bras gantés du modèle AKM : les mains sont replacées sur chaque arme par cinématique inverse (poignée, garde-main), la main gauche va chercher le chargeur pendant le rechargement, la main droite manœuvre le verrou du LUNARIS après chaque tir.
+- **LUNARIS** : clic droit = lunette x8 (réticule gradué) ; la respiration et le pouls font dériver le réticule, Maj le stabilise 5 s puis il faut reprendre son souffle ; sans lunette, le tir est très imprécis.
+- **Sons** : coups de feu synthétisés par arme (claquement supersonique, souffle, grave, mécanisme), réverbération courte à l'intérieur et longue avec écho à l'extérieur, son retardé et assourdi avec la distance, claquement et sifflement des balles qui passent près, douilles qui rebondissent, impacts sur les murs et sur les corps, déclic de touche.
+- **Sang** : brume et gouttes à l'impact, éclaboussures sur le mur ou le sol derrière la cible, flaque qui s'étend sous les corps, projections sur l'objectif de la caméra quand on est touché.
+- **Adversaires animés** : marche avant, arrière et de côté selon leur déplacement, course, accroupi, visée haut / bas, recul au tir, rechargement visible (les bots vident leur chargeur de 30 puis rechargent), sursaut à l'impact, mort en deux temps (les genoux lâchent, puis le corps tombe). Les joueurs en ligne tiennent l'arme qu'ils ont réellement en main.
+
 **Drone FPV « CORBEAU-1 » — simulateur physique**
+- Gabarit FPV « 5 pouces » renforcé : 0,72 kg, poussée de 7 fois son poids, moteurs à 15 cm du centre qui répondent en 20 ms, rotations jusqu'à 700°/s en ACRO. Au clavier, les touches poussent les manches progressivement (comme un manche analogique) au lieu d'un tout-ou-rien. Caméra FPV grand angle relevée de 27° en ACRO, ombre au sol et poussière soulevée près du sol.
 - Physique de quadrirotor intégrée à 240 Hz : 4 moteurs indépendants avec montée et descente en régime, poussée proportionnelle au carré de leur vitesse ; roulis et tangage naissent des écarts de poussée, le lacet de la réaction des hélices. Gravité 9,81 m/s², inertie et effet gyroscopique, traînée calculée sur la vitesse par rapport à l'air (plus forte à plat qu'en piqué), vent et turbulences, effet de sol, perte de poussée dans son propre souffle en descente verticale. En virage, la poussée inclinée ne porte plus tout le poids : le drone perd de l'altitude si on ne remet pas des gaz.
 - **ANGLE** (stabilisé) : les manches commandent l'inclinaison (55° max) et le drone se remet à plat seul. Gaz au neutre = poussée de vol stationnaire à plat, avec une légère tenue de la vitesse verticale (qui ne compense pas les virages).
-- **ACRO** (manuel) : les manches commandent les vitesses de rotation (jusqu'à 630°/s), rien n'est stabilisé, les gaz sont manuels et restent en place. C'est le mode des saltos et tonneaux (comptés à l'écran et dans le contrat « Voltigeur »).
+- **ACRO** (manuel) : les manches commandent les vitesses de rotation (jusqu'à 700°/s), rien n'est stabilisé, les gaz sont manuels et restent en place. C'est le mode des saltos et tonneaux (comptés à l'écran et dans le contrat « Voltigeur »).
 - Clavier : G lancer / prendre / rendre la main · T mode ANGLE/ACRO · Z/S tangage · Q/D roulis · A/E lacet · Espace/Ctrl gaz · Maj plein gaz · souris : lacet + caméra (ANGLE) ou tangage + roulis (ACRO) · ↑/↓ inclinaison caméra · molette zoom · X retourner un drone sur le dos · F rappel · Échap quitter.
 - Manette (mode 2) : stick gauche gaz/lacet (neutre = stationnaire) · stick droit tangage/roulis · RT plein gaz · Y mode · A retourner · LB/RB caméra · croix ←/→ zoom · ↓ rappel · B quitter.
 - Caméra FPV solidaire du châssis (inclinaison réglable), vibrations selon la charge des moteurs et les dégâts, flou et champ qui s'élargissent avec la vitesse, souffle du vent qui monte avec la vitesse, son de chacun des 4 moteurs.

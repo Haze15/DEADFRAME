@@ -239,7 +239,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 @keyframes fadeL{from{opacity:0;transform:translateX(-12px)}}@keyframes fadeU{from{opacity:0;transform:translateY(10px)}}
 @media(prefers-reduced-motion:reduce){#menu *,#menu.in *,#boot *,#ins,#ins *{animation:none!important;transition:none!important}}
 @media(max-width:1180px){.mm-body{grid-template-columns:230px minmax(0,1fr);column-gap:30px}.mm-logo svg.logo{width:220px}.mm-nav button{font-size:26px}}
-@media(max-width:820px){
+@media(max-width:820px),(max-height:520px){
  html,body{overflow:auto}
  #menu{position:fixed;overflow:auto;display:flex;flex-direction:column}
  #menu.off{display:none}
@@ -268,6 +268,23 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #resume{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(6,7,6,.45);pointer-events:auto;cursor:pointer;text-align:center;font-family:var(--data,monospace)}
 #resume b{font:600 18px var(--data,monospace);letter-spacing:.2em;color:#dfe9d6}#resume span{font:400 12px var(--data,monospace);letter-spacing:.12em;color:#a9c59b}
 #err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:30px;font-size:18px;background:#0a0b0c}
+/* ---- commandes tactiles (téléphone, tablette) ---- */
+#touch{position:fixed;inset:0;z-index:6;display:none;pointer-events:none;font-family:var(--data,Consolas,monospace);user-select:none;-webkit-user-select:none;touch-action:none}
+body.touch.play #touch{display:block}
+#touch .zone{position:absolute;pointer-events:auto;touch-action:none}
+#tzL{left:0;top:18%;bottom:0;width:42%}#tzR{right:0;top:0;bottom:0;width:58%}
+#touch .stk{position:absolute;width:132px;height:132px;margin:-66px 0 0 -66px;border:1.5px solid rgba(233,230,223,.32);border-radius:50%;display:none;pointer-events:none}
+#touch .stk i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(233,230,223,.22);border:1.5px solid rgba(233,230,223,.5)}
+#touch .tb{position:absolute;pointer-events:auto;touch-action:none;display:flex;align-items:center;justify-content:center;width:62px;height:62px;border:1.5px solid rgba(233,230,223,.4);background:rgba(10,11,10,.38);color:#e9e6df;font-size:10px;letter-spacing:.14em;text-transform:uppercase;border-radius:3px}
+#touch .tb.on{background:rgba(233,230,223,.24);border-color:#e9e6df}
+#touch .tb:active{background:rgba(233,230,223,.3)}
+#tFire{right:22px;bottom:96px;width:88px!important;height:88px!important;font-size:12px!important;border-color:rgba(229,41,31,.75)!important}
+#tAds{right:122px;bottom:150px}#tJump{right:122px;bottom:34px}#tCr{right:192px;bottom:34px}#tRl{right:22px;bottom:20px}
+#tSw{right:22px;top:92px}#tDr{right:92px;top:92px}#tLamp{right:162px;top:92px}#tMenu{left:14px;top:14px;width:56px!important;height:40px!important}
+#tMode{right:22px;top:92px}#tTurt{right:92px;top:92px}#tRec{right:162px;top:92px}#tOut{right:232px;top:92px}
+body.touch.uav #tMenu{left:50%;margin-left:-28px;top:64px}#touch .d{display:none}body.touch.uav #touch .d{display:flex}body.touch.uav #touch .p{display:none}
+#tRot{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:#0a0b0a;color:#e9e6df;font:600 15px var(--data,monospace);letter-spacing:.16em;text-align:center;padding:30px}
+@media(orientation:portrait){body.touch.play #tRot{display:flex}}
 </style>
 </head>
 <body>
@@ -283,6 +300,15 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
   <div id="score"></div>
   <div id="resume"><b>CONTRÔLE RENDU À L'OPÉRATEUR</b><span>Le drone tient sa position · cliquer pour reprendre · Échap : menu</span></div>
 </div>
+<div id="touch" aria-hidden="true">
+ <div class="zone" id="tzL"></div><div class="zone" id="tzR"></div>
+ <div class="stk" id="tsL"><i></i></div><div class="stk" id="tsR"><i></i></div>
+ <div class="tb" id="tMenu">Menu</div>
+ <div class="tb p" id="tFire">Tir</div><div class="tb p" id="tAds">Visée</div><div class="tb p" id="tJump">Saut</div><div class="tb p" id="tCr">Accr.</div><div class="tb p" id="tRl">Rech.</div>
+ <div class="tb p" id="tSw">Arme</div><div class="tb p" id="tDr">Drone</div><div class="tb p" id="tLamp">Lampe</div>
+ <div class="tb d" id="tMode">Mode</div><div class="tb d" id="tTurt">Retourner</div><div class="tb d" id="tRec">Rappel</div><div class="tb d" id="tOut">Sortir</div>
+</div>
+<div id="tRot">TOURNEZ L'APPAREIL<br>EN MODE PAYSAGE</div>
 <div id="menu" class="off">
  <div class="mm-scrim"></div>
  <header class="mm-bar mm-top">
@@ -426,6 +452,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
     </div>
     <div class="sp" id="s-ctl">
      <label class="fld">Sensibilité <input type="range" id="isens" min="0.3" max="2.5" step="0.05"><span class="v" id="vsens"></span></label>
+     <label class="fld wide" style="margin-top:10px">Commandes tactiles <select id="itouch"><option value="0">Auto (écran tactile)</option><option value="1">Toujours</option><option value="2">Jamais</option></select></label>
      <p class="data" id="padst" style="margin-top:12px"></p>
     </div>
     <div class="sp" id="s-aud">
@@ -434,7 +461,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
     <div class="sp keys" id="s-keys">
      <h3>À pied — clavier AZERTY</h3>
      <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> déplacement &nbsp; <kbd>Maj</kbd> sprint &nbsp; <kbd>Espace</kbd> saut &nbsp; <kbd>C</kbd> accroupi &nbsp; <kbd>A</kbd><kbd>E</kbd> se pencher<br>
-     <kbd>Clic G</kbd> tir &nbsp; <kbd>Clic D</kbd> visée &nbsp; <kbd>R</kbd> recharger — maintenu : vérifier le chargeur &nbsp; <kbd>1</kbd>–<kbd>4</kbd> / molette : arme &nbsp; <kbd>V</kbd> inspecter<br>
+     <kbd>Clic G</kbd> tir &nbsp; <kbd>Clic D</kbd> visée &nbsp; <kbd>R</kbd> recharger — maintenu : vérifier le chargeur &nbsp; <kbd>1</kbd>–<kbd>5</kbd> / molette : arme &nbsp; <kbd>Maj</kbd> en lunette : retenir sa respiration &nbsp; <kbd>V</kbd> inspecter<br>
      <kbd>F</kbd> lampe &nbsp; <kbd>G</kbd> drone &nbsp; <kbd>Tab</kbd> scores &nbsp; <kbd>Échap</kbd> menu
      <h3>Drone FPV — CORBEAU-1</h3>
      <kbd>G</kbd> lancer / prendre / rendre le contrôle &nbsp; <kbd>T</kbd> mode ANGLE / ACRO &nbsp; <kbd>X</kbd> retourner le drone s'il est sur le dos &nbsp; <kbd>F</kbd> rappel &nbsp; <kbd>Échap</kbd> quitter le mode drone<br>
@@ -479,7 +506,7 @@ const gl=cv.getContext('webgl2',{antialias:false,alpha:false,powerPreference:'hi
 if(!gl){$('err').style.display='flex';$('err').textContent='WebGL2 est requis pour DEADFRAME (navigateur ou carte graphique non compatible).';throw new Error('no webgl2')}
 
 /* ================= réglages ================= */
-const CFG={sens:1,fish:.17,scale:0,bots:6,name:'',vol:.8,map:0,dcid:'',dc:null,loadout:0,server:''};
+const CFG={sens:1,fish:.17,scale:0,bots:6,name:'',vol:.8,map:0,dcid:'',dc:null,loadout:0,server:'',touch:0};
 try{Object.assign(CFG,JSON.parse(localStorage.getItem('deadframe')||'{}'))}catch(e){}
 const saveCfg=()=>{try{localStorage.setItem('deadframe',JSON.stringify(CFG))}catch(e){}};
 if(!CFG.name)CFG.name='UNIT-'+(100+Math.random()*900|0);
@@ -833,10 +860,12 @@ const whiteTex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,whiteTex);gl.texI
 // un fichier d'asset : soit embarqué dans la page (version « page unique »), soit téléchargé depuis assets/
 async function assetBuf(file){const el=document.getElementById('asset:'+file);if(el){const b=atob(el.textContent),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);el.textContent='';return u.buffer}
  const r=await fetch('assets/'+file);if(!r.ok)throw new Error(r.status);return r.arrayBuffer()}
+// matériau sans texture (ex. sniper) : texture 1×1 de sa couleur (facteur linéaire -> sRVB)
+function colorTex(c){if(!c)return whiteTex;const t=gl.createTexture(),v=c.map(x=>Math.round(255*Math.pow(clamp(x,0,1),1/2.2)));gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([v[0],v[1],v[2],255]));return t}
 async function loadModel(name){try{
  const buf=await assetBuf(name+'.dfm'),jl=new DataView(buf).getUint32(0,true);
  const meta=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,jl))),base=4+jl,f32=k=>new Float32Array(buf,base+meta[k][0],meta[k][1]);
- const m={name,bytes:buf.byteLength,skinned:meta.skinned,prims:meta.prims,bbox:meta.bbox,mats:meta.mats,tex:meta.mats.map(()=>whiteTex)};
+ const m={name,bytes:buf.byteLength,skinned:meta.skinned,prims:meta.prims,bbox:meta.bbox,mats:meta.mats,nodeNames:meta.nodeNames,tex:meta.mats.map(mt=>mt.tex?whiteTex:colorTex(mt.color))};
  m.vao=gl.createVertexArray();gl.bindVertexArray(m.vao);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,f32('vtx'),gl.STATIC_DRAW);
  const st=meta.stride*4;gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,st,0);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,st,12);gl.enableVertexAttribArray(2);gl.vertexAttribPointer(2,2,gl.FLOAT,false,st,24);
  if(m.skinned){gl.enableVertexAttribArray(3);gl.vertexAttribPointer(3,4,gl.FLOAT,false,st,32);gl.enableVertexAttribArray(4);gl.vertexAttribPointer(4,4,gl.FLOAT,false,st,48)}
@@ -894,6 +923,7 @@ function initAudio(){if(AC)return;try{
  const hum=AC.createOscillator();hum.type='sawtooth';hum.frequency.value=50;const hg=AC.createGain();hg.gain.value=.004;hum.connect(hg);hg.connect(master);hum.start();
  droneGain=AC.createGain();droneGain.gain.value=0;const df=AC.createBiquadFilter();df.type='bandpass';df.frequency.value=900;df.Q.value=.7;df.connect(droneGain);droneGain.connect(master);
  for(const fr of[182,187,366,549]){const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=fr;o.connect(df);o.start();droneOsc.push(o)}
+ setTimeout(audioBank,30);   // échantillons d'armes et réverbérations, préparés hors du premier tir
 }catch(e){AC=null}}
 function noise(vol,dur,f0,f1,pan=0,type='lowpass',q=.7){if(!AC||vol<=.001)return;const t=AC.currentTime,s=AC.createBufferSource();s.buffer=noiseBuf;s.loop=true;s.loopStart=Math.random();
  const f=AC.createBiquadFilter();f.type=type;f.Q.value=q;f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(Math.max(40,f1),t+dur);
@@ -901,14 +931,63 @@ function noise(vol,dur,f0,f1,pan=0,type='lowpass',q=.7){if(!AC||vol<=.001)return
  let out=g;if(AC.createStereoPanner){const p=AC.createStereoPanner();p.pan.value=clamp(pan,-1,1);g.connect(p);out=p}
  s.connect(f);f.connect(g);out.connect(master);s.start(t,Math.random()*1.5);s.stop(t+dur+.05)}
 function thump(vol,f0,f1,dur){if(!AC||vol<=.001)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0008,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05)}
-function sndShot(pos,rifle){const lp=listenPos(),d=sub(pos,lp),dist=len(d),pan=dist>.5?dot(d,rightOf(camS.yaw))/dist:0,v=1/(1+dist*.07);
- const muf=zoneOf(pos)!==zoneOf(lp)?.45:1;
- noise(v*.9*muf,.28+Math.min(.5,dist*.012),(rifle?5200:3800)*muf/(1+dist*.03),260,pan);noise(v*.5*muf,.07,9000*muf/(1+dist*.05),1500,pan,'highpass');thump(v*.7*muf,rifle?170:130,38,.16);
- if(dist>12)setTimeout(()=>noise(v*.25,.7,900,150,pan),Math.min(400,dist*6))}
+/* ---- sons d'armes synthétisés une fois au démarrage (échantillons) ----
+   Coup de feu = onde de choc supersonique (claquement), souffle de bouche (bruit filtré), grave du corps, bruit de mécanisme.
+   Puis réverbération à convolution (intérieur court et brillant / extérieur long et sourd, avec écho), atténuation de l'air
+   avec la distance, retard du son (343 m/s), claquement et sifflement des balles qui passent près, douilles qui tombent. */
+const SB={};let revIn=null,revOut=null,revInG=null,revOutG=null;
+function synthBuf(dur,ch,fn){const sr=AC.sampleRate,n=Math.floor(sr*dur),b=AC.createBuffer(ch,n,sr);for(let c=0;c<ch;c++)fn(b.getChannelData(c),sr,n,c);return b}
+// p : crack (onde de choc), cd (sa durée), body/bf/bd (souffle : niveau, fréquence, durée), boom/b0/bdk (grave), mech (mécanisme), drive (saturation)
+function shotBuf(p){return synthBuf(p.len||.9,1,(d,sr,n)=>{let lp=0,lp2=0,hp=0,ph=0,m1=0;const a1=1-Math.exp(-2*Math.PI*p.bf/sr),a2=1-Math.exp(-2*Math.PI*p.bf*.35/sr),ah=1-Math.exp(-2*Math.PI*2500/sr);
+ for(let i=0;i<n;i++){const t=i/sr,w=Math.random()*2-1;lp+=(w-lp)*a1;lp2+=(lp-lp2)*a2;hp+=(w-hp)*ah;
+  // onde en N : surpression puis dépression sur ~0,5 ms, suivie d'un claquement aigu
+  const nw=t<p.nw?(1-2*t/p.nw):0,cr=(w-hp)*Math.exp(-t/p.cd)*p.crack;
+  const body=(lp*1.8*Math.exp(-t/p.bd)+lp2*2.4*Math.exp(-t/(p.bd*2.2)))*p.body*Math.min(1,t/.0006);
+  const f=p.b0*(.55+.45*Math.exp(-t/.02));ph+=2*Math.PI*f/sr;const boom=Math.sin(ph)*Math.exp(-t/p.bdk)*p.boom*Math.min(1,t/.0015);
+  let mech=0;for(const mt of p.mech||[]){const u=t-mt[0];if(u>0&&u<.03)mech+=Math.sin(2*Math.PI*mt[1]*u)*Math.exp(-u/.004)*mt[2]*(Math.random()*.6+.7)}
+  const x=nw*p.nwA+cr+body+boom+mech;d[i]=Math.tanh(x*p.drive)/Math.tanh(p.drive)*Math.exp(-Math.max(0,t-.5)/.12)}})}
+// réponse impulsionnelle : bruit stéréo décroissant, s'assombrissant ; réflexions précoces ; écho lointain en extérieur
+function irBuf(rt,bright,early,echo){return synthBuf(rt*1.3+.1,2,(d,sr,n,c)=>{let lp=0;for(let i=0;i<n;i++){const t=i/sr,k=1-Math.exp(-2*Math.PI*Math.max(300,bright*Math.exp(-t*3/rt))/sr);lp+=((Math.random()*2-1)-lp)*k;d[i]=lp*Math.exp(-6.9*t/rt)*Math.min(1,t/.004)}
+ for(const[e,a]of early){const j=Math.floor((e+(c?.0021:0))*sr);if(j<n)d[j]+=a*(c?.8:1)}
+ if(echo){const j0=Math.floor(echo[0]*sr);for(let i=0;i<sr*.25&&j0+i<n;i++)d[j0+i]+=(Math.random()*2-1)*echo[1]*Math.exp(-i/sr/.06)*(1-Math.exp(-i/sr/.01))}})}
+function snapBuf(){return synthBuf(.12,1,(d,sr,n)=>{let hp=0;for(let i=0;i<n;i++){const t=i/sr,w=Math.random()*2-1;hp+=(w-hp)*.3;d[i]=(t<.0003?1-t/.00015:0)*.9+(w-hp)*Math.exp(-t/.006)*.8}})}
+function pingBuf(fs,dec,len){return synthBuf(len,1,(d,sr,n)=>{for(let i=0;i<n;i++){const t=i/sr;let v=0;for(const[f,a]of fs)v+=Math.sin(2*Math.PI*f*t)*a;d[i]=v*Math.exp(-t/dec)*Math.min(1,t/.0005)}})}
+function audioBank(){if(SB.ok||!AC)return;SB.ok=1;
+ SB.hk=shotBuf({nw:.0005,nwA:.9,crack:1.1,cd:.004,body:.9,bf:2200,bd:.022,boom:.75,b0:105,bdk:.06,drive:2.4,mech:[[.012,3400,.12],[.03,2100,.08]]});
+ SB.ak74=shotBuf({nw:.0005,nwA:.9,crack:1.2,cd:.0045,body:1,bf:2000,bd:.025,boom:.8,b0:98,bdk:.065,drive:2.6,mech:[[.014,2900,.13],[.034,1800,.1]]});
+ SB.akm=shotBuf({nw:.0006,nwA:1,crack:1,cd:.005,body:1.2,bf:1500,bd:.032,boom:1.1,b0:78,bdk:.085,drive:3,mech:[[.015,2500,.15],[.036,1600,.12]]});
+ SB.pistol=shotBuf({nw:.0002,nwA:.4,crack:.8,cd:.003,body:1,bf:2600,bd:.016,boom:.6,b0:140,bdk:.04,drive:2,mech:[[.008,4200,.18],[.02,3000,.1]]});
+ SB.sniper=shotBuf({len:1.2,nw:.0008,nwA:1.2,crack:1.3,cd:.006,body:1.4,bf:1200,bd:.045,boom:1.5,b0:58,bdk:.14,drive:3.6,mech:[]});
+ SB.snap=snapBuf();SB.casing=pingBuf([[3900,.5],[6100,.35],[8700,.2]],.05,.25);SB.casingP=pingBuf([[5200,.5],[7900,.3],[10400,.15]],.035,.2);
+ SB.bolt={up:pingBuf([[1800,.4],[3300,.3]],.012,.06),back:pingBuf([[900,.4],[2600,.3],[4100,.2]],.03,.12),fwd:pingBuf([[1100,.5],[2900,.35]],.025,.1),down:pingBuf([[2200,.5],[4800,.25]],.015,.07)};
+ revIn=AC.createConvolver();revIn.buffer=irBuf(.75,7000,[[.007,.5],[.013,.35],[.019,.3],[.028,.22]],null);revInG=AC.createGain();revIn.connect(revInG);revInG.connect(master);
+ revOut=AC.createConvolver();revOut.buffer=irBuf(2.2,2400,[[.03,.12]],[.42,.28]);revOutG=AC.createGain();revOut.connect(revOutG);revOutG.connect(master)}
+const SHOT_KEY=['hk','ak74','akm','pistol','sniper'];
+// joue un échantillon : position (atténuation, filtre de l'air, panoramique, retard), envoi en réverbération
+function playBuf(buf,pos,vol,o={}){if(!AC||!buf)return;const lp=listenPos(),dv=pos?sub(pos,lp):[0,0,0],dist=pos?len(dv):0,pan=dist>.5?dot(dv,rightOf(camS.yaw))/dist:0;
+ const t=AC.currentTime+(o.delay?dist/343:0),s=AC.createBufferSource();s.buffer=buf;s.playbackRate.value=o.rate||1;
+ const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=Math.max(500,(o.lp||18000)/(1+dist*(o.air||.025)));
+ const g=AC.createGain();g.gain.value=vol/(1+dist*(o.fall||.09));s.connect(f);f.connect(g);let out=g;
+ if(AC.createStereoPanner){const p=AC.createStereoPanner();p.pan.value=clamp(pan*.85,-1,1);g.connect(p);out=p}out.connect(master);
+ if(o.wet&&revIn){const inside=zoneOf(lp)>0,r=AC.createGain();r.gain.value=vol*o.wet*(.35+Math.min(1.2,dist*.03));f.connect(r);r.connect(inside?revIn:revOut)}
+ s.start(t);return s}
+function sndShot(pos,wi,mine){audioBank();const key=SHOT_KEY[wi]||'hk',lp=listenPos(),muf=zoneOf(pos)!==zoneOf(lp)?.35:1;
+ playBuf(SB[key],pos,(mine?1.05:1.15)*(key==='sniper'?1.25:1)*(key==='pistol'?.8:1),{delay:!mine,wet:1,rate:.97+rnd()*.06,lp:18000*muf,fall:.06,air:.03});
+ // douilles qui rebondissent au sol
+ if(mine&&key!=='sniper'){const b=key==='pistol'?SB.casingP:SB.casing;setTimeout(()=>playBuf(b,null,.07,{rate:.9+rnd()*.3}),380+rnd()*200);setTimeout(()=>playBuf(b,null,.035,{rate:.85+rnd()*.3}),560+rnd()*220)}}
+function sndBolt(k){audioBank();playBuf(SB.bolt[k],null,.32,{rate:.95+rnd()*.1});if(k==='back')setTimeout(()=>playBuf(SB.casing,null,.06,{rate:.7}),420)}
+// balle qui passe près de l'auditeur : claquement supersonique + sifflement qui descend
+function sndFlyby(o,e){if(!AC)return;audioBank();const lp=listenPos(),d=sub(e,o),L=len(d)||1,u=mulS(d,1/L),tt=clamp(dot(sub(lp,o),u),0,L),c=add(o,mulS(u,tt)),miss=len(sub(lp,c));
+ if(miss>4.5||tt<3)return;const v=1/(1+miss*.8);playBuf(SB.snap,c,.55*v,{fall:0,rate:.9+rnd()*.2});
+ noise(.18*v,.22,4200+rnd()*800,900,dot(sub(c,lp),rightOf(camS.yaw))/(miss||1),'bandpass',3)}
 const sndStep=(v=.12)=>noise(v,.09,500+rnd()*500,120);
 const sndClick=()=>noise(.25,.03,5200,2500,0,'bandpass',4);
 const sndHit=()=>{thump(.6,95,30,.22);noise(.4,.2,900,120)};
-const sndImp=(pos)=>{const d=sub(pos,listenPos()),dist=len(d);noise(.3/(1+dist*.15),.07,3800,700,dist>.5?dot(d,rightOf(camS.yaw))/dist:0,'bandpass',2)};
+// impacts : dur (éclat + grésillement de débris), chair (choc sourd et humide)
+const sndImp=(pos,kind)=>{const d=sub(pos,listenPos()),dist=len(d),pan=dist>.5?dot(d,rightOf(camS.yaw))/dist:0,v=1/(1+dist*.15);
+ if(kind==='flesh'){thump(.5*v,140,45,.12);noise(.32*v,.16,900,180,pan);noise(.1*v,.25,500,120,pan,'lowpass',2);return}
+ noise(.34*v,.05,5200,1500,pan,'bandpass',1.5);noise(.12*v,.18,2600,600,pan,'highpass');thump(.15*v,420,120,.04);if(rnd()<.5)setTimeout(()=>noise(.06*v,.12,6500,3000,pan,'bandpass',4),40+rnd()*80)};
+const sndTick=()=>{noise(.22,.03,3200,2600,0,'bandpass',8);thump(.12,900,600,.03)};
 
 /* ================= état de jeu ================= */
 const BOXR={muz:[0,.03,-.62],ads:[0,.094,.44],lh:[0,-.03,-.32],parts:[[0,.02,-.12,.045,.07,.3],[0,.03,-.44,.02,.02,.34],[0,.02,-.33,.05,.055,.2],[0,.01,.16,.04,.06,.24],[0,-.08,-.1,.03,.13,.05],[0,-.06,0,.03,.09,.04],[.009,.072,-.02,.005,.034,.01],[-.009,.072,-.02,.005,.034,.01],[0,.074,-.5,.004,.03,.004]]};
@@ -916,16 +995,19 @@ const BOXP={muz:[0,.03,-.2],ads:[0,.062,.42],lh:[-.02,-.07,-.01],parts:[[0,.03,-
 // m = réglages du modèle 3D (fix : espace modèle -> poignée à l'origine, canon vers -Z, mètres) ; b = repli en blocs si le modèle n'est pas chargé
 const WPN=[
  {n:'HK416',cal:'5.56×45',mag:30,res:150,cd:.08,auto:true,dmg:34,rec:.02,spread:.0035,rl:2.4,rifle:1,model:'hk416',b:BOXR,
-  m:{fix:mm(M.scl(4.2,4.2,4.2),M.trs(-.002,-.005,-.026)),muz:[-.009,.052,-.66],ads:[-.009,.133,.2],holo:1,lh:[0,.0,-.34],hip:[.13,-.17,.36]}},
+  m:{fix:mm(M.scl(4.2,4.2,4.2),M.trs(-.002,-.005,-.026)),muz:[-.009,.052,-.66],ads:[-.009,.133,.2],holo:1,lh:[0,.0,-.34],hip:[.13,-.17,.36],rw:[-.006,-.014,.094],lw:[-.05,-.012,-.3],mag:[-.01,-.03,-.16]}},
  {n:'AKS-74',cal:'5.45×39',mag:30,res:150,cd:.092,auto:true,dmg:36,rec:.024,spread:.004,rl:2.8,rifle:1,model:'aks74',b:BOXR,
   vm:{hip:[.02,-.27,-.2],ads:[-.088,-.2,-.1],adsRot:[0,0],muz:[.088,.13,-1.12],fov:.66,fovAds:.5},anims:{shot:'Shot',reload:'Reload_t',walk:'Walk',inspect:'Inspect'}},
  {n:'AKM',cal:'7.62×39',mag:30,res:120,cd:.1,auto:true,dmg:44,rec:.031,spread:.0045,rl:2.7,rifle:1,model:'akm',b:BOXR,
-  m:{fix:mm(M.scl(.0232,.0232,.0232),M.ry(Math.PI),M.trs(4.24,4.2,-6.6)),muz:[-.016,.056,-.62],ads:[-.016,.089,.3],lh:[0,.01,-.3],hip:[.13,-.17,.36]}},
+  m:{fix:mm(M.scl(.0232,.0232,.0232),M.ry(Math.PI),M.trs(4.24,4.2,-6.6)),muz:[-.016,.056,-.62],ads:[-.016,.089,.3],lh:[0,.01,-.3],hip:[.13,-.17,.36],mag:[-.016,-.04,-.2]}},
  {n:'P43',cal:'9×19',mag:12,res:60,cd:.15,auto:false,dmg:26,rec:.036,spread:.006,rl:1.6,rifle:0,model:'pistol',b:BOXP,
-  m:{fix:mm(M.scl(.0255,.0255,.0255),M.ry(Math.PI),M.trs(0,-.9,2.1)),muz:[0,.017,-.14],ads:[0,.0335,.4],lh:[-.02,-.05,-.005],hip:[.12,-.15,.36]}}];
+  m:{fix:mm(M.scl(.0255,.0255,.0255),M.ry(Math.PI),M.trs(0,-.9,2.1)),muz:[0,.017,-.14],ads:[0,.0335,.4],lh:[-.02,-.05,-.005],hip:[.12,-.15,.36],rw:[.004,-.03,.058],lw:[-.03,-.058,.052],lrot:[0,.5,-1.2],mag:[.005,-.1,.03]}},
+ // LUNARIS : fusil de précision à verrou (modèle « Lunaris », lunette x8) — un coup, réarmement manuel, tir mortel au buste
+ {n:'LUNARIS',cal:'.338 LM',mag:5,res:25,cd:1.25,auto:false,dmg:120,rec:.11,spread:.0004,rl:3.1,rifle:1,sniper:1,model:'sniper',b:BOXR,
+  m:{fix:M.id(),muz:[0,.034,-.905],ads:[0,.0872,.1],scope:1,lh:[0,0,-.3],hip:[.13,-.17,.34],rw:[.003,-.03,.05],lw:[-.045,-.024,-.3],mag:[0,-.03,-.27],bolt:[.044,.036,-.066]}}];
 const wcfg=w=>MODELS[w.model]&&w.m?w.m:w.b;
 const me={id:0,name:CFG.name,kind:'p',pos:[0,0,0],vel:[0,0,0],yaw:0,pitch:0,cy:0,cp:0,hp:100,alive:false,crouch:0,lean:0,onG:true,w:0,ammo:WPN.map(w=>w.mag),res:WPN.map(w=>w.res),reload:0,cool:0,ads:0,fl:1,kills:0,deaths:0,
- bob:0,shake:0,kick:0,swT:0,swTo:0,spr:0,chk:0,lastHurt:-99,respawn:0,spd:0,walk:0,fall:0,flash:0,drone:null,droneCd:0,inDrone:false,uavLost:0,land:0};
+ bob:0,shake:0,kick:0,bolt:0,breath:1,swT:0,swTo:0,spr:0,chk:0,lastHurt:-99,respawn:0,spd:0,walk:0,fall:0,flash:0,drone:null,droneCd:0,inDrone:false,uavLost:0,land:0};
 let started=false,playing=false,now=0,solo=true;
 const players={};      // joueurs distants
 let bots=[];
@@ -966,12 +1048,13 @@ function onNet(f,d){
   return}
  if(d.t==='s'){let p=players[f];if(!p){p=players[f]={id:f,kind:'p',pos:d.p.slice(),tpos:d.p,yaw:d.y,tyaw:d.y,pitch:0,tpitch:0,walk:0,spd:0,fall:0,alive:false,name:''};feed(esc(String(d.n).slice(0,12))+' a rejoint la zone');updNet()}
   p.name=String(d.n).slice(0,12);p.tpos=d.p;p.tyaw=d.y;p.tpitch=d.pi;p.hp=d.h;p.crouch=d.c;p.fl=d.fl;p.w=d.w;p.kills=d.k;p.deaths=d.dt;if(d.al&&!p.alive){p.pos=d.p.slice();p.fall=0}p.alive=!!d.al;p.drone=d.d||null;p.av=typeof d.a==='string'&&/^\d+\/[a-z0-9_]+$/.test(d.a)?d.a:null;if(f===hostId&&d.m>=0&&d.m!==curMap)loadMap(d.m)}
- else if(d.t==='sh'){shotFx(d.o,d.e,!!(WPN[d.w]||WPN[0]).rifle,false);if(isHost())alertBots(d.o)}
+ else if(d.t==='sh'){shotFx(d.o,d.e,!!(WPN[d.w]||WPN[0]).rifle,false,d.w|0);const sh=typeof d.b==='string'?bots.find(b=>b.id===d.b):players[f];if(sh)sh.shT=now;if(isHost())alertBots(d.o)}
  else if(d.t==='hit'){const by=d.by!==undefined?d.by:f;
   if(d.dr){if(d.to===myId&&me.drone)droneDamage(clamp(+d.dmg||20,0,120),by,'shot')}
   else if(d.to===myId)hurt(d.dmg,by);
   else if(typeof d.to==='string'&&isHost()){const b=bots.find(b=>b.id===d.to);if(b)hurtBot(b,d.dmg,by)}}
  else if(d.t==='kill'){feedKill(d.k,d.v);if(d.k===myId){me.kills++;creditKill(d.v)}if(isHost()&&typeof d.k==='string'){const b=bots.find(b=>b.id===d.k);if(b)b.k++}}
+ else if(d.t==='rl'){const p=typeof d.b==='string'?bots.find(b=>b.id===d.b):players[f];if(p)p.rlS=now}
  else if(d.t==='dx'&&Array.isArray(d.p)&&d.p.length===3&&d.p.every(Number.isFinite))explode(d.p,1);
  else if(d.t==='b'){if(!isHost()&&f===hostId)syncBots(d.l)}
 }
@@ -1004,8 +1087,43 @@ function updHud(dt){$('hud').classList.toggle('uav',me.inDrone||me.uavLost>0);hu
 function showMsg(html){const m=$('msg');if(html){m.innerHTML=html;m.style.display='block'}else m.style.display='none'}
 
 /* ---- effets ---- */
-function shotFx(o,e,rifle,mine){tracers.push({a:o,b:e,life:.07});sndShot(o,rifle);lights.dyn={p:o.slice(),t:.05};if(!mine){const d=sub(e,o),l=len(d);parts.push({pos:o.slice(),vel:[0,0,0],life:.05,col:[9,6,2.5],s:.16,em:1,g:0})}}
-function impact(p,n,blood){if(blood){for(let i=0;i<7;i++)parts.push({pos:p.slice(),vel:[(rnd()-.5)*2.5,rnd()*2,(rnd()-.5)*2.5],life:.35+rnd()*.3,col:[.16,.012,.01],s:.035+rnd()*.03,em:0,g:9});return}
+function shotFx(o,e,rifle,mine,wi){tracers.push({a:o,b:e,life:.07});sndShot(o,wi===undefined?(rifle?0:3):wi,mine);if(!mine)sndFlyby(o,e);lights.dyn={p:o.slice(),t:.05};if(!mine){const d=sub(e,o),l=len(d);parts.push({pos:o.slice(),vel:[0,0,0],life:.05,col:[9,6,2.5],s:.16,em:1,g:0})}}
+/* ---- sang : brume à l'impact, gouttes, éclaboussures sur le mur ou le sol derrière la cible, flaque sous les corps,
+   gouttes sur l'objectif de la caméra quand l'opérateur est touché ---- */
+const BLOOD=[],LENS=[];
+function addBlood(p,n,s,o={}){const b={p:add(p,mulS(n,.003+BLOOD.length%7*.0004)),n,s,a:rnd()*3.14,el:o.el||1,dir:o.dir||null,grow:o.grow||0,age:0,dk:.55+rnd()*.35};BLOOD.push(b);if(BLOOD.length>160)BLOOD.shift();return b}
+function bloodFx(p,dir,dmg){const dl=len(dir)||1,d=mulS(dir,1/dl),k=clamp(dmg/40,.5,2.4);sndImp(p,'flesh');
+ for(let i=0;i<3+k*2;i++)fx({p:p.slice(),v:add(mulS(d,.8+rnd()*1.6),[(rnd()-.5)*.8,(rnd()-.2)*.6,(rnd()-.5)*.8]),life:.25+rnd()*.35,s0:.05,s1:.28+rnd()*.25*k,c0:[.32,.012,.01,.75],c1:[.14,.008,.006,0],k:2,drag:4.5,g:.6});
+ for(let i=0;i<2;i++)fx({p:p.slice(),v:add(mulS(d,-.6),[(rnd()-.5)*.5,rnd()*.4,(rnd()-.5)*.5]),life:.2+rnd()*.2,s0:.04,s1:.16,c0:[.3,.015,.01,.6],c1:[.12,.01,.01,0],k:2,drag:5});
+ for(let i=0;i<8+k*5;i++)parts.push({pos:p.slice(),vel:add(mulS(d,1.5+rnd()*3.5),[(rnd()-.5)*1.6,rnd()*1.4,(rnd()-.5)*1.6]),life:.5+rnd()*.5,col:[.11,.005,.004],s:.008+rnd()*.016,em:0,g:9.81,blood:1});
+ // éclaboussure sur la surface derrière la cible
+ const r=rayWorld(p,d,2.6);if(r.hit){const q=add(p,mulS(d,r.t)),f=1-r.t/2.6;addBlood(q,r.n,(.16+rnd()*.14)*k*(.5+f*.6),{el:1.6+rnd(),dir:d});for(let i=0;i<4+k*2;i++){const j=[(rnd()-.5)*.5*k,(rnd()-.5)*.5*k,(rnd()-.5)*.5*k];const jj=sub(j,mulS(r.n,dot(j,r.n)));addBlood(add(q,jj),r.n,.025+rnd()*.05,{el:1+rnd()*2,dir:d})}}
+ // gouttes au sol sous l'impact
+ const g=rayWorld(p,[0,-1,0],2.5);if(g.hit)for(let i=0;i<2+k;i++)addBlood(add(add(p,[0,-g.t,0]),[d[0]*(.2+rnd()*.6)+(rnd()-.5)*.3,0,d[2]*(.2+rnd()*.6)+(rnd()-.5)*.3]),[0,1,0],.04+rnd()*.07*k,{el:1+rnd()})}
+function bloodUpdate(dt){for(const b of BLOOD){b.age+=dt;if(b.grow&&b.s<b.grow)b.s+=(b.grow-b.s)*dt*.3}
+ // flaque qui s'étend sous chaque corps
+ for(const e of bots.concat(Object.values(players))){if(e.alive){e.pool=null;continue}if(e.pool||e.fall<.95||!MODELS.soldier)continue;
+  const back=((e.i||0)+(e.d||e.deaths||0)+(typeof e.id==='number'?e.id:0))%2?1:-1,c=[e.pos[0]+Math.sin(e.yaw)*.75*back,e.pos[1]+.5,e.pos[2]+Math.cos(e.yaw)*.75*back],r=rayWorld(c,[0,-1,0],2);
+  e.pool=r.hit?addBlood(add(c,[0,-r.t,0]),[0,1,0],.08,{grow:.5+rnd()*.25,el:1.3}):{}}
+ for(let i=LENS.length-1;i>=0;i--){const l=LENS[i];l.t-=dt;if(l.t<=0)LENS.splice(i,1)}}
+// projections sur l'objectif : une tache irrégulière (plusieurs lobes), des gouttelettes autour, une coulure qui descend lentement
+function lensBlood(dmg){const n=Math.min(6,1+dmg/14|0),cx=.15+rnd()*.7,cy=.1+rnd()*.6;for(let i=0;i<n;i++){const r=.008+rnd()*.03*clamp(dmg/30,.6,2);
+  const t=6+rnd()*5;LENS.push({x:cx+(rnd()-.5)*.35,y:cy+(rnd()-.5)*.3,r,t,t0:t,vy:rnd()<.5?.004+rnd()*.01:0,y0:0,lobes:Array.from({length:4+(rnd()*4|0)},()=>[(rnd()-.5)*1.3,(rnd()-.5)*1.3,.35+rnd()*.55]),sp:Array.from({length:3+(rnd()*6|0)},()=>[(rnd()-.5)*5,(rnd()-.5)*5,.06+rnd()*.14])})}}
+function lensHUD(w,h){if(!LENS.length)return;o2.save();const S=Math.min(w,h);
+ for(const l of LENS){const a=clamp(l.t/3.5,0,1),x=l.x*w,y=l.y*h,r=l.r*S;
+  o2.fillStyle='rgba(58,5,4,'+a*.62+')';for(const[ox,oy,s]of l.lobes){o2.beginPath();o2.arc(x+ox*r,y+oy*r,r*s,0,7);o2.fill()}
+  o2.fillStyle='rgba(92,10,7,'+a*.4+')';o2.beginPath();o2.arc(x-r*.15,y-r*.15,r*.5,0,7);o2.fill();
+  for(const[ox,oy,s]of l.sp){o2.fillStyle='rgba(60,6,4,'+a*.55+')';o2.beginPath();o2.arc(x+ox*r,y+oy*r,Math.max(1,r*s),0,7);o2.fill()}
+  if(l.vy){const ln=Math.min(.25*h,(l.t0-l.t)*l.vy*h*3);o2.fillStyle='rgba(55,5,4,'+a*.5+')';o2.fillRect(x-r*.12,y,r*.24,Math.max(0,ln));o2.beginPath();o2.arc(x,y+Math.max(0,ln),r*.16,0,7);o2.fill()}}
+ o2.restore()}
+// décalque posé sur une surface : octogone (deux carrés tournés) étiré dans le sens du jet
+function bloodDraw(){const col=[.07,.004,.003];for(const b of BLOOD){if(b.s<.01||!inSphere(b.p[0],b.p[1],b.p[2],b.s*b.el))continue;const n=b.n;
+  let t=Math.abs(n[1])>.9?[1,0,0]:cross([0,1,0],n);t=mulS(t,1/(len(t)||1));let u=cross(n,t);
+  if(b.dir){const dp=sub(b.dir,mulS(n,dot(b.dir,n))),l=len(dp);if(l>.2){t=mulS(dp,1/l);u=cross(n,t)}}
+  const c=mulS(col,b.dk*(b.age<.4?1.6-b.age*1.5:1));
+  for(let k=0;k<2;k++){const ang=b.a*0+k*.785,ca=Math.cos(ang),sa=Math.sin(ang),ax=add(mulS(t,ca),mulS(u,sa)),ay=add(mulS(t,-sa),mulS(u,ca)),sx=b.s*(k?.9:1)*b.el,sz=b.s*(k?.9:1);
+   const Mx=new Float32Array([ax[0]*sx,ax[1]*sx,ax[2]*sx,0,n[0]*.002,n[1]*.002,n[2]*.002,0,ay[0]*sz,ay[1]*sz,ay[2]*sz,0,b.p[0],b.p[1],b.p[2],1]);cube(Mx,c)}}}
+function impact(p,n,blood,dir,dmg){if(blood){bloodFx(p,dir||[rnd()-.5,0,rnd()-.5],dmg||30);return}
  sndImp(p);decals.push({p:add(p,mulS(n,.004)),n});if(decals.length>90)decals.shift();
  for(let i=0;i<5;i++)parts.push({pos:p.slice(),vel:[n[0]*2+(rnd()-.5)*3,n[1]*2+rnd()*2.5,n[2]*2+(rnd()-.5)*3],life:.12+rnd()*.2,col:[6,4,1.5],s:.015,em:1,g:9});
  for(let i=0;i<4;i++)parts.push({pos:p.slice(),vel:[n[0]+(rnd()-.5),n[1]+rnd()*.8,n[2]+(rnd()-.5)],life:.5+rnd()*.5,col:[.2,.2,.2],s:.05+rnd()*.05,em:0,g:1.5})}
@@ -1072,16 +1190,18 @@ function explode(pos,sc=1){const q=[pos[0],Math.max(.2,pos[1]),pos[2]],grounded=
 /* ================= DRONE : modèle 3D ================= */
 const DISCQ=[];
 // p position · yaw/pt/rl orientation du châssis · gim tangage absolu de la nacelle · spin vitesse d'hélice 0..1 · ph phase · lit feux de navigation
-function drawUAV(p,yaw,pt,rl,gim,spin,ph,lit,t){if(!inSphere(p[0],p[1],p[2],.6))return;const B=mm(M.trs(p[0],p[1],p[2]),M.ry(yaw),M.rx(pt),M.rz(rl)),C=(x,y,z,sx,sy,sz,col,ty,R)=>cube(R?mm(B,M.trs(x,y,z),R,M.scl(sx,sy,sz)):mm(B,M.trs(x,y,z),M.scl(sx,sy,sz)),col,ty||4);
+// fpv : vue depuis la caméra embarquée, seuls les bras avant, moteurs et hélices entrent dans le champ
+function drawUAV(p,yaw,pt,rl,gim,spin,ph,lit,t,fpv){if(!inSphere(p[0],p[1],p[2],.6))return;const B=mm(M.trs(p[0],p[1],p[2]),M.ry(yaw),M.rx(pt),M.rz(rl),M.scl(UAV.scl,UAV.scl,UAV.scl)),C=(x,y,z,sx,sy,sz,col,ty,R)=>cube(R?mm(B,M.trs(x,y,z),R,M.scl(sx,sy,sz)):mm(B,M.trs(x,y,z),M.scl(sx,sy,sz)),col,ty||4);
  const body=[.032,.036,.03],top=[.026,.03,.025],dark=[.012,.013,.014],arm=[.018,.019,.018],metal=[.06,.06,.064];
- C(0,0,0,.17,.065,.3,body);C(0,.046,.02,.13,.028,.2,top);C(0,.074,.075,.1,.034,.12,dark);C(0,.006,-.162,.12,.046,.03,dark);C(0,.03,.14,.08,.03,.04,dark);
+ if(!fpv){C(0,0,0,.17,.065,.3,body);C(0,.046,.02,.13,.028,.2,top);C(0,.074,.075,.1,.034,.12,dark);C(0,.006,-.162,.12,.046,.03,dark);C(0,.03,.14,.08,.03,.04,dark);
  C(-.034,.012,-.178,.02,.012,.004,[.12,.16,.22],5);C(.034,.012,-.178,.02,.012,.004,[.12,.16,.22],5);
- const blur=spin>.35;
- for(const[sx,sz]of[[1,-1],[-1,-1],[1,1],[-1,1]]){const tip=[sx*.235,.012,sz*.205];cube(mm(B,between([sx*.05,0,sz*.08],tip,.026,.018)),arm);
+ }const blur=spin>.35;
+ for(const[sx,sz]of[[1,-1],[-1,-1],[1,1],[-1,1]]){const tip=[sx*.235,.012,sz*.205];if(fpv&&sz>0)continue;cube(mm(B,between([sx*.05,0,sz*.08],tip,.026,.018)),arm);
   C(tip[0],tip[1],tip[2],.046,.04,.046,metal);C(tip[0],tip[1]+.026,tip[2],.028,.012,.028,dark);C(tip[0],tip[1]-.03,tip[2],.014,.03,.014,arm);
   const dir=sx*sz>0?1:-1,a=ph*dir+sx*.7,py=tip[1]+.038;
   if(blur){DISCQ.push(mm(B,M.trs(tip[0],py,tip[2]),M.scl(.27,.003,.27)));C(tip[0],py,tip[2],.27,.003,.012,[.035,.035,.035],4,M.ry(a))}
   else C(tip[0],py,tip[2],.27,.004,.026,dark,4,M.ry(a))}
+ if(fpv)return;
  for(const sx of[-1,1]){C(sx*.07,-.075,-.08,.012,.09,.012,arm);C(sx*.07,-.075,.08,.012,.09,.012,arm);C(sx*.07,-.122,0,.016,.012,.27,arm)}
  C(0,-.04,-.115,.05,.022,.03,dark);const G=mm(B,M.trs(0,-.065,-.12),M.rx(gim-pt));
  cube(mm(G,M.scl(.054,.048,.052)),[.04,.042,.046]);cube(mm(G,M.trs(0,0,-.027),M.scl(.024,.024,.006)),[.06,.09,.14],5);
@@ -1098,11 +1218,13 @@ function rayChars(o,d,maxT,skip){let best=null,bt=maxT,bm=1;const test=e=>{if(!e
 function pickSpawn(){let cand=spawns.map(s=>{let dmin=1e9;const chk=e=>{if(e.alive)dmin=Math.min(dmin,Math.hypot(e.pos[0]-s[0],e.pos[2]-s[1]))};chk(me);for(const id in players)chk(players[id]);for(const b of bots)chk(b);return{s,d:dmin}});
  cand.sort((a,b)=>b.d-a.d);return cand[(rnd()*Math.min(5,cand.length))|0].s}
 function spawnMe(){const s=pickSpawn();me.pos=[s[0],0,s[1]];me.vel=[0,0,0];me.hp=100;me.alive=true;me.fall=0;me.yaw=me.cy=Math.atan2(s[0],s[1]);me.pitch=me.cp=0;me.ammo=WPN.map(w=>w.mag);me.res=WPN.map(w=>w.res);me.reload=0;me.w=clamp(CFG.loadout|0,0,WPN.length-1);vmA.w=-1;me.lastHurt=-99;showMsg('')}
-function hurt(dmg,by){if(!me.alive)return;me.hp-=dmg;me.lastHurt=now;me.shake=Math.min(2,me.shake+.9);sndHit();rumble(180,.9);if(me.inDrone){exitDrone();tip('OPÉRATEUR TOUCHÉ — liaison drone coupée')}
+function hurt(dmg,by){if(!me.alive)return;me.hp-=dmg;if(dmg>8)lensBlood(dmg);me.lastHurt=now;me.shake=Math.min(2,me.shake+.9);sndHit();rumble(180,.9);if(me.inDrone){exitDrone();tip('OPÉRATEUR TOUCHÉ — liaison drone coupée')}
  if(me.hp<=0){me.hp=0;me.alive=false;me.deaths++;PROF.deaths++;me.streak=0;profSave(true);me.respawn=4.5;me.fall=0;if(me.drone)killDrone();feedKill(by,myId);send({t:'kill',k:by,v:myId});if(typeof by==='string'&&isHost()){const b=bots.find(b=>b.id===by);if(b)b.k++}
   showMsg('SIGNAL PERDU<small>ÉLIMINÉ PAR '+esc(nameOf(by))+' — REDÉPLOIEMENT…</small>')}}
 
 /* ---- bots ---- */
+// munitions des bots : 30 coups, puis 2,4 s de rechargement (animation visible par tous)
+function botBullet(b){if((b.mag=(b.mag===undefined?30:b.mag)-1)<=0){b.mag=30;b.rlS=now;b.cool=Math.max(b.cool,2.4+rnd()*.3);send({t:'rl',b:b.id})}}
 function mkBot(i){return{id:'b'+i,i,kind:'b',name:BN[i%BN.length],pos:[0,0,0],tpos:[0,0,0],vel:[0,0,0],yaw:0,tyaw:0,pitch:0,hp:100,alive:false,resp:.5+rnd()*2,k:0,d:0,walk:0,spd:0,fl:1,crouch:0,fall:1,
  path:[],tgt:null,last:null,react:0,burst:3,cool:0,think:rnd()*.2,strafe:1,strT:0,look:0,stuck:0}}
 function setBots(n){while(bots.length<n)bots.push(mkBot(bots.length));bots.length=n}
@@ -1112,23 +1234,23 @@ function targets(){const t=[];if(me.alive&&started)t.push(me);for(const id in pl
  for(const id in players){const p=players[id],q=p.drone;if(q&&q[7]!==1){const o=p.droneT||(p.droneT={isDrone:true,owner:p.id,alive:true,crouch:0,fl:1,pos:[0,0,0]});o.pos=[q[0],q[1],q[2]];o.alive=true;t.push(o)}else if(p.droneT)p.droneT.alive=false}
  return t}
 const aimH=c=>c.isDrone?0:c.crouch>.5?.8:1.25;
-function botFireDrone(b,c,dist){const f=dirOf(b.yaw,b.pitch),o=[b.pos[0]+f[0]*.6,b.pos[1]+1.33,b.pos[2]+f[2]*.6];let e;
+function botFireDrone(b,c,dist){if(b.rlS!==undefined&&now-b.rlS<2.5)return;const f=dirOf(b.yaw,b.pitch),o=[b.pos[0]+f[0]*.6,b.pos[1]+1.33,b.pos[2]+f[2]*.6];let e;
  if(rnd()<clamp(.34-dist*.009,.05,.3)){e=c.pos.slice();const dmg=7+rnd()*9;if(c.owner==='me')droneDamage(dmg,b.id,'shot');else send({t:'hit',to:c.owner,dr:1,dmg,by:b.id});
   for(let i=0;i<5;i++)parts.push({pos:e.slice(),vel:[(rnd()-.5)*4,rnd()*3,(rnd()-.5)*4],life:.15+rnd()*.2,col:[6,4,1.5],s:.015,em:1,g:9})}
  else{const aim=add(c.pos,[(rnd()-.5)*1.6,(rnd()-.5)*1.2,(rnd()-.5)*1.6]),dv=sub(aim,o),l=len(dv),dn=mulS(dv,1/l),r=rayWorld(o,dn,90);e=add(o,mulS(dn,r.t));if(r.hit)impact(e,r.n)}
- shotFx(o,e,true,false);send({t:'sh',o,e,w:0})}
+ shotFx(o,e,true,false);send({t:'sh',o,e,w:0,b:b.id});b.shT=now;botBullet(b)}
 function alertBots(pos){for(const b of bots)if(b.alive&&!b.tgt&&Math.hypot(b.pos[0]-pos[0],b.pos[2]-pos[2])<38&&rnd()<.75){b.last=[pos[0],pos[2]];b.path=[];b.look=0}}
 function hurtBot(b,dmg,by){if(!b.alive)return;b.hp-=dmg;
  if(!b.tgt){const a=by===myId?me:players[by];if(a){b.last=[a.pos[0],a.pos[2]];b.path=[];b.tyaw=Math.atan2(-(a.pos[0]-b.pos[0]),-(a.pos[2]-b.pos[2]));b.look=0}}
  if(b.hp<=0){b.alive=false;b.d++;b.resp=5+rnd()*3;b.fall=0;feedKill(by,b.id);send({t:'kill',k:by,v:b.id});if(by===myId){me.kills++;creditKill(b.id)}}}
-function botFire(b,c,dist){if(c.isDrone)return botFireDrone(b,c,dist);const f=dirOf(b.yaw,b.pitch),o=[b.pos[0]+f[0]*.6,b.pos[1]+1.33,b.pos[2]+f[2]*.6];
+function botFire(b,c,dist){if(b.rlS!==undefined&&now-b.rlS<2.5)return;if(c.isDrone)return botFireDrone(b,c,dist);const f=dirOf(b.yaw,b.pitch),o=[b.pos[0]+f[0]*.6,b.pos[1]+1.33,b.pos[2]+f[2]*.6];
  let p=.6-dist*.011-(c.spd||0)*.045-(c.crouch>.5?.1:0)-(c===me&&me.lean?0.08:0);p=clamp(p,.06,.68);
  const chest=[c.pos[0],c.pos[1]+(c.crouch>.5?.8:1.2),c.pos[2]];let e;
- if(rnd()<p){e=chest;const dmg=rnd()<.06?70:13+rnd()*13;if(c===me)hurt(dmg,b.id);else send({t:'hit',to:c.id,dmg,by:b.id});impact(e,[0,1,0],true)}
+ if(rnd()<p){e=chest;const dmg=rnd()<.06?70:13+rnd()*13;if(c===me)hurt(dmg,b.id);else send({t:'hit',to:c.id,dmg,by:b.id});impact(e,[0,1,0],true,sub(e,o),dmg)}
  else{const aim=add(chest,[(rnd()-.5)*2.2,(rnd()-.3)*1.6,(rnd()-.5)*2.2]),d=sub(aim,o),l=len(d),dn=mulS(d,1/l),r=rayWorld(o,dn,90);e=add(o,mulS(dn,r.t));if(r.hit)impact(e,r.n)}
- shotFx(o,e,true,false);send({t:'sh',o,e,w:0})}
+ shotFx(o,e,true,false);send({t:'sh',o,e,w:0,b:b.id});b.shT=now;botBullet(b)}
 function botUpdate(b,dt){
- if(!b.alive){b.fall=Math.min(1,b.fall+dt*3);b.resp-=dt;if(b.resp<=0)botSpawn(b);return}
+ if(!b.alive){b.fall=Math.min(1,b.fall+dt*1.5);b.resp-=dt;if(b.resp<=0)botSpawn(b);return}
  b.think-=dt;
  if(b.think<=0){b.think=.15;let best=null,bd=1e9;const eye=[b.pos[0],b.pos[1]+1.5,b.pos[2]];
   for(const c of targets()){const dx=c.pos[0]-b.pos[0],dz=c.pos[2]-b.pos[2],dy=c.pos[1]+aimH(c)-eye[1],dist=Math.hypot(dx,dz);if(dist>55||dist>=bd||(c.isDrone&&(dist>42||dy>28)))continue;
@@ -1160,15 +1282,16 @@ function botUpdate(b,dt){
    États : launch (décollage depuis la main) · fly (piloté) · hold (stationnaire, opérateur à pied)
            rth (retour automatique : rappel ou liaison perdue) · land (batterie critique) · down (abattu, chute libre)
    Une chute se termine par l'explosion (effet visuel et sonore uniquement) et le retrait du drone, puis un délai avant le suivant. */
-const UAV={call:'CORBEAU-1',model:'RQ-DF3',hp:100,cdLost:20,cdStow:5,camOff:[0,.02,-.15]};
+const UAV={call:'CORBEAU-1',model:'RQ-DF3',hp:100,cdLost:20,cdStow:5,camOff:[0,.016,-.092],scl:.62};
 /* ---- quadrirotor en X : physique de corps rigide intégrée à 240 Hz ----
    Chaque moteur a sa propre vitesse (montée et descente en régime progressives) ; sa poussée suit le carré de cette vitesse.
    Les différences de poussée créent roulis et tangage, la réaction des hélices crée le lacet. Gravité 9,81 m/s², inertie et effet
    gyroscopique, traînée calculée sur la vitesse par rapport à l'air (vent + turbulences), effet de sol, perte de poussée dans son
    propre souffle. Un contrôleur de vol (modes ANGLE et ACRO) transforme les commandes en consignes de rotation puis en puissance moteur. */
-const QD={m:1.05,I:[.0125,.023,.0115],tw:4.4,kQ:.016,tUp:.035,tDn:.055,idle:.06,cd:[.045,.11,.035],aDrag:.004,maxAng:.96,rate:[11,5.5,11],kRate:[24,12,24],kAtt:8};
+// gabarit FPV « 5 pouces » renforcé : 0,72 kg, poussée 7 fois le poids, moteurs à 15 cm du centre, réponse en 20 ms
+const QD={m:.72,I:[.0042,.0078,.0038],tw:7,kQ:.014,tUp:.02,tDn:.035,idle:.055,cd:[.035,.085,.028],aDrag:.0016,maxAng:.96,rate:[12.2,7.5,12.2],kRate:[30,14,30],kAtt:9};
 QD.tmax=QD.tw*QD.m*9.81/4;QD.hov=Math.sqrt(1/QD.tw);
-const MOT=[[.235,-.205,1],[-.235,-.205,-1],[.235,.205,-1],[-.235,.205,1]];   // avant droit, avant gauche, arrière droit, arrière gauche : x, z, sens de rotation
+const MOT=[[.146,-.127,1],[-.146,-.127,-1],[.146,.127,-1],[-.146,.127,1]];   // avant droit, avant gauche, arrière droit, arrière gauche : x, z, sens de rotation
 const qmul=(a,b)=>[a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]];
 const qrot=(q,v)=>{const x=q[0],y=q[1],z=q[2],w=q[3],tx=2*(y*v[2]-z*v[1]),ty=2*(z*v[0]-x*v[2]),tz=2*(x*v[1]-y*v[0]);return[v[0]+w*tx+y*tz-z*ty,v[1]+w*ty+z*tx-x*tz,v[2]+w*tz+x*ty-y*tx]};
 const qinv=q=>[-q[0],-q[1],-q[2],q[3]],qnorm=q=>{const n=Math.hypot(q[0],q[1],q[2],q[3])||1;return[q[0]/n,q[1]/n,q[2]/n,q[3]/n]};
@@ -1178,7 +1301,7 @@ function quatEuler(q){const[x,y,z,w]=q;return[Math.atan2(2*(x*z+y*w),1-2*(x*x+y*
 let uavHint=0;
 function uavNew(){const f=dirOf(me.yaw,0),p=[me.pos[0]+f[0]*.9,me.pos[1]+1.15,me.pos[2]+f[2]*.9];
  return{isDrone:true,owner:'me',alive:true,crouch:0,fl:1,pos:p,vel:[0,0,0],q:qAxis([0,1,0],me.yaw),w:[0,0,0],m:[0,0,0,0],cmd:[0,0,0,0],T:[0,0,0,0],
-  eu:[me.yaw,0,0],yawS:me.yaw,pt:0,rl:0,gimS:.26,tilt:.26,spin:0,ph:0,hp:UAV.hp,state:'launch',mode:0,lever:QD.hov,ts:0,in:{p:0,r:0,y:0,thr:0,punch:0,mx:0,mz:0},
+  eu:[me.yaw,0,0],yawS:me.yaw,pt:0,rl:0,gimS:.2,tilt:.2,ks:{p:0,r:0,y:0},spin:0,ph:0,hp:UAV.hp,state:'launch',mode:0,lever:QD.hov,ts:0,in:{p:0,r:0,y:0,thr:0,punch:0,mx:0,mz:0},
   t:0,rec:0,bat:1,draw:.3,lq:1,los:1,rssi:-40,lostT:0,zoom:1,zoomS:1,hitT:0,msg:'',msgT:0,msgRed:false,onG:false,smokeT:0,recall:false,wind:rnd()*100,vs:0,agl:1,
   turb:[0,0,0],wash:0,flips:0,fa:[0,0],air:0}}
 function uavMsg(d,m,red,t){d.msg=m;d.msgRed=!!red;d.msgT=t||2.6}
@@ -1197,7 +1320,7 @@ function droneDamage(dmg,by,cause){const d=me.drone;if(!d||d.state==='down')retu
  if(d.hp<=0){d.hp=0;d.state='down';d.alive=false;for(let a=0;a<3;a++)d.w[a]+=(rnd()-.5)*14;uavMsg(d,'DRONE TOUCHÉ — PERTE DE CONTRÔLE',true,9);
   if(by!==undefined&&cause!=='crash')feed('<i>DRONE ABATTU</i> par '+esc(nameOf(by)))}
  else uavMsg(d,(cause==='crash'?'IMPACT':'TOUCHÉ')+' — STRUCTURE '+Math.round(d.hp)+' %',d.hp<40)}
-function uavMode(){const d=me.drone;if(!d||d.state!=='fly')return;d.mode=1-d.mode;
+function uavMode(){const d=me.drone;if(!d||d.state!=='fly')return;d.mode=1-d.mode;d.tilt=d.mode?Math.max(d.tilt,.47):Math.min(d.tilt,.2);
  if(d.mode===1)d.lever=Math.sqrt(clamp(QD.m*9.81*(1+d.ts*(d.ts>0?QD.tw*.8-1:.85))/(4*QD.tmax),0,1));uavHint=7;uavMsg(d,'MODE '+(d.mode?'ACRO — AUCUNE STABILISATION':'ANGLE — STABILISATION AUTOMATIQUE'),false,2.5)}
 function uavTurtle(){const d=me.drone;if(!d||d.state!=='turtle')return;d.state=me.inDrone?'fly':'hold';d.vel[1]=3.2;d.w=[0,0,(rnd()<.5?-1:1)*13];d.pos[1]+=.15;uavMsg(d,'RETOURNÉ')}
 function uavDestroy(d){explode(d.pos,1);send({t:'dx',p:d.pos.map(v=>+v.toFixed(2))});me.drone=null;me.droneCd=UAV.cdLost;
@@ -1227,7 +1350,7 @@ function uavCtrl(d){const I=d.in,st=d.state;
   return uavAuto(d,[hh>.01?hx/hh*sp:0,clamp(((d.recall?ty:Math.max(ty,d.pos[1]))-d.pos[1])*.9,-2,3),hh>.01?hz/hh*sp:0],yr)}
  return null}
 // mélangeur : poussée totale + couples voulus → puissance de chacun des 4 moteurs (priorité à la rotation, comme le mode « air » d'un vrai contrôleur)
-function uavMix(Tc,tx,ty,tz){const tm=QD.tmax,tl=QD.idle*QD.idle*tm,T=[0,0,0,0],avg=Tc/4,b2=.205*.205,a2=.235*.235;
+function uavMix(Tc,tx,ty,tz){const tm=QD.tmax,tl=QD.idle*QD.idle*tm,T=[0,0,0,0],avg=Tc/4,b2=MOT[0][1]*MOT[0][1],a2=MOT[0][0]*MOT[0][0];
  for(let i=0;i<4;i++){const[x,z,sp]=MOT[i];T[i]=avg+tx*(-z)/(4*b2)+tz*x/(4*a2)+ty*sp/(4*QD.kQ)}
  let mn=Math.min(...T),mx=Math.max(...T);if(mx-mn>tm-tl){const k=(tm-tl)/(mx-mn);for(let i=0;i<4;i++)T[i]=avg+(T[i]-avg)*k;mn=Math.min(...T);mx=Math.max(...T)}
  const sh=mn<tl?tl-mn:mx>tm?tm-mx:0;return T.map(t=>Math.sqrt(clamp(t+sh,0,tm)/tm))}
@@ -1256,9 +1379,11 @@ function droneUpdate(dt){if(me.uavLost>0)me.uavLost-=dt;if(!me.drone&&me.droneCd
  // ---- commandes du pilote (clavier AZERTY + manette, mode 2)
  const pil=me.inDrone&&playing&&d.state==='fly',I=d.in;I.p=I.r=I.y=I.mx=I.mz=0;I.punch=0;
  if(pil){const kb=(a,b)=>(keys[a]?1:0)-(keys[b]?1:0),thrK=(keys.Space?1:0)-((keys.ControlLeft||keys.ControlRight||keys.KeyC)?1:0),ms=.0022*CFG.sens;
-  I.p=kb('KeyW','KeyS');I.r=kb('KeyD','KeyA');I.y=kb('KeyE','KeyQ');I.punch=keys.ShiftLeft||keys.ShiftRight?1:0;
+  // clavier : la touche pousse le manche progressivement (et le relâche en douceur) au lieu d'un tout-ou-rien
+  const ks=d.ks,ramp=(k,tg)=>{const r=tg===0?7:Math.sign(tg)!==Math.sign(ks[k])&&ks[k]!==0?12:4.2;ks[k]+=clamp(tg-ks[k],-r*dt,r*dt);return ks[k]};
+  I.p=ramp('p',kb('KeyW','KeyS'));I.r=ramp('r',kb('KeyD','KeyA'));I.y=ramp('y',kb('KeyE','KeyQ'));I.punch=keys.ShiftLeft||keys.ShiftRight?1:0;
   d.tilt=clamp(d.tilt+kb('ArrowUp','ArrowDown')*dt*.6,-.6,.8);
-  if(d.mode===0){I.y+=clamp(mdx*ms*.6/Math.max(dt,1e-3),-1.5,1.5);d.tilt=clamp(d.tilt-mdy*ms*.5,-.6,.8);d.ts+=(thrK*(thrK>0?.32:.6)-d.ts)*Math.min(1,dt*6)}
+  if(d.mode===0){I.y+=clamp(mdx*ms*.6/Math.max(dt,1e-3),-1.5,1.5);d.tilt=clamp(d.tilt-mdy*ms*.5,-.6,.8);d.ts+=(thrK*(thrK>0?.2:.5)-d.ts)*Math.min(1,dt*6)}
   else{if(dt>0){I.mx=clamp(-mdy*ms*2.2/dt,-14,14);I.mz=clamp(-mdx*ms*2.2/dt,-14,14)}d.lever=clamp(d.lever+(thrK>0?.75:thrK<0?-1.4:0)*dt,0,1)}
   if(pad.on&&pad.g){const g=pad.g,bv=i=>g.buttons[i]?g.buttons[i].value:0,s=(1-pad.ly)/2;I.y+=pad.lx;I.r+=pad.rx;I.p-=pad.ry;if(bv(7)>.5)I.punch=1;d.tilt=clamp(d.tilt+pad.lean*dt*.6,-.6,.8);
    if(Math.abs(pad.ly)>.03||pad.thrUsed){pad.thrUsed=true;if(d.mode===0)d.ts=-pad.ly;else d.lever=s<.5?s/.5*QD.hov:QD.hov+(s-.5)/.5*(1-QD.hov)}}
@@ -1283,7 +1408,7 @@ function droneUpdate(dt){if(me.uavLost>0)me.uavLost-=dt;if(!me.drone&&me.droneCd
  // ---- intégration à 240 Hz
  const n=Math.max(1,Math.ceil(dt*240)),h=dt/n;for(let i=0;i<n;i++)uavStep(d,h,wind);
  // ---- déplacement avec collisions (découpé pour ne pas traverser les murs fins à grande vitesse)
- const v0=d.vel.slice(),y0=d.pos[1],sm=Math.max(1,Math.ceil(len(d.vel)*dt/.12));let og=false;for(let i=0;i<sm;i++)og=moveBox(d.pos,[.26,.1,.24],d.vel,dt/sm)||og;d.onG=og;
+ const v0=d.vel.slice(),y0=d.pos[1],sm=Math.max(1,Math.ceil(len(d.vel)*dt/.12));let og=false;for(let i=0;i<sm;i++)og=moveBox(d.pos,[.17,.07,.15],d.vel,dt/sm)||og;d.onG=og;
  const imp=Math.hypot(v0[0]-d.vel[0],v0[1]-d.vel[1],v0[2]-d.vel[2]);d.vs=(d.pos[1]-y0)/Math.max(dt,1e-3);
  d.pos[0]=clamp(d.pos[0],-60,60);d.pos[2]=clamp(d.pos[2],-60,60);if(d.pos[1]>60){d.pos[1]=60;d.vel[1]=Math.min(0,d.vel[1])}
  if(d.state==='down'){d.smokeT-=dt;if(d.smokeT<=0){d.smokeT=.03;fx({p:d.pos.slice(),v:[(rnd()-.5)*.4,.4,(rnd()-.5)*.4],life:1.6+rnd(),s0:.25,s1:1.3,c0:[.2,.17,.14,.7],c1:[.1,.1,.1,0],k:2,drag:1.2,g:-.4});
@@ -1295,7 +1420,8 @@ function droneUpdate(dt){if(me.uavLost>0)me.uavLost-=dt;if(!me.drone&&me.droneCd
  const up=qrot(d.q,[0,1,0]);if(d.onG&&up[1]<-.15&&len(d.vel)<.6&&d.state!=='down'&&d.state!=='turtle'){d.state='turtle';uavMsg(d,'SUR LE DOS — X POUR RETOURNER',true,6)}
  // ---- valeurs dérivées (affichage, réseau, caméra)
  d.eu=quatEuler(d.q);const f=qrot(d.q,[0,0,-1]);if(Math.hypot(f[0],f[2])>.15)d.yawS=Math.atan2(-f[0],-f[2]);d.pt=d.eu[1];d.rl=d.eu[2];d.gimS=d.tilt;
- d.spin=(d.m[0]+d.m[1]+d.m[2]+d.m[3])/4;d.ph+=d.spin*95*dt;d.zoomS+=(d.zoom-d.zoomS)*Math.min(1,dt*8);d.agl=d.pos[1]-Math.max(0,d.pos[1]-rayWorld(d.pos,[0,-1,0],80).t);
+ d.spin=(d.m[0]+d.m[1]+d.m[2]+d.m[3])/4;d.ph+=d.spin*95*dt;
+ if(d.agl<1.6&&d.spin>.25&&d.state!=='down'&&rnd()<dt*40*d.spin*(1-d.agl/1.6)){const a=rnd()*6.283,gy=d.pos[1]-d.agl+.05;fx({p:[d.pos[0]+Math.cos(a)*.15,gy,d.pos[2]+Math.sin(a)*.15],v:[Math.cos(a)*(2+rnd()*2.5)*d.spin,.15+rnd()*.3,Math.sin(a)*(2+rnd()*2.5)*d.spin],life:.7+rnd()*.7,s0:.08,s1:.55,c0:[.3,.28,.24,.28],c1:[.2,.19,.17,0],k:2,drag:3,g:-.1})}d.zoomS+=(d.zoom-d.zoomS)*Math.min(1,dt*8);d.agl=d.pos[1]-Math.max(0,d.pos[1]-rayWorld(d.pos,[0,-1,0],80).t);
  // ---- saltos : le drone passe sur le dos puis revient à l'endroit en moins de 2,5 s (un virage serré ne compte pas)
  if(!d.inv&&up[1]<-.5&&!d.onG){d.inv=1;d.invT=0;d.invK=Math.abs(d.w[0])>Math.abs(d.w[2])?(d.w[0]<0?'SALTO AVANT':'SALTO ARRIÈRE'):'TONNEAU'}
  if(d.inv){d.invT+=dt;if(up[1]>.5){if(d.invT<2.5){d.flips++;PROF.flips=(PROF.flips||0)+1;uavMsg(d,d.invK+' · '+d.flips,false,1.6);checkContracts()}d.inv=0}else if(d.invT>2.5)d.inv=0}
@@ -1306,18 +1432,19 @@ function eyeH(){return 1.55-.55*me.crouch}
 function fire(){const w=WPN[me.w];if(me.cool>0||me.reload>0)return;
  if(me.ammo[me.w]<=0){sndClick();me.cool=.25;if(me.res[me.w]>0)reload();return}
  me.ammo[me.w]--;me.cool=w.cd;if(w.anims&&w.anims.shot)vmPlay(w.anims.shot,false,1);
- const sp=w.spread*(1+(1-me.ads)*3.5+me.spd*.7+(me.onG?0:4));
+ if(w.sniper){me.bolt=1;[[.3,'up'],[.48,'back'],[.7,'fwd'],[.86,'down']].forEach(([dt,k])=>setTimeout(()=>sndBolt(k),dt*1000))}
+ const sp=w.spread*(1+(1-me.ads)*3.5+me.spd*.7+(me.onG?0:4))*(w.sniper?1+(1-(camS.scope||0))*28:1);
  const d=dirOf(gun.yaw+(rnd()-.5)*sp*2,gun.pitch+(rnd()-.5)*sp*2),o=camS.pos.slice();
  const rw=rayWorld(o,d,300);let end=add(o,mulS(d,rw.t)),rc=rayChars(o,d,rw.t,null),hitDrone=null;
  for(const id in players){const p=players[id];if(p.drone){const q=p.drone,t=rayBox(o,d,[q[0]-.35,q[1]-.2,q[2]-.35,q[0]+.35,q[1]+.2,q[2]+.35],rc?rc.t:rw.t);if(t>=0){hitDrone=p;end=add(o,mulS(d,t))}}}
  if(hitDrone){send({t:'hit',to:hitDrone.id,dr:1,dmg:w.dmg});impact(end,[0,1,0]);for(let i=0;i<5;i++)parts.push({pos:end.slice(),vel:[(rnd()-.5)*4,rnd()*3,(rnd()-.5)*4],life:.15+rnd()*.2,col:[6,4,1.5],s:.015,em:1,g:9})}
- else if(rc){end=add(o,mulS(d,rc.t));const dmg=w.dmg*rc.m;lastHit[rc.e.id]={w:me.w,head:rc.m>3};impact(end,[0,1,0],true);
+ else if(rc){end=add(o,mulS(d,rc.t));const dmg=w.dmg*rc.m;lastHit[rc.e.id]={w:me.w,head:rc.m>3};impact(end,[0,1,0],true,d,dmg);sndTick();
   if(rc.e.kind==='b'){if(isHost())hurtBot(rc.e,dmg,myId);else send({t:'hit',to:rc.e.id,dmg})}else send({t:'hit',to:rc.e.id,dmg})}
  else if(rw.hit)impact(end,rw.n);
- const mz=gun.muzzle||o;shotFx(mz,end,!!w.rifle,true);me.flash=.045;send({t:'sh',o:mz.map(v=>+v.toFixed(2)),e:end.map(v=>+v.toFixed(2)),w:me.w});
+ const mz=gun.muzzle||o;shotFx(mz,end,!!w.rifle,true,me.w);me.flash=.045;send({t:'sh',o:mz.map(v=>+v.toFixed(2)),e:end.map(v=>+v.toFixed(2)),w:me.w});
  me.pitch=Math.min(1.45,me.pitch+w.rec*(.7+rnd()*.6));me.yaw+=(rnd()-.5)*w.rec*.9;me.kick=Math.min(1.5,me.kick+1);me.shake=Math.min(2,me.shake+.35);rumble(70,.55);
  if(isHost())alertBots(me.pos)}
-function reload(){const w=WPN[me.w];if(me.reload>0||me.ammo[me.w]>=w.mag||me.res[me.w]<=0)return;let d=w.rl;if(w.anims&&w.anims.reload){const ad=vmPlay(w.anims.reload,false,1.1);if(ad)d=ad}
+function reload(){const w=WPN[me.w];if(me.reload>0||me.ammo[me.w]>=w.mag||me.res[me.w]<=0)return;send({t:'rl'});let d=w.rl;if(w.anims&&w.anims.reload){const ad=vmPlay(w.anims.reload,false,1.1);if(ad)d=ad}
  me.reload=d;sndClick();setTimeout(sndClick,d*450);setTimeout(()=>{sndClick();setTimeout(sndClick,90)},d*850)}
 function switchW(i){if(i===me.w||!WPN[i]||me.reload>0||!me.alive||me.swT>0)return;me.swTo=i;me.swT=.42;me.cool=Math.max(me.cool,.5);sndClick()}
 // animation du modèle de vue (bras + arme skinnés)
@@ -1334,11 +1461,11 @@ let stepAcc=0;
 function playerUpdate(dt){
  if(!me.alive){me.fall=Math.min(1,me.fall+dt*2.2);if(started){me.respawn-=dt;if(me.respawn<=0)spawnMe()}return}
  const ctl=playing&&!me.inDrone;
- if(ctl){const s=.0022*CFG.sens*(1-.45*me.ads);me.yaw-=mdx*s;me.pitch=clamp(me.pitch-mdy*s,-1.45,1.45)}
+ if(ctl){const s=.0022*CFG.sens*(1-.45*me.ads)*(1-.86*(camS.scope||0));me.yaw-=mdx*s;me.pitch=clamp(me.pitch-mdy*s,-1.45,1.45)}
  const f=ctl?clamp((keys.KeyW?1:0)-(keys.KeyS?1:0)-pad.ly,-1,1):0,s=ctl?clamp((keys.KeyD?1:0)-(keys.KeyA?1:0)+pad.lx,-1,1):0;
  const wantCr=ctl&&(keys.KeyC||pad.crouch);me.crouch+=((wantCr?1:0)-me.crouch)*Math.min(1,dt*9);
  const wantAds=(ctl&&(mb2||pad.ads)&&me.reload<=0)||!!DBG.ads;me.ads+=((wantAds?1:0)-me.ads)*Math.min(1,dt*11);
- const sprint=ctl&&(keys.ShiftLeft||pad.sprint)&&f>.5&&!wantCr&&!wantAds;
+ const sprint=ctl&&(keys.ShiftLeft||pad.sprint)&&f>.5&&!wantCr&&!wantAds&&!(camS.scope>.3);
  const sp=sprint?5.7:wantCr?1.7:wantAds?2.0:3.3,F=dirOf(me.yaw,0),R=rightOf(me.yaw);
  let wx=F[0]*f+R[0]*s,wz=F[2]*f+R[2]*s;const wl=Math.hypot(wx,wz);if(wl>0){const kk=Math.min(1,wl)*sp/wl;wx*=kk;wz*=kk}
  const k=Math.min(1,dt*(me.onG?10:2));me.vel[0]+=(wx-me.vel[0])*k;me.vel[2]+=(wz-me.vel[2])*k;
@@ -1351,6 +1478,9 @@ function playerUpdate(dt){
  if(me.swT>0){const b4=me.swT;me.swT-=dt;if(b4>.21&&me.swT<=.21){me.w=me.swTo;vmA.w=-1}}me.spr+=((sprint?1:0)-me.spr)*Math.min(1,dt*8);
  me.chk+=(((ctl&&(keys.KeyR||pad.rHeld)&&now-rT>=.3&&me.reload<=0&&me.swT<=0)?1:0)-me.chk)*Math.min(1,dt*9);
  me.cool-=dt;me.land*=Math.exp(-dt*7);me.kick*=Math.exp(-dt*11);me.shake*=Math.exp(-dt*6);me.flash-=dt;
+ if(me.bolt>0)me.bolt=Math.max(0,me.bolt-dt/1.05);
+ // lunette : Maj retient la respiration (5 s), puis le tireur doit reprendre son souffle
+ {const hold=ctl&&(keys.ShiftLeft||pad.sprint)&&(camS.scope||0)>.5&&me.breath>0;me.holding=hold;me.breath=clamp(me.breath+(hold?-dt/5:dt/7),0,1);if(!hold&&me.breath<=0)me.breath=.001}
  if(me.reload>0){me.reload-=dt;if(me.reload<=0){const w=WPN[me.w],n=Math.min(w.mag-me.ammo[me.w],me.res[me.w]);me.ammo[me.w]+=n;me.res[me.w]-=n}}
  if(ctl&&(mb0||pad.fire)&&(WPN[me.w].auto||mb0Edge||pad.fireEdge)&&!sprint)fire();
  if(now-me.lastHurt>6&&me.hp<100)me.hp=Math.min(100,me.hp+9*dt);
@@ -1365,21 +1495,34 @@ function drawChar(e){if(!inSphere(e.pos[0],e.pos[1]+.9,e.pos[2],1.6))return;if(!
  if(e.fl&&e.alive){const B=mm(M.trs(e.pos[0],e.pos[1],e.pos[2]),M.ry(e.yaw));cube(mm(B,M.trs(.12,(e.crouch>.5?1.0:1.32),-.2),M.scl(.05,.05,.03)),[7,7,6.2],5)}}
 // squelette procédural du soldat (11 os, voir tools/convert.py) : marche, visée, accroupi, tenue de l'arme
 const RIG={piv:[[0,.95,-.1],[0,1.1,-.1],[0,1.5,-.12],[-.30,1.42,-.1],[-.44,1.12,-.1],[.30,1.42,-.1],[.44,1.12,-.1],[-.12,.88,-.1],[-.22,.47,-.1],[.12,.88,-.1],[.22,.47,-.1]],par:[-1,0,1,1,3,1,5,0,7,0,9]},_cw=new Array(11);
+/* Animations : marche avant / arrière / de côté (direction tirée de la vitesse locale), course, accroupi, visée haut-bas,
+   recul au tir, rechargement (main gauche au chargeur, tête baissée), sursaut à l'impact, mort en deux temps (genoux qui lâchent, puis chute). */
 function poseSoldier(m,e,dt){const al=e.alive,a=al?Math.min(1.25,(e.spd||0)/2.6):0,ph=e.walk||0,p=al?clamp(e.pitch||0,-1.2,1.2):0;
- e.crS=(e.crS||0)+(((e.crouch>.5&&al)?1:0)-(e.crS||0))*Math.min(1,dt*9);const cr=e.crS,sn=Math.sin(ph),cs=Math.cos(ph),hold=al?1:.12,sp=al?clamp(((e.spd||0)-3.8)/1.5,0,1):0,fz=e.fz||0,dead=al?0:1;
- const R=[mm(M.trs(0,-cr*.4-Math.abs(sn)*.035*a,0),M.rx(-.04*a)),M.rx(-(.07*a+cr*.3+sp*.14)+p*.4+fz*.22+Math.sin(now*1.7+(e.i||0))*.012),mm(M.rx(p*.3+cr*.22+fz*.2+sp*.1),M.ry(Math.sin(now*.6+(e.i||0)*2)*.12*(1-a))),
-  mm(M.rx((1.12-sp*.35+p*.55*(1-sp))*hold+sn*.12*sp),M.rz(.28*hold-dead*.5)),mm(M.ry(-.8*hold),M.rx(.75*hold+sp*.3)),
-  mm(M.rx((.82-sp*.4+p*.55*(1-sp))*hold-sn*.12*sp),M.rz(-.3*hold+dead*.5)),mm(M.ry(.55*hold),M.rx(1.15*hold+sp*.25)),
-  mm(M.rx(sn*.62*a+cr*1.05),M.rz(.13)),M.rx(-(.1*a+.85*a*Math.max(0,cs))-cr*1.95),
-  mm(M.rx(-sn*.62*a+cr*1.05),M.rz(-.13)),M.rx(-(.1*a+.85*a*Math.max(0,-cs))-cr*1.95)];
+ e.crS=(e.crS||0)+(((e.crouch>.5&&al)?1:0)-(e.crS||0))*Math.min(1,dt*9);const cr=e.crS,sn=Math.sin(ph),cs=Math.cos(ph),sp=al?clamp(((e.spd||0)-3.8)/1.5,0,1):0,fz=e.fz||0,dead=al?0:1;
+ const vl=Math.hypot(e.lvF||0,e.lvS||0),fw=vl>.3?(e.lvF||0)/vl:1,sd=vl>.3?(e.lvS||0)/vl:0;
+ const rk=al?Math.max(0,1-(now-(e.shT||-9))/.13):0,ru=al&&e.rlS!==undefined?(now-e.rlS)/2.4:9,rl=ru>=0&&ru<1?Math.sin(ru*Math.PI):0,rlg=ru>=0&&ru<1?Math.sin(clamp((ru-.1)/.8,0,1)*Math.PI):0;
+ const kb=al?0:Math.sin(clamp(e.fall*1.6,0,1)*Math.PI*.5)*(1-clamp((e.fall-.55)*2.2,0,1)*.85),hold=al?1-rlg*.55:.12;
+ const lp=Math.sin(now*1.7+(e.i||0))*.012;
+ const R=[mm(M.trs(0,-cr*.4-Math.abs(sn)*.035*a-kb*.32,0),M.rx(-.04*a*fw),M.ry(-sd*fw*.35*a*(1-sp))),
+  M.rx(-(.07*a*fw+cr*.3+sp*.14)+p*.4+fz*.22+lp-rk*.07+rl*.12+kb*.35),
+  mm(M.rx(p*.3+cr*.22+fz*.2+sp*.1+rl*.35+kb*.4),M.ry(Math.sin(now*.6+(e.i||0)*2)*.12*(1-a)*(1-rl)+sd*.2*a)),
+  mm(M.rx((1.12-sp*.35+p*.55*(1-sp))*hold+sn*.12*sp+rlg*.25),M.rz(.28*hold-dead*.5+rlg*.15)),mm(M.ry(-.8*hold),M.rx(.75*hold+sp*.3+rlg*.9)),
+  mm(M.rx((.82-sp*.4+p*.55*(1-sp))*(al?1:.12)-sn*.12*sp+rk*.14),M.rz(-.3*(al?1:.12)+dead*.5)),mm(M.ry(.55*(al?1:.12)),M.rx(1.15*(al?1:.12)+sp*.25-rk*.1)),
+  mm(M.rx(sn*.62*a*fw+cr*1.05+kb*1.15),M.rz(.13+sn*.32*a*sd)),M.rx(-(.1*a+.85*a*Math.max(0,cs*fw))-cr*1.95-kb*1.9),
+  mm(M.rx(-sn*.62*a*fw+cr*1.05+kb*1.05),M.rz(-.13+sn*.32*a*sd)),M.rx(-(.1*a+.85*a*Math.max(0,-cs*fw))-cr*1.95-kb*1.75)];
  for(let k=0;k<11;k++){const pv=RIG.piv[k],L=mm(M.trs(pv[0],pv[1],pv[2]),R[k],M.trs(-pv[0],-pv[1],-pv[2]));_cw[k]=RIG.par[k]<0?L:M.mul(_cw[RIG.par[k]],L);m.jm.set(_cw[k],k*16)}
  m.dirty=true;return tp(_cw[6],[.45,.86,-.1])}
 function drawCharModel(e){const dv=sub(e.pos,camS.pos),dist=len(dv);if(dist>110)return;
  const m=dist>16&&MODELS.soldier_lod?MODELS.soldier_lod:MODELS.soldier;let B=mm(M.trs(e.pos[0],e.pos[1],e.pos[2]),M.ry(e.yaw));
  if(e.hp<(e._hp===undefined?e.hp:e._hp))e.fz=1;e._hp=e.hp;e.fz=Math.max(0,(e.fz||0)-frameDt*4);
- if(!e.alive){const back=((e.i||0)+(e.d||e.deaths||0)+(typeof e.id==='number'?e.id:0))%2;B=mm(B,M.trs(0,.2,0),M.rx((back?1:-1)*e.fall*1.5))}
+ // vitesse dans le repère du personnage (avant / côté) : choisit le sens des pas
+ if(e._pp&&frameDt>0){const vx=clamp((e.pos[0]-e._pp[0])/frameDt,-8,8),vz=clamp((e.pos[2]-e._pp[2])/frameDt,-8,8),sy=Math.sin(e.yaw),cy=Math.cos(e.yaw),k=Math.min(1,frameDt*8);
+  e.lvF=(e.lvF||0)+(-(vx*sy+vz*cy)-(e.lvF||0))*k;e.lvS=(e.lvS||0)+((vx*cy-vz*sy)-(e.lvS||0))*k}e._pp=e.pos.slice();
+ if(!e.alive){const back=((e.i||0)+(e.d||e.deaths||0)+(typeof e.id==='number'?e.id:0))%2,fr=clamp((e.fall-.3)/.7,0,1),f2=fr*fr*(3-2*fr);B=mm(B,M.trs(0,.2*f2,0),M.rx((back?1:-1)*f2*1.5))}
  const hd=poseSoldier(m,e,frameDt);drawModel(m,B,{col:e.kind==='b'?[1.15,.9,.78]:WHITE,spec:.08});
- const g=MODELS.hk416_lod||MODELS.hk416;if(g&&e.alive&&dist<45)drawModel(g,mm(B,M.trs(hd[0]-.05,hd[1]+.05,hd[2]-.02),M.rx(e.pitch||0),WPN[0].m.fix),{spec:.3})}
+ if(e.alive&&dist<45){let wi=e.kind==='p'?(e.w|0):0;if(!WPN[wi]||!WPN[wi].m)wi=WPN[wi]&&WPN[wi].model==='aks74'?2:0;const W=WPN[wi],g=W.model==='hk416'?(dist>12&&MODELS.hk416_lod||MODELS.hk416):MODELS[W.model];
+  const ru=e.rlS!==undefined?(now-e.rlS)/2.4:9,rl=ru>=0&&ru<1?Math.sin(ru*Math.PI):0,rk=Math.max(0,1-(now-(e.shT||-9))/.13);
+  if(g)drawModel(g,mm(B,M.trs(hd[0]-.05,hd[1]+.05,hd[2]-.02+rk*.04),M.rx((e.pitch||0)+rk*.08-rl*.35),M.rz(rl*.6),W.m.fix),{spec:.3})}}
 function drawCharBox(e){
  const cr=e.crouch>.5?.42:0;let B=mm(M.trs(e.pos[0],e.pos[1],e.pos[2]),M.ry(e.yaw));
  if(!e.alive)B=mm(B,M.trs(0,.1,0),M.rx(-e.fall*1.48));
@@ -1391,6 +1534,54 @@ function drawCharBox(e){
  cube(mm(A,between([.27,0,0],[.05,-.06,-.48],.1,.1)),limb);cube(mm(A,between([-.27,0,0],[0,-.08,-.62],.1,.1)),limb);
  cube(mm(A,M.trs(.03,-.03,-.6),M.scl(.05,.12,.62)),[.018,.018,.02]);
  if(e.fl&&e.alive)cube(mm(B,M.trs(.13,1.3-cr,-.17),M.scl(.05,.05,.03)),[7,7,6.2],5)}
+/* ---- bras du modèle AKM (gants, manches) réutilisés sur toutes les armes ----
+   Le squelette est figé dans la pose de prise en main de l'AKM. Pour chaque arme, les poignets sont replacés sur ses points de
+   prise (poignée, garde-main, chargeur, culasse) par cinématique inverse à deux os : l'épaule reste fixe, le coude garde son côté,
+   la main conserve son orientation par rapport à l'arme. */
+const ARMS={ok:false};
+function armsInit(){const m=MODELS.arms,akm=WPN.find(w=>w.model==='akm');if(!m||!m.nodeNames||!akm)return;const ix=n=>m.nodeNames.indexOf(n);
+ ARMS.m=m;ARMS.fix=akm.m.fix;ARMS.ifix=mm(M.trs(-4.24,-4.2,6.6),M.ry(Math.PI),M.scl(1/.0232,1/.0232,1/.0232));
+ const sub=r=>{const out=[r];for(let k=0;k<out.length;k++)for(let i=0;i<m.parents.length;i++)if(m.parents[i]===out[k])out.push(i);return out};
+ ARMS.side={};for(const[s,u,f,h]of[['L','L_Upperarm_09','L_Forearm_010','L_Hand_011'],['R','R_Upperarm_030','R_Forearm_031','R_Hand_032']]){
+  const a={up:ix(u),fo:ix(f),ha:ix(h)};if(a.up<0||a.fo<0||a.ha<0)return;a.sUp=sub(a.up);a.sFo=sub(a.fo);a.sHa=sub(a.ha);ARMS.side[s]=a}
+ solvePose(m,m.rest);ARMS.base=m.world.slice();const wp=i=>[ARMS.base[i*16+12],ARMS.base[i*16+13],ARMS.base[i*16+14]];
+ // poignets de l'AKM dans le repère de l'arme : référence des autres armes
+ akm.m.rw=tp(ARMS.fix,wp(ARMS.side.R.ha));akm.m.lw=tp(ARMS.fix,wp(ARMS.side.L.ha));ARMS.ok=true}
+const _ax=new Float32Array(16),_at=new Float32Array(16);
+// matrice de rotation (colonnes) d'angle t autour de l'axe unitaire a, centrée sur le point c
+function rotAbout(a,t,c){const x=a[0],y=a[1],z=a[2],cs=Math.cos(t),sn=Math.sin(t),k=1-cs,o=_ax;
+ o[0]=cs+x*x*k;o[1]=y*x*k+z*sn;o[2]=z*x*k-y*sn;o[3]=0;o[4]=x*y*k-z*sn;o[5]=cs+y*y*k;o[6]=z*y*k+x*sn;o[7]=0;o[8]=x*z*k+y*sn;o[9]=y*z*k-x*sn;o[10]=cs+z*z*k;o[11]=0;
+ o[12]=c[0]-(o[0]*c[0]+o[4]*c[1]+o[8]*c[2]);o[13]=c[1]-(o[1]*c[0]+o[5]*c[1]+o[9]*c[2]);o[14]=c[2]-(o[2]*c[0]+o[6]*c[1]+o[10]*c[2]);o[15]=1;return o}
+function xfSub(W,X,list){for(const i of list){mul4(_at,0,X,0,W,i*16);W.set(_at,i*16)}}
+function swing(W,list,c,from,to){const a=cross(from,to),l=len(a),d=dot(from,to);if(l<1e-7)return;xfSub(W,rotAbout(mulS(a,1/l),Math.atan2(l,d),c),list)}
+const wpos=(W,i)=>[W[i*16+12],W[i*16+13],W[i*16+14]];
+// place le poignet en T (repère des bras) ; rot = rotation supplémentaire de la main [axe x,y,z en radians, repère de l'arme]
+function armIK(W,a,T,rot){const S=wpos(W,a.up),E=wpos(W,a.fo),H=wpos(W,a.ha);
+ const R0=W.slice(a.ha*16,a.ha*16+12),l1=len(sub(E,S)),l2=len(sub(H,E));let dv=sub(T,S),d=len(dv);d=clamp(d,Math.abs(l1-l2)+1e-3,(l1+l2)*.999);const dir=mulS(dv,1/(len(dv)||1));
+ let pole=sub(E,S);pole=sub(pole,mulS(dir,dot(pole,dir)));const pl=len(pole)||1;pole=mulS(pole,1/pl);
+ const x=(l1*l1-l2*l2+d*d)/(2*d),y=Math.sqrt(Math.max(0,l1*l1-x*x)),E2=add(S,add(mulS(dir,x),mulS(pole,y))),T2=add(S,mulS(dir,d));
+ swing(W,a.sUp,S,sub(E,S),sub(E2,S));swing(W,a.sFo,E2,sub(wpos(W,a.ha),E2),sub(T2,E2));
+ // la main reprend son orientation d'origine (relative à l'arme), puis la rotation propre à l'arme
+ const R1=W.slice(a.ha*16,a.ha*16+12),cn=wpos(W,a.ha);
+ // rotation de passage R0·R1ᵀ (bases orthogonales à l'échelle près)
+ const sc=1/(R1[0]*R1[0]+R1[1]*R1[1]+R1[2]*R1[2]),X=_ax;
+ for(let c=0;c<3;c++)for(let r=0;r<3;r++)X[c*4+r]=(R0[r]*R1[c]+R0[4+r]*R1[4+c]+R0[8+r]*R1[8+c])*sc;
+ X[3]=X[7]=X[11]=0;X[15]=1;X[12]=cn[0]-(X[0]*cn[0]+X[4]*cn[1]+X[8]*cn[2]);X[13]=cn[1]-(X[1]*cn[0]+X[5]*cn[1]+X[9]*cn[2]);X[14]=cn[2]-(X[2]*cn[0]+X[6]*cn[1]+X[10]*cn[2]);xfSub(W,X,a.sHa);
+ // axes de l'arme dans le repère des bras (demi-tour autour de Y) : x -> -x, z -> -z
+ if(rot)for(let k=0;k<3;k++)if(rot[k]){const ax=[0,0,0];ax[k]=k===1?1:-1;xfSub(W,rotAbout(ax,rot[k],cn),a.sHa)}}
+// courbe d'images clés [u, point] -> point interpolé (lissé)
+function keyPath(u,K){if(u<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(u<=K[i][0]){const a=K[i-1],b=K[i],k=(u-a[0])/(b[0]-a[0]||1),s=k*k*(3-2*k);return[lerp(a[1][0],b[1][0],s),lerp(a[1][1],b[1][1],s),lerp(a[1][2],b[1][2],s)]}return K[K.length-1][1]}
+function drawArms(G,w,c){const m=ARMS.m,W=m.world;W.set(ARMS.base);
+ let rw=c.rw,lw=c.lw;
+ // rechargement : la main gauche va au chargeur, le retire, en remet un, revient
+ if(me.reload>0&&c.mag){const u=1-me.reload/w.rl,mg=c.mag,dn=[mg[0]-.04,mg[1]-.3,mg[2]+.12];
+  lw=keyPath(u,[[0,lw],[.16,mg],[.24,mg],[.4,dn],[.55,dn],[.7,mg],[.78,add(mg,[0,.012,0])],[.95,lw]])}
+ // réarmement du verrou (fusil de précision) : main droite à la culasse, levier levé, tiré, repoussé, rabattu
+ if(me.bolt>0&&c.bolt){const u=1-me.bolt,b=add(c.bolt,[.02,-.035,.04]);
+  rw=keyPath(u,[[0,rw],[.18,b],[.3,add(b,[.012,.025,0])],[.48,add(b,[.012,.025,.085])],[.66,add(b,[.012,.025,0])],[.76,b],[1,rw]])}
+ armIK(W,ARMS.side.R,tp(ARMS.ifix,rw),c.rrot);armIK(W,ARMS.side.L,tp(ARMS.ifix,lw),c.lrot);
+ for(let k=0;k<m.joints.length;k++)mul4(m.jm,k*16,W,m.joints[k]*16,m.ibm,k*16);m.dirty=true;
+ drawModel(m,mm(G,ARMS.fix),{spec:.1})}
 function drawWeapon(cam,R,U,F,dt,VPw,asp){
  const w=WPN[me.w],mdl=MODELS[w.model],a=me.ads,mv=Math.min(1,me.spd/3.3);
  const bobX=Math.sin(me.bob)*.012*mv*(1-a),bobY=-Math.abs(Math.cos(me.bob))*.012*mv*(1-a),drop=me.swT>0?Math.sin(Math.PI*(1-me.swT/.42)):0,spr=me.spr;
@@ -1406,13 +1597,14 @@ function drawWeapon(cam,R,U,F,dt,VPw,asp){
   const ph=add(add(add(cam,mulS(R,hip[0]+bobX)),mulS(U,hip[1]+bobY-rl*.14-me.land*.03-drop*.25-spr*.04)),mulS(F,hip[2]-me.kick*.03));
   const pa=add(cam,tp(Rg,[-c.ads[0],-c.ads[1]-rl*.14,-c.ads[2]+me.kick*.02]));
   const pos=[lerp(ph[0],pa[0],a),lerp(ph[1],pa[1],a),lerp(ph[2],pa[2],a)],G=mm(M.trs(pos[0],pos[1],pos[2]),Rg);
-  if(c.fix){gl.useProgram(PM.p);drawModel(mdl,mm(G,c.fix),{spec:.3});gl.useProgram(PW.p)}
-  else for(const p of c.parts)cube(mm(G,M.trs(p[0],p[1],p[2]),M.scl(p[3],p[4],p[5])),[.022,.022,.025]);
+  const scoped=c.scope&&a>.9;   // dans la lunette : l'arme sort du champ, la vue passe par l'optique (voir scopeHUD)
+  if(c.fix&&!scoped){gl.useProgram(PM.p);drawModel(mdl,mm(G,c.fix),{spec:.3});if(ARMS.ok&&c.rw)drawArms(G,w,c);gl.useProgram(PW.p)}
+  else if(!c.fix)for(const p of c.parts)cube(mm(G,M.trs(p[0],p[1],p[2]),M.scl(p[3],p[4],p[5])),[.022,.022,.025]);
   gun.muzzle=gun.flashPos=tp(G,c.muz);gun.anchor=tp(G,[c.ads[0]-.07,.09,-.1]);gun.VPw=VPw;
-  const rh=tp(G,[c.ads[0],-.05,.0]),lh=tp(G,[c.lh[0]+c.ads[0],c.lh[1],c.lh[2]]),sr=add(add(add(cam,mulS(R,.24)),mulS(U,-.36)),mulS(F,-.02)),sl=add(add(add(cam,mulS(R,-.22)),mulS(U,-.36)),mulS(F,.0));
+  if(!(ARMS.ok&&c.fix&&c.rw)&&!scoped){const rh=tp(G,[c.ads[0],-.05,.0]),lh=tp(G,[c.lh[0]+c.ads[0],c.lh[1],c.lh[2]]),sr=add(add(add(cam,mulS(R,.24)),mulS(U,-.36)),mulS(F,-.02)),sl=add(add(add(cam,mulS(R,-.22)),mulS(U,-.36)),mulS(F,.0));
   const glove=[.025,.025,.027],sleeve=[.03,.036,.033];
   cube(between(rh,sr,.085,.085),sleeve);cube(between(lh,sl,.085,.085),sleeve);
-  cube(mm(M.trs(rh[0],rh[1],rh[2]),M.ry(gun.yaw),M.rx(gun.pitch),M.scl(.075,.09,.085)),glove);cube(mm(M.trs(lh[0],lh[1],lh[2]),M.ry(gun.yaw),M.rx(gun.pitch),M.scl(.075,.08,.09)),glove);
+  cube(mm(M.trs(rh[0],rh[1],rh[2]),M.ry(gun.yaw),M.rx(gun.pitch),M.scl(.075,.09,.085)),glove);cube(mm(M.trs(lh[0],lh[1],lh[2]),M.ry(gun.yaw),M.rx(gun.pitch),M.scl(.075,.08,.09)),glove)}
   if(c.holo&&a>.4&&me.reload<=0){ // réticule holographique collimaté : dessiné loin dans l'axe du canon
    const gd=dirOf(gun.yaw,gun.pitch),o=add(cam,mulS(gd,7)),Rr=mm(M.trs(o[0],o[1],o[2]),M.ry(gun.yaw),M.rx(gun.pitch)),col=[9*a,.5,.3];
    cube(mm(Rr,M.scl(.012,.012,.004)),col,5);for(let i=0;i<12;i++){const an=i/12*6.283;cube(mm(Rr,M.trs(Math.cos(an)*.09,Math.sin(an)*.09,0),M.rz(an),M.scl(.006,.03,.004)),col,5)}
@@ -1448,7 +1640,7 @@ const zMin=new Float32Array(15).fill(9999),zMax=new Float32Array(15).fill(9998);
 function loadMap(i){i=MAPS[i]?i:0;WB.length=0;boxes.length=verts.length=zones.length=lights.length=spawns.length=0;lights.dyn=null;fxClear();MAPS[i].build();buildNav();
  gl.bindBuffer(gl.ARRAY_BUFFER,worldVBO);gl.bufferData(gl.ARRAY_BUFFER,buildChunks(),gl.STATIC_DRAW);worldCount=verts.length/10;verts.length=0;WB.length=0;
  zMin.fill(9999);zMax.fill(9998);zones.forEach((z,k)=>{if(k<5){zMin.set([z[0],z[1],z[2]],k*3);zMax.set([z[3],z[4],z[5]],k*3)}});
- decals.length=tracers.length=parts.length=0;curMap=i;
+ decals.length=tracers.length=parts.length=BLOOD.length=LENS.length=0;curMap=i;
  if(started){me.drone=null;me.inDrone=false;spawnMe();for(const b of bots){b.alive=false;b.fall=1;b.resp=.5+rnd()*2;b.path=[];b.tgt=null;b.last=null}feed('Carte : <i>'+MAPS[i].n+'</i>')}
  const sel=$('imap');if(sel)sel.value=i;if(typeof drawMaps==='function'&&$('maps'))drawMaps()}
 let gain=1.6,lastCamYaw=0,lastCamPitch=0,fpsAcc=0,fpsN=0,slowT=0;
@@ -1460,7 +1652,7 @@ function computeCam(dt){
  else if(me.inDrone&&me.drone){const d=me.drone,e=quatEuler(qmul(d.q,qAxis([1,0,0],d.tilt))),sp=len(d.vel),ms=d.spin,
    vib=.0003+.0026*ms*ms+(1-d.hp/100)*.004+d.wash*.014+d.hitT*.012+Math.min(.002,sp*.00006);
   camS.pos=add(d.pos,qrot(d.q,UAV.camOff));camS.yaw=e[0]+(rnd()-.5)*vib;camS.pitch=e[1]+(rnd()-.5)*vib;camS.roll=e[2]+(rnd()-.5)*vib*1.4;
-  k=.14;cfov=(1.32+Math.min(.14,sp*.005))/d.zoomS;camS.uavF=cfov;camS.vb=Math.min(.22,sp*.007)}
+  k=.2;cfov=(1.5+Math.min(.16,sp*.005))/d.zoomS;camS.uavF=cfov;camS.vb=Math.min(.22,sp*.007)}
  else{const R=rightOf(me.cy),mv=Math.min(1,me.spd/3.3),sh=me.shake;
   const eh=me.alive?eyeH()-me.land*.12+Math.abs(Math.sin(me.bob))*.035*mv:lerp(eyeH(),.22,me.fall);
   camS.pos=[me.pos[0]+R[0]*me.lean*.3,me.pos[1]+eh,me.pos[2]+R[2]*me.lean*.3];
@@ -1472,6 +1664,13 @@ function computeCam(dt){
  // direction de l'arme (léger flottement)
  const mv=Math.min(1,me.spd/3.3),sw=(1+mv*2.5)*(1-.88*me.ads)*(1-.3*me.crouch);
  gun.yaw=me.yaw+(Math.sin(t*1.1)*.004+Math.sin(t*2.7)*.002)*sw;gun.pitch=me.pitch+(Math.sin(t*1.5+1)*.004+Math.sin(t*3.1)*.002)*sw;
+ // lunette x8 du fusil de précision : la caméra passe dans l'axe de l'arme ; respiration et pouls font dériver le réticule
+ camS.scope=0;const wS=WPN[me.w];
+ if(wS.sniper&&started&&me.alive&&!me.inDrone&&!DBG.cam&&!DBG.view&&!(me.uavLost>0)){const sk=clamp((me.ads-.6)/.35,0,1),s=sk*sk*(3-2*sk);camS.scope=s;
+  if(s>0){const calm=me.holding?.12:1+(me.breath<.3?(.3-me.breath)*6:0),mvp=1+me.spd*1.5,br=(1-me.crouch*.35)*calm*mvp;
+   gun.yaw+=(Math.sin(t*.43)*.0028+Math.sin(t*1.07+2)*.0012)*br*s;gun.pitch+=(Math.sin(t*.61+1)*.0022+Math.sin(t*6.8)*.00025*(me.holding?0:1)+Math.max(0,Math.sin(t*1.25))*.0011)*br*s;
+   camS.yaw+=angd(gun.yaw,camS.yaw)*s;camS.pitch+=(gun.pitch-camS.pitch)*s;camS.roll*=1-s;
+   const kk=camS.k*(1-s),asp=RW/RH;camS.k=kk;camS.zoom=1+kk*(asp*asp+1);camS.fov=lerp(camS.fov,.1,s)}}
 }
 function render(dt){
  const asp=RW/RH,t=now;
@@ -1504,7 +1703,10 @@ function render(dt){
  for(const b of bots)if(b.alive||b.fall<1||b.resp>0)drawChar(b);
  if(!started&&!DBG.cam)drawChar(menuOp);
  if(started&&!firstPerson)drawChar(me);
- if(me.drone&&!me.inDrone){const d=me.drone;drawUAV(d.pos,d.eu[0],d.eu[1],d.eu[2],d.eu[1]+d.tilt,d.spin,d.ph,d.state!=='down',t)}
+ if(me.drone){const d=me.drone;drawUAV(d.pos,d.eu[0],d.eu[1],d.eu[2],d.eu[1]+d.tilt,d.spin,d.ph,d.state!=='down',t,me.inDrone);
+  // ombre au sol : aide à juger la hauteur, comme dans la réalité
+  if(d.agl<14&&d.state!=='down'){const gy=d.pos[1]-d.agl+.012,r=.22+d.agl*.02;DISCQ.push(mm(M.trs(d.pos[0],gy,d.pos[2]),M.ry(d.eu[0]),M.scl(r*1.15,.002,r)))}}
+ bloodDraw();
  for(const d of decals){if(!inSphere(d.p[0],d.p[1],d.p[2],.08))continue;const a=Math.abs(d.n[0])>.5?[.012,.07,.07]:Math.abs(d.n[1])>.5?[.07,.012,.07]:[.07,.07,.012];cube(mm(M.trs(d.p[0],d.p[1],d.p[2]),M.scl(a[0],a[1],a[2])),[.012,.012,.012])}
  for(const p of parts)if(inSphere(p.pos[0],p.pos[1],p.pos[2],p.s))cube(mm(M.trs(p.pos[0],p.pos[1],p.pos[2]),M.scl(p.s,p.s,p.s)),p.col,p.em?5:4);
  for(const tr of tracers){const d=sub(tr.b,tr.a),l=len(d);if(l<2||!inSphere((tr.a[0]+tr.b[0])/2,(tr.a[1]+tr.b[1])/2,(tr.a[2]+tr.b[2])/2,l/2))continue;const a=add(tr.a,mulS(d,.04)),b=add(tr.a,mulS(d,Math.min(1,.04+18/l)));cube(between(a,tr.b,.012,.012),[3,2.2,1.1],5)}
@@ -1540,8 +1742,22 @@ function autoExposure(dt){if(++aeN%20)return;if(!aeFB)aeFB=gl.createFramebuffer(
 /* ---- surcouche 2D (HUD drone) ---- */
 function toScreen(p,VP,asp,k,w,h){const x=VP[0]*p[0]+VP[4]*p[1]+VP[8]*p[2]+VP[12],y=VP[1]*p[0]+VP[5]*p[1]+VP[9]*p[2]+VP[13],ww=VP[3]*p[0]+VP[7]*p[1]+VP[11]*p[2]+VP[15];if(ww<.05)return null;
  const sx=x/ww,sy=y/ww;if(Math.abs(sx)>1.2||Math.abs(sy)>1.2)return null;let qx=sx,qy=sy;const nz=1+k*(asp*asp+1);for(let i=0;i<10;i++){const r2=qx*qx*asp*asp+qy*qy;qx=sx*nz/(1+k*r2);qy=sy*nz/(1+k*r2)}return[(qx*.5+.5)*w,(.5-qy*.5)*h]}
+// lunette x8 : tube noir, ombre de bord, réticule duplex gradué en millièmes ; l'ombre bouge avec le recul et la marche
+function scopeHUD(w,h){const s=camS.scope,mv=Math.min(1,me.spd/3.3),r=Math.min(w,h)*.45,cx=w/2+Math.sin(me.bob)*r*.05*mv+me.lean*r*.03,cy=h/2+me.kick*r*.12+Math.abs(Math.cos(me.bob))*r*.04*mv;
+ o2.save();o2.globalAlpha=Math.min(1,s*1.4);o2.fillStyle='#000';o2.beginPath();o2.rect(0,0,w,h);o2.arc(cx,cy,r,0,Math.PI*2,true);o2.fill();
+ const g=o2.createRadialGradient(cx,cy,r*.72,cx,cy,r);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.75,'rgba(0,0,0,.35)');g.addColorStop(1,'rgba(0,0,0,1)');o2.fillStyle=g;o2.beginPath();o2.arc(cx,cy,r+1,0,Math.PI*2);o2.fill();
+ const X=w/2,Y=h/2,u=r*.075;o2.strokeStyle='#050505';o2.fillStyle='#050505';
+ o2.lineWidth=Math.max(1,r*.004);o2.beginPath();o2.moveTo(X-r*.42,Y);o2.lineTo(X+r*.42,Y);o2.moveTo(X,Y-r*.42);o2.lineTo(X,Y+r*.42);o2.stroke();
+ const pw=Math.max(3,r*.022);o2.fillRect(X-r*1.1,Y-pw/2,r*.68,pw);o2.fillRect(X+r*.42,Y-pw/2,r*.68,pw);o2.fillRect(X-pw/2,Y+r*.42,pw,r*.68);o2.fillRect(X-pw/2,Y-r*1.1,pw,r*.68);
+ for(let i=1;i<=5;i++){const d=i*u,ds=Math.max(1.5,r*.009);for(const[a,b]of[[d,0],[-d,0],[0,d],[0,-d]]){o2.beginPath();o2.arc(X+a,Y+b,ds,0,7);o2.fill()}}
+ for(let i=1;i<=9;i++){const d=i*u*.5;if(i%2)o2.fillRect(X-r*.012,Y+d,r*.024,Math.max(1,r*.003))}
+ o2.globalAlpha=Math.min(1,s*1.4)*.9;o2.fillStyle='#c9c4b8';o2.font=Math.round(Math.max(11,h*.016))+'px Consolas,Menlo,monospace';o2.textAlign='center';
+ const bw=r*.5,by=cy+r*.9;o2.fillText(me.holding?'RESPIRATION RETENUE':me.breath<.3?'ESSOUFFLÉ':'MAJ : RETENIR SA RESPIRATION',X,by-Math.max(11,h*.016)*.7);
+ o2.fillStyle='rgba(201,196,184,.25)';o2.fillRect(X-bw/2,by,bw,4);o2.fillStyle=me.breath<.3?'#e5291f':'#c9c4b8';o2.fillRect(X-bw/2,by,bw*me.breath,4);o2.textAlign='left';o2.restore()}
 function overlay(){const w=ov.width,h=ov.height;o2.clearRect(0,0,w,h);if(!started)return;
  const asp=RW/RH,k=camS.k,P=M.persp(camS.fov,asp,.06,320),V=mm(M.rz(-camS.roll),M.rx(-camS.pitch),M.ry(-camS.yaw),M.trs(-camS.pos[0],-camS.pos[1],-camS.pos[2])),VP=M.mul(P,V);
+ if(!me.inDrone&&!(me.uavLost>0)&&camS.scope>.02)scopeHUD(w,h);
+ if(!me.inDrone&&!(me.uavLost>0))lensHUD(w,h);
  if(!me.inDrone&&!(me.uavLost>0)){ // R maintenu : le compte de munitions s'affiche à côté de l'arme
   if(me.chk>.05&&me.alive&&gun.anchor&&gun.VPw){const sc=toScreen(gun.anchor,gun.VPw,asp,k,w,h);if(sc){const wp=WPN[me.w],al=Math.min(1,me.chk*1.4),fs=Math.max(18,h*.04),x=sc[0]-fs*3.2,y=sc[1]-fs*1.6;
    o2.globalAlpha=al;o2.shadowColor='#000';o2.shadowBlur=4;o2.strokeStyle='#e9e6dfaa';o2.lineWidth=1;o2.beginPath();o2.moveTo(sc[0],sc[1]);o2.lineTo(x+fs*2.4,y+fs*.35);o2.lineTo(x-fs*.2,y+fs*.35);o2.stroke();
@@ -1626,18 +1842,19 @@ function uavHUD(w,h,VP,asp,k){const d=me.drone,G='#a9c59b',Gd='rgba(169,197,155,
 let lastT=0,netAcc=0,botAcc=0;
 function update(dt){if(started&&playing)PROF.time+=dt;
  if(started&&isHost())for(const b of bots)botUpdate(b,dt);
- else for(const b of bots){const k=Math.min(1,dt*12),ox=b.pos[0],oz=b.pos[2];for(let i=0;i<3;i++)b.pos[i]+=(b.tpos[i]-b.pos[i])*k;b.yaw+=angd(b.tyaw,b.yaw)*k;b.spd=Math.hypot(b.pos[0]-ox,b.pos[2]-oz)/Math.max(dt,1e-4);b.walk+=b.spd*dt*2.4;if(!b.alive)b.fall=Math.min(1,b.fall+dt*3)}
- for(const id in players){const p=players[id],k=Math.min(1,dt*12),ox=p.pos[0],oz=p.pos[2];for(let i=0;i<3;i++)p.pos[i]+=(p.tpos[i]-p.pos[i])*k;p.yaw+=angd(p.tyaw,p.yaw)*k;p.pitch+=(p.tpitch-p.pitch)*k;p.spd=Math.hypot(p.pos[0]-ox,p.pos[2]-oz)/Math.max(dt,1e-4);p.walk+=p.spd*dt*2.4;if(!p.alive)p.fall=Math.min(1,p.fall+dt*3)}
+ else for(const b of bots){const k=Math.min(1,dt*12),ox=b.pos[0],oz=b.pos[2];for(let i=0;i<3;i++)b.pos[i]+=(b.tpos[i]-b.pos[i])*k;b.yaw+=angd(b.tyaw,b.yaw)*k;b.spd=Math.hypot(b.pos[0]-ox,b.pos[2]-oz)/Math.max(dt,1e-4);b.walk+=b.spd*dt*2.4;if(!b.alive)b.fall=Math.min(1,b.fall+dt*1.5)}
+ for(const id in players){const p=players[id],k=Math.min(1,dt*12),ox=p.pos[0],oz=p.pos[2];for(let i=0;i<3;i++)p.pos[i]+=(p.tpos[i]-p.pos[i])*k;p.yaw+=angd(p.tyaw,p.yaw)*k;p.pitch+=(p.tpitch-p.pitch)*k;p.spd=Math.hypot(p.pos[0]-ox,p.pos[2]-oz)/Math.max(dt,1e-4);p.walk+=p.spd*dt*2.4;if(!p.alive)p.fall=Math.min(1,p.fall+dt*1.5)}
  playerUpdate(dt);droneUpdate(dt);
  for(let i=tracers.length-1;i>=0;i--)if((tracers[i].life-=dt)<=0)tracers.splice(i,1);
  for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=dt;if(p.life<=0){parts.splice(i,1);continue}p.vel[1]-=p.g*dt;for(let a=0;a<3;a++)p.pos[a]+=p.vel[a]*dt;if(p.pos[1]<.02){p.pos[1]=.02;p.vel=[0,0,0]}}
+ bloodUpdate(dt);
  // son du drone (le plus proche)
  fxUpdate(dt);
  for(const id in players){const q=players[id].drone;if(q&&q[7]===1&&rnd()<dt*30)fx({p:[q[0],q[1],q[2]],v:[(rnd()-.5)*.4,.4,(rnd()-.5)*.4],life:1.6+rnd(),s0:.25,s1:1.3,c0:[.2,.17,.14,.7],c1:[.1,.1,.1,0],k:2,drag:1.2,g:-.4})}
  if(AC){let v=0,f=.01;const src=[];if(me.drone)src.push([me.drone.pos,me.drone.spin,me.inDrone]);for(const id in players){const q=players[id].drone;if(q)src.push([[q[0],q[1],q[2]],q[8]===undefined?.6:q[8],false])}
   for(const[p,sp,on]of src){const vv=on?.03*sp:.12*sp/(1+len(sub(p,camS.pos))*.13);if(vv>v){v=vv;f=.42+sp*1.15}}
   droneGain.gain.setTargetAtTime(v,AC.currentTime,.08);const md=me.drone&&(me.inDrone||len(sub(me.drone.pos,camS.pos))<30)?me.drone.m:null;
-  droneOsc.forEach((o,i)=>o.frequency.setTargetAtTime(md?[176,183,190,197][i]*(.38+1.25*md[i])*(i>1?2:1):[182,187,366,549][i]*f*(1+Math.sin(now*3.1+i*1.7)*.012),AC.currentTime,.03));
+  droneOsc.forEach((o,i)=>o.frequency.setTargetAtTime(md?[282,293,304,315][i]*(.35+1.3*md[i])*(i>1?2:1):[182,187,366,549][i]*f*(1+Math.sin(now*3.1+i*1.7)*.012),AC.currentTime,.03));
   if(rushG)rushG.gain.setTargetAtTime(me.inDrone&&me.drone?Math.min(.16,(len(me.drone.vel)/30)**2*.16):0,AC.currentTime,.1)}
  // réseau
  if(online){netAcc+=dt;if(netAcc>1/15){netAcc=0;const r=v=>+v.toFixed(2);send({t:'s',n:me.name,p:me.pos.map(r),y:r(me.yaw),pi:r(me.pitch),h:Math.round(me.hp),c:me.crouch>.5?1:0,fl:me.fl,w:me.w,k:me.kills,dt:me.deaths,al:me.alive&&started?1:0,m:isHost()?curMap:-1,a:CFG.dc?CFG.dc.id+'/'+CFG.dc.av:0,d:me.drone?[r(me.drone.pos[0]),r(me.drone.pos[1]),r(me.drone.pos[2]),r(me.drone.eu[0]),r(me.drone.eu[1]),r(me.drone.eu[2]),r(me.drone.eu[1]+me.drone.tilt),me.drone.state==='down'?1:0,r(me.drone.spin)]:0})}
@@ -1648,14 +1865,14 @@ function perf(raw){if(raw>0&&raw<.25){fpsMs+=(raw*1000-fpsMs)*.06}fpsT+=raw;if(f
  if(CFG.scale>0||document.hidden)return;let ns=autoScale;if(fpsMs>19.5)ns=Math.max(.5,autoScale-(fpsMs>28?.12:.06));else if(fpsMs<13)ns=Math.min(1.1,autoScale+.04);
  if(Math.abs(ns-autoScale)>.001){autoScale=ns;resize()}}
 function frame(ms){requestAnimationFrame(frame);const t=ms/1000,raw=t-lastT;let dt=Math.min(.05,raw);lastT=t;if(dt<=0)dt=.016;now+=dt;frameDt=dt;perf(raw);
- pollPad(dt);update(dt);computeCam(dt);render(dt);autoExposure(dt);overlay();updHud(dt)}
+ pollPad(dt);touchPad();update(dt);computeCam(dt);render(dt);autoExposure(dt);overlay();updHud(dt)}
 
 /* ================= entrées / menu ================= */
 function setMenu(on){const m=$('menu');m.classList.toggle('off',!on);if(typeof resumeOn!=='undefined'&&resumeOn){resumeOn=false;$('resume').style.display='none'}if(on){$('go').firstElementChild.textContent=started?'Reprendre':'Déployer';uiRefresh()}$('hud').style.display=started?'block':'none';playing=!on&&started}
 let noLock=false;
 function enter(){initAudio();if(AC&&AC.state==='suspended')AC.resume();
  me.name=(($('iname').value||'').trim().toUpperCase().slice(0,12))||CFG.name;CFG.name=me.name;saveCfg();
- if(!started){started=true;setBots(CFG.bots);spawnMe();PROF.deploys++;profSave(true);insertion();tip('Clic droit pour viser · maintiens R pour vérifier le chargeur · G déploie le drone',7)}else if(isHost())setBots(CFG.bots);
+ if(!started){started=true;setBots(CFG.bots);spawnMe();PROF.deploys++;profSave(true);insertion();tip(TOUCH.on?'Joystick gauche : se déplacer · glisser à droite : viser · RECH. maintenu : vérifier le chargeur':'Clic droit pour viser · maintiens R pour vérifier le chargeur · G déploie le drone',7)}else if(isHost())setBots(CFG.bots);
  setMenu(false);try{const p=cv.requestPointerLock();if(p&&p.catch)p.catch(()=>{noLock=true})}catch(e){noLock=true}}
 $('go').addEventListener('click',enter);
 // Échap en vol : la souris est libérée par le navigateur → on quitte le mode drone (le drone se met en stationnaire), un clic reprend
@@ -1717,7 +1934,47 @@ addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mb0=mb2=false});
 const bind=(id,key,vid,fmt,cb)=>{const el=$(id);el.value=CFG[key];const up=()=>{CFG[key]=el.type==='range'||el.tagName==='SELECT'?+el.value:el.value;if(vid)$(vid).textContent=fmt(CFG[key]);saveCfg();cb&&cb()};el.addEventListener('input',up);if(vid)$(vid).textContent=fmt(CFG[key])};
 $('iname').value=CFG.name;
 bind('ibots','bots','vbots',v=>v);bind('isens','sens','vsens',v=>v.toFixed(2));bind('ifish','fish','vfish',v=>Math.round(v/.3*100)+'%');
-bind('ivol','vol','vvol',v=>Math.round(v*100)+'%',()=>{if(master)master.gain.value=CFG.vol});bind('iq','scale',null,null,resize);
+bind('ivol','vol','vvol',v=>Math.round(v*100)+'%',()=>{if(master)master.gain.value=CFG.vol});bind('iq','scale',null,null,resize);bind('itouch','touch',null,null,()=>touchApply());
+/* ================= COMMANDES TACTILES =================
+   Joystick gauche : déplacement (drone : gaz / lacet ; en ACRO les gaz restent où on les laisse, comme une vraie radio).
+   Moitié droite : glisser pour viser (drone : second manche, tangage / roulis). Le bouton TIR se fait aussi glisser pour viser.
+   Les commandes alimentent les mêmes entrées que la manette. */
+const TOUCH={on:false,lx:0,ly:0,rx:0,ry:0,fire:false,fireEdge:false,ads:false,jump:false,crouch:false,sprint:false,rHeld:false,g:{buttons:[]},ptr:{}};
+function touchWanted(){const v=CFG.touch|0;return v===1||(v===0&&((window.matchMedia&&matchMedia('(pointer:coarse)').matches)||navigator.maxTouchPoints>1&&!matchMedia('(pointer:fine)').matches))}
+function touchApply(){TOUCH.on=touchWanted();document.body.classList.toggle('touch',TOUCH.on)}
+function touchState(){document.body.classList.toggle('play',TOUCH.on&&playing&&started);document.body.classList.toggle('uav',TOUCH.on&&me.inDrone);
+ for(const[id,on]of[['tAds',TOUCH.ads],['tCr',TOUCH.crouch],['tLamp',!!me.fl]])$(id).classList.toggle('on',on)}
+(function(){const R=88;
+ const stick=(zone,el,side)=>{zone.addEventListener('pointerdown',e=>{e.preventDefault();if(TOUCH.ptr[side]!==undefined)return;TOUCH.ptr[side]={id:e.pointerId,x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY};
+   if(side==='L'&&me.inDrone&&me.drone&&me.drone.mode===1)TOUCH.ptr.L.y=e.clientY-TOUCH.ly*R;   // gaz ACRO : le manche repart d'où il était
+   const look=side==='R'&&!me.inDrone;if(!look){el.style.display='block';el.style.left=e.clientX+'px';el.style.top=e.clientY+'px';el.firstChild.style.transform=''}
+   try{zone.setPointerCapture(e.pointerId)}catch(_){}});
+  zone.addEventListener('pointermove',e=>{const p=TOUCH.ptr[side];if(!p||p.id!==e.pointerId)return;e.preventDefault();
+   if(side==='R'&&!me.inDrone){if(playing){mdx+=(e.clientX-p.lx)*1.7;mdy+=(e.clientY-p.ly)*1.7}p.lx=e.clientX;p.ly=e.clientY;return}
+   let dx=(e.clientX-p.x)/R,dy=(e.clientY-p.y)/R;const l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}
+   el.firstChild.style.transform='translate('+dx*R*.6+'px,'+dy*R*.6+'px)';
+   if(side==='L'){TOUCH.lx=dx;TOUCH.ly=dy;TOUCH.sprint=!me.inDrone&&dy<-.92}else{TOUCH.rx=dx;TOUCH.ry=dy}});
+  const end=e=>{const p=TOUCH.ptr[side];if(!p||p.id!==e.pointerId)return;delete TOUCH.ptr[side];el.style.display='none';
+   if(side==='L'){TOUCH.lx=0;TOUCH.sprint=false;if(!(me.inDrone&&me.drone&&me.drone.mode===1))TOUCH.ly=0}else{TOUCH.rx=TOUCH.ry=0}};
+  zone.addEventListener('pointerup',end);zone.addEventListener('pointercancel',end)};
+ stick($('tzL'),$('tsL'),'L');stick($('tzR'),$('tsR'),'R');
+ const btn=(id,down,up)=>{const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();initAudio();down(e,b);try{b.setPointerCapture(e.pointerId)}catch(_){}});
+  if(up){b.addEventListener('pointerup',e=>up(e,b));b.addEventListener('pointercancel',e=>up(e,b))}};
+ // TIR : maintenu = feu ; glissé = visée en même temps
+ btn('tFire',(e,b)=>{TOUCH.fire=true;TOUCH.fireEdge=true;b.lx=e.clientX;b.ly=e.clientY},()=>{TOUCH.fire=false});
+ $('tFire').addEventListener('pointermove',e=>{const b=$('tFire');if(!TOUCH.fire||b.lx===undefined)return;mdx+=(e.clientX-b.lx)*1.7;mdy+=(e.clientY-b.ly)*1.7;b.lx=e.clientX;b.ly=e.clientY});
+ btn('tAds',()=>{TOUCH.ads=!TOUCH.ads});btn('tJump',()=>{TOUCH.jump=true},()=>{TOUCH.jump=false});btn('tCr',()=>{TOUCH.crouch=!TOUCH.crouch});
+ btn('tRl',()=>{TOUCH.rHeld=true;TOUCH.rT=now},()=>{TOUCH.rHeld=false;if(now-TOUCH.rT<.3)act('KeyR')});
+ btn('tSw',()=>act('NextW'));btn('tDr',()=>act('KeyG'));btn('tLamp',()=>act('KeyF'));
+ btn('tMode',()=>act('KeyT'));btn('tTurt',()=>act('KeyX'));btn('tRec',()=>act('KeyF'));btn('tOut',()=>act('KeyG'));
+ btn('tMenu',()=>{setMenu(true)});
+ touchApply()})();
+// relaie l'état tactile dans l'objet manette (appelé à chaque image avant la lecture des entrées)
+function touchPad(){if(!TOUCH.on||(pad.g&&pad.g!==TOUCH.g))return;
+ pad.on=true;pad.g=TOUCH.g;pad.lx=TOUCH.lx;pad.ly=TOUCH.ly;pad.rx=TOUCH.rx;pad.ry=TOUCH.ry;pad.fire=TOUCH.fire;pad.fireEdge=TOUCH.fireEdge;TOUCH.fireEdge=false;
+ pad.ads=TOUCH.ads;pad.jump=TOUCH.jump;pad.crouch=TOUCH.crouch;pad.sprint=TOUCH.sprint;pad.lean=0;pad.rHeld=TOUCH.rHeld;if(TOUCH.rHeld&&now-TOUCH.rT>=.3)rT=TOUCH.rT;
+ if(me.inDrone&&(Math.abs(TOUCH.ly)>.03))pad.thrUsed=true;touchState()}
+
 /* ================= MENU PRINCIPAL =================
    Sections : DEPLOY (zone, opposition, réseau) · LOADOUT (arme d'insertion) · OPERATORS (dossier, progression, Discord)
    MISSIONS (contrats suivis) · SETTINGS (affichage, contrôles, audio, touches, crédits) · QUIT (quitter la partie / le jeu). */
@@ -1742,7 +1999,7 @@ function uiRefresh(){if(uiSec==='operators')drawOperator();if(uiSec==='missions'
 
 /* ---- progression de l'opérateur : persistante dans ce navigateur (localStorage) ---- */
 const RANKS=[[1,'Recrue'],[3,'Soldat'],[5,'Soldat de 1re classe'],[8,'Caporal'],[12,'Caporal-chef'],[16,'Sergent'],[21,'Sergent-chef'],[27,'Adjudant'],[34,'Adjudant-chef'],[42,'Major']];
-const PROF={flips:0,xp:0,kills:0,deaths:0,heads:0,deploys:0,time:0,drone:0,best:0,wk:[0,0,0,0],mk:[0,0,0,0],done:{}};
+const PROF={flips:0,xp:0,kills:0,deaths:0,heads:0,deploys:0,time:0,drone:0,best:0,wk:[0,0,0,0,0],mk:[0,0,0,0],done:{}};
 try{const sv=JSON.parse(localStorage.getItem('deadframe_profile')||'{}');for(const k in PROF)if(k in sv&&typeof sv[k]===typeof PROF[k])PROF[k]=sv[k]}catch(e){}
 let profT=0;function profSave(now_){if(!now_&&performance.now()-profT<4000)return;profT=performance.now();try{localStorage.setItem('deadframe_profile',JSON.stringify(PROF))}catch(e){}}
 addEventListener('pagehide',()=>profSave(true));document.addEventListener('visibilitychange',()=>{if(document.hidden)profSave(true)});
@@ -1755,6 +2012,7 @@ const CONTRACTS=[
  {id:'hk',n:'HK416',d:'20 éliminations au HK416.',goal:20,xp:600,v:p=>p.wk[0]},
  {id:'ak',n:'Kalachnikov',d:'20 éliminations à l\'AKS-74 ou à l\'AKM.',goal:20,xp:600,v:p=>p.wk[1]+p.wk[2]},
  {id:'p43',n:'Arme de poing',d:'8 éliminations au P43.',goal:8,xp:600,v:p=>p.wk[3]},
+ {id:'sn',n:'Tireur d\'élite',d:'10 éliminations au fusil de précision LUNARIS.',goal:10,xp:700,v:p=>p.wk[4]||0},
  {id:'m0',n:'Dépôt industriel',d:'15 éliminations sur cette carte.',goal:15,xp:400,v:p=>p.mk[0]},
  {id:'m1',n:'Hôpital abandonné',d:'15 éliminations sur cette carte.',goal:15,xp:400,v:p=>p.mk[1]},
  {id:'m2',n:'Tranchées',d:'15 éliminations sur cette carte.',goal:15,xp:400,v:p=>p.mk[2]},
@@ -1836,7 +2094,7 @@ function stageLights(spots){const op=menuOp,ch=[op.pos[0],1.35,op.pos[2]],R=righ
  spots.push({p:key,d:nd(sub(ch,key)),z:-1,c:[2.1,1.95,1.7,.93]});spots.push({p:rim,d:nd(sub([op.pos[0],1.5,op.pos[2]],rim)),z:-1,c:[1.1,1.2,1.35,.9]})}
 
 /* ---- chargement initial : progression réelle (shaders, carte, modèles) ---- */
-const MODEL_LIST=['soldier','soldier_lod','hk416','hk416_lod','aks74','akm','pistol'];let bootN=0,bootOver=false;const bootTotal=MODEL_LIST.length+3;
+const MODEL_LIST=['soldier','soldier_lod','hk416','hk416_lod','aks74','akm','pistol','sniper','arms'];let bootN=0,bootOver=false;const bootTotal=MODEL_LIST.length+3;
 function bootLog(txt,ok){const li=document.createElement('li');if(ok===false)li.className='ko';li.innerHTML='<b>'+(ok===false?'ÉCHEC':'OK')+'</b> &nbsp;'+txt;const ol=$('bootLog');ol.appendChild(li);while(ol.children.length>7)ol.firstChild.remove();
  bootN++;const pc=Math.min(100,Math.round(bootN/bootTotal*100));$('bootBar').style.width=pc+'%';$('bootPct').textContent=pc+' %';$('bootStep').textContent=txt.split(' — ')[0].toUpperCase()}
 function bootDone(){if(bootOver)return;bootOver=true;$('bootStep').textContent='PRÊT';$('boot').classList.add('done');$('menu').classList.add('in');setTimeout(()=>{$('boot').style.display='none'},700)}
@@ -1862,10 +2120,10 @@ dcShow();
 
 bootLog('Shaders — monde, modèles, capteur, accumulation compilés');
 loadMap(CFG.map|0);{let nn=0;for(let i=0;i<NG*NG;i++)if(adj[i]&&adj[i].length)nn++;bootLog('Carte '+(MAPS[curMap]||MAPS[0]).n+' — '+fmtN(boxes.length)+' volumes · '+fmtN(nn)+' nœuds de navigation')}
-Promise.all(MODEL_LIST.map(n=>loadModel(n).then(()=>{const m=MODELS[n];bootLog(m?'Modèle '+n+' — '+fmtN(m.prims.reduce((a,p)=>a+p.count,0)/3)+' triangles · '+(m.bytes/1048576).toFixed(1)+' Mo':'Modèle '+n+' — indisponible, remplacé par des volumes simples',!!m)}))).then(()=>Promise.all(TEXP)).then(()=>{bootLog('Textures — '+TEXP.length+' chargées sur le GPU');requestAnimationFrame(()=>requestAnimationFrame(bootDone))});
+Promise.all(MODEL_LIST.map(n=>loadModel(n).then(()=>{const m=MODELS[n];bootLog(m?'Modèle '+n+' — '+fmtN(m.prims.reduce((a,p)=>a+p.count,0)/3)+' triangles · '+(m.bytes/1048576).toFixed(1)+' Mo':'Modèle '+n+' — indisponible, remplacé par des volumes simples',!!m)}))).then(()=>{armsInit();return Promise.all(TEXP)}).then(()=>{bootLog('Textures — '+TEXP.length+' chargées sur le GPU');requestAnimationFrame(()=>requestAnimationFrame(bootDone))});
 setTimeout(bootDone,20000);
 resize();updNet();connect();showSec('deploy',true);setMenu(true);uiTick();requestAnimationFrame(frame);
-window.DF={__sim(n,dt){for(let i=0;i<n;i++){mdx=mdy=0;droneUpdate(dt)}},__setMouse(x,y){mdx=x;mdy=y},__CH:()=>CH,__inBox:inBox,__asp:()=>RW/RH,camS,bench(n){gl.finish();const t0=performance.now();for(let i=0;i<n;i++){computeCam(.016);render(.016)}gl.finish();return(performance.now()-t0)/n},CULL,get chunks(){return CH.length},UAVX:{fxUpdate,droneDamage,uavZoom,explode,launchDrone,exitDrone,uavRecall,FX,DEB,FIRES,FXL,UAV,get flash(){return flashFx}},PROF,showSec,leaveMatch,STAGES,menuOp,MODELS,DBG,vmA,vmPlay,loadMap,MAPS,pad,act,get map(){return curMap},gun,me,bots,players,CFG,enter,get online(){return online},get host(){return isHost()},nav:{nodeOK,adj,NG},spawns,freeAt,boxes,fire,keys,launchDrone,camS,WPN,gunRef:gun,setLook(y,p){me.yaw=me.cy=y;me.pitch=me.cp=p}};
+window.DF={__fire:()=>fire(),__net:(f,d)=>onNet(f,d),get now(){return now},ARMS,BLOOD,LENS,TOUCH,WPN,bloodFx,lensBlood,touchApply,__frame(dt){update(dt);computeCam(dt)},__sim(n,dt){for(let i=0;i<n;i++){mdx=mdy=0;droneUpdate(dt)}},__setMouse(x,y){mdx=x;mdy=y},__CH:()=>CH,__inBox:inBox,__asp:()=>RW/RH,camS,bench(n){gl.finish();const t0=performance.now();for(let i=0;i<n;i++){computeCam(.016);render(.016)}gl.finish();return(performance.now()-t0)/n},CULL,get chunks(){return CH.length},UAVX:{fxUpdate,droneDamage,uavZoom,explode,launchDrone,exitDrone,uavRecall,FX,DEB,FIRES,FXL,UAV,get flash(){return flashFx}},PROF,showSec,leaveMatch,STAGES,menuOp,MODELS,DBG,vmA,vmPlay,loadMap,MAPS,pad,act,get map(){return curMap},gun,me,bots,players,CFG,enter,get online(){return online},get host(){return isHost()},nav:{nodeOK,adj,NG},spawns,freeAt,boxes,fire,keys,launchDrone,camS,WPN,gunRef:gun,setLook(y,p){me.yaw=me.cy=y;me.pitch=me.cp=p}};
 </script>
 </body>
 </html>

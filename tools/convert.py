@@ -137,6 +137,14 @@ def export_textures(g, mats_used, name, outdir, size, quality=84):
     return out
 
 
+def recolor(mats, colors):
+    """couleurs imposées par nom de matériau (modèles sans texture)"""
+    for m in mats:
+        if colors and m['name'] in colors:
+            m['color'] = colors[m['name']]
+    return mats
+
+
 def write_dfm(path, meta, chunks):
     off, blobs = 0, []
     for key, arr in chunks:
@@ -260,11 +268,11 @@ def soldier_rig(P):
     return np.concatenate([J, W / W.sum(1, keepdims=True)], 1)
 
 
-def convert_static(src, name, outdir, target, tex=1024, fix=None, skip_mats=(), lods=(), cut=None, rig=None):
+def convert_static(src, name, outdir, target, tex=1024, fix=None, skip_mats=(), lods=(), cut=None, rig=None, colors=None):
     g = GLB(src)
     P, N, UV, MAT, IDX, mats = gather_static(g, skip_mats)
-    if cut is not None:  # supprime les triangles dans une boîte (espace d'origine)
-        inb = np.all((P >= np.array(cut[0])) & (P <= np.array(cut[1])), 1)
+    for c in ([cut] if cut is not None and not isinstance(cut[0][0], (list, tuple)) else (cut or [])):  # supprime les triangles dans une boîte (espace d'origine)
+        inb = np.all((P >= np.array(c[0])) & (P <= np.array(c[1])), 1)
         IDX = IDX[~inb[IDX].any(1)]
     if fix is not None:  # matrice 4x4 : espace modèle -> espace jeu (mètres, -Z = avant, Y = haut)
         F = np.asarray(fix, float)
@@ -286,7 +294,7 @@ def convert_static(src, name, outdir, target, tex=1024, fix=None, skip_mats=(), 
                     hi = mid; p, n, uv, mat, idx = r
         V, I, prims = pack_prims(p, n, uv, mat, idx, rig(p) if rig else None)
         meta = {'skinned': bool(rig), 'stride': 16 if rig else 8, 'rig': 11 if rig else 0, 'prims': prims, 'bbox': [p.min(0).round(4).tolist(), p.max(0).round(4).tolist()],
-                'mats': export_textures(g, mats, name, outdir, tex) if suffix == '' else res[0][1]['mats'],
+                'mats': recolor(export_textures(g, mats, name, outdir, tex), colors) if suffix == '' else res[0][1]['mats'],
                 'credit': g.j['asset'].get('extras', {})}
         sz = write_dfm(f'{outdir}/{name}{suffix}.dfm', meta, [('vtx', V), ('idx', I)])
         res.append((suffix, meta))
@@ -414,10 +422,62 @@ def convert_skinned(src, name, outdir, tex=1024, fps=30, skip_mats=(), only_anim
     return meta
 
 
+def convert_arms(src, name, outdir, tex=1024, scales=None):
+    """Bras de l'AKM seuls, skinnés, posés comme sur l'image 0 de l'animation (prise en main de l'AKM).
+    L'export Sketchfab a des sommets de bras à une autre échelle que leurs matrices de liaison : on les corrige
+    (bras droit en miroir). Le jeu replace ensuite les mains par cinématique inverse sur chaque arme."""
+    g = GLB(src)
+    j = g.j
+    nodes = j['nodes']
+    _, parent = world_mats(g)
+    skin = j['skins'][0]
+    joints = skin['joints']
+    ibm = g.acc(skin['inverseBindMatrices']).astype(np.float32)
+    Ps, Ns, UVs, Ms, Is, Js, Ws, off, mats = [], [], [], [], [], [], [], 0, []
+    for ni, n in enumerate(nodes):
+        if 'mesh' not in n or 'skin' not in n or ni not in scales:
+            continue
+        for p in j['meshes'][n['mesh']]['primitives']:
+            mi = p.get('material')
+            if mi not in mats:
+                mats.append(mi)
+            a = p['attributes']
+            sc = scales[ni]
+            P = g.acc(a['POSITION']).astype(np.float64) * sc
+            N = g.acc(a['NORMAL']).astype(np.float64) * np.sign(sc)
+            I = g.acc(p['indices']).astype(np.int64).reshape(-1, 3)
+            Ps.append(P); Ns.append(N); UVs.append(g.acc(a['TEXCOORD_0']).astype(np.float64))
+            Js.append(g.acc(a['JOINTS_0']).astype(np.float64)); w = g.acc(a['WEIGHTS_0']).astype(np.float64)
+            Ws.append(w / np.maximum(w.sum(1, keepdims=True), 1e-9))
+            Ms.append(np.full(len(P), mats.index(mi), np.int64)); Is.append(I + off); off += len(P)
+    P, N, UV, MAT, IDX = map(np.concatenate, (Ps, Ns, UVs, Ms, Is))
+    V, I, prims = pack_prims(P, N, UV, MAT, IDX, np.concatenate([np.concatenate(Js), np.concatenate(Ws)], 1))
+    rest = np.array([np.concatenate(node_trs(n)) for n in nodes], np.float32)
+    an = j['animations'][0]  # pose de prise en main = image 0
+    for c in an['channels']:
+        s = an['samplers'][c['sampler']]
+        v = g.acc(s['output'])[0]
+        k, path = c['target']['node'], c['target']['path']
+        if path == 'translation': rest[k, 0:3] = v
+        elif path == 'rotation': rest[k, 3:7] = v / np.linalg.norm(v)
+        elif path == 'scale': rest[k, 7:10] = v
+    names = [n.get('name', '') for n in nodes]
+    meta = {'skinned': True, 'stride': 16, 'prims': prims, 'bbox': [[-1, -1, -1], [1, 1, 1]],
+            'mats': export_textures(g, mats, name, outdir, tex), 'parents': parent, 'joints': joints,
+            'nodeNames': names, 'anims': [], 'credit': j['asset'].get('extras', {})}
+    sz = write_dfm(f'{outdir}/{name}.dfm', meta, [('vtx', V), ('idx', I), ('ibm', ibm), ('rest', rest)])
+    print(f'{name}: {len(IDX)} tris, {len(V)} verts, {sz//1024} KB', [m['tex'] for m in meta['mats']])
+
+
+BULLET = ([-.002, -.026, -.0235], [.002, -.0085, -.0198])  # cartouche isolée sous l'HK416 (espace d'origine)
+_s = .16  # sniper « Lunaris » : x avant -> -Z, z (côté culasse) -> +X droite ; origine au haut de la poignée
+SNIPER_FIX = np.array([[0, 0, _s, 0], [0, _s, 0, -.075 * _s], [-_s, 0, 0, -.14 * _s], [0, 0, 0, 1]])
+
+
 if __name__ == '__main__':
     U = '/mnt/user-data/uploads/'
     out = sys.argv[1]
-    which = sys.argv[2:] or ['soldier', 'pistol', 'hk416', 'aks74', 'akm']
+    which = sys.argv[2:] or ['soldier', 'pistol', 'hk416', 'aks74', 'akm', 'arms', 'sniper']
     os.makedirs(out, exist_ok=True)
     if 'soldier' in which:
         S = 1.8 / .98
@@ -427,8 +487,14 @@ if __name__ == '__main__':
         convert_static(U + 'ccae6623-pistol_43_tactical__free_lowpoly.glb', 'pistol', out, 99999, 1024)
     if 'hk416' in which:
         convert_static(U + 'hk416_full_reworked.glb', 'hk416', out, 110000, 1024, lods=[('_lod', 3500)], skip_mats=('Glass',),
-                       cut=([-1, .0298, .0105], [1, 1, .0278]))  # retire la hausse rabattable qui masquait le viseur holographique
+                       cut=[([-1, .0298, .0105], [1, 1, .0278]), BULLET])  # retire la hausse rabattable (masquait le viseur holographique) et la cartouche isolée
     if 'aks74' in which:
         convert_skinned(U + '817a8f72-stalker_aks-74_reanimation.glb', 'aks74', out, 1024, skip_mats=('wpn_upgrade_S', 'wpn_vog_S'))
     if 'akm' in which:
         convert_skinned(U + 'akm_reload_animation.glb', 'akm', out, 1024, bake={'keep': ('AK_mat',), 'drop_joints': ('mag2',)})
+    if 'arms' in which:  # bras de l'AKM (gants), réutilisés sur toutes les armes
+        convert_arms(U + 'akm_reload_animation.glb', 'arms', out, 1024, scales={20: 1 / 3062., 22: -1 / 3062.})
+    if 'sniper' in which:  # « Lunaris » (export obj2glb, sans texture) : canon le long de +X, unités ~ 0,16 m
+        s = .16
+        convert_static(U + '8892ad09-Lunaris-sniper.glb', 'sniper', out, 99999, fix=SNIPER_FIX,
+                       colors={'LightMetal': [.052, .055, .04], 'DarkMetal': [.03, .03, .03], 'Black': [.018, .018, .019], 'Grey': [.06, .06, .06], 'Glass': [.01, .03, .05]})
