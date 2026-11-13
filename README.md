@@ -96,7 +96,7 @@ GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o download/DEADFR
 ## Limites connues
 - Rendu stylisé (décors en blocs, textures procédurales, pas d'ombres portées).
 - Le soldat n'a pas de squelette d'origine : un squelette de 11 os est généré automatiquement (`tools/convert.py`) et animé par le jeu (marche, visée, accroupi) ; les épaules se déforment un peu.
-- AKM : seul le fusil est utilisé (les bras du fichier d'origine sont inexploitables) ; l'AKS-74 a ses bras et animations d'origine.
+- Bras de l'AKM : l'export d'origine a des sommets de bras à une mauvaise échelle (corrigée à la conversion, bras droit en miroir). Les doigts gardent la prise de l'AKM sur toutes les armes ; seul l'AKS-74 a ses propres bras et animations.
 - Réseau : relais simple, dégâts déclarés par le tireur (pas d'anti-triche). Par Internet : rediriger le port 7777 ou VPN type LAN.
 
 ## Crédits
