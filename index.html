@@ -995,16 +995,16 @@ const BOXP={muz:[0,.03,-.2],ads:[0,.062,.42],lh:[-.02,-.07,-.01],parts:[[0,.03,-
 // m = réglages du modèle 3D (fix : espace modèle -> poignée à l'origine, canon vers -Z, mètres) ; b = repli en blocs si le modèle n'est pas chargé
 const WPN=[
  {n:'HK416',cal:'5.56×45',mag:30,res:150,cd:.08,auto:true,dmg:34,rec:.02,spread:.0035,rl:2.4,rifle:1,model:'hk416',b:BOXR,
-  m:{fix:mm(M.scl(4.2,4.2,4.2),M.trs(-.002,-.005,-.026)),muz:[-.009,.052,-.66],ads:[-.009,.133,.2],holo:1,lh:[0,.0,-.34],hip:[.13,-.17,.36],rw:[-.006,-.014,.094],lw:[-.05,-.012,-.3],mag:[-.01,-.03,-.16]}},
+  m:{fix:mm(M.scl(4.2,4.2,4.2),M.trs(-.002,-.005,-.026)),muz:[-.009,.052,-.66],ads:[-.009,.133,.2],holo:1,lh:[0,.0,-.34],hip:[.035,-.15,.36],rw:[-.006,-.014,.094],lw:[-.05,-.012,-.3],mag:[-.01,-.03,-.16]}},
  {n:'AKS-74',cal:'5.45×39',mag:30,res:150,cd:.092,auto:true,dmg:36,rec:.024,spread:.004,rl:2.8,rifle:1,model:'aks74',b:BOXR,
-  vm:{hip:[.02,-.27,-.2],ads:[-.088,-.2,-.1],adsRot:[0,0],muz:[.088,.13,-1.12],fov:.66,fovAds:.5},anims:{shot:'Shot',reload:'Reload_t',walk:'Walk',inspect:'Inspect'}},
+  vm:{hip:[.02,-.27,-.2],ads:[-.088,-.2,-.1],adsRot:[0,0],muz:[.088,.13,-1.12],fov:.66,fovAds:.5,bone:'wpn_body_03',eye:[-.06,.045,.086],bMuz:[.79,.045,.03],hipOff:[.04,-.14,.1]},anims:{shot:'Shot',reload:'Reload_t',walk:'Walk',inspect:'Inspect'}},
  {n:'AKM',cal:'7.62×39',mag:30,res:120,cd:.1,auto:true,dmg:44,rec:.031,spread:.0045,rl:2.7,rifle:1,model:'akm',b:BOXR,
-  m:{fix:mm(M.scl(.0232,.0232,.0232),M.ry(Math.PI),M.trs(4.24,4.2,-6.6)),muz:[-.016,.056,-.62],ads:[-.016,.089,.3],lh:[0,.01,-.3],hip:[.13,-.17,.36],mag:[-.016,-.04,-.2]}},
+  m:{fix:mm(M.scl(.0232,.0232,.0232),M.ry(Math.PI),M.trs(4.24,4.2,-6.6)),muz:[-.016,.056,-.62],ads:[-.016,.089,.3],lh:[0,.01,-.3],hip:[.035,-.15,.36],mag:[-.016,-.04,-.2]}},
  {n:'P43',cal:'9×19',mag:12,res:60,cd:.15,auto:false,dmg:26,rec:.036,spread:.006,rl:1.6,rifle:0,model:'pistol',b:BOXP,
-  m:{fix:mm(M.scl(.0255,.0255,.0255),M.ry(Math.PI),M.trs(0,-.9,2.1)),muz:[0,.017,-.14],ads:[0,.0335,.4],lh:[-.02,-.05,-.005],hip:[.12,-.15,.36],rw:[.004,-.03,.058],lw:[-.03,-.058,.052],lrot:[0,.5,-1.2],mag:[.005,-.1,.03]}},
+  m:{fix:mm(M.scl(.0255,.0255,.0255),M.ry(Math.PI),M.trs(0,-.9,2.1)),muz:[0,.017,-.14],ads:[0,.0335,.4],lh:[-.02,-.05,-.005],hip:[.03,-.13,.38],rw:[.004,-.03,.058],lw:[-.03,-.058,.052],lrot:[0,.5,-1.2],mag:[.005,-.1,.03]}},
  // LUNARIS : fusil de précision à verrou (modèle « Lunaris », lunette x8) — un coup, réarmement manuel, tir mortel au buste
  {n:'LUNARIS',cal:'.338 LM',mag:5,res:25,cd:1.25,auto:false,dmg:120,rec:.11,spread:.0004,rl:3.1,rifle:1,sniper:1,model:'sniper',b:BOXR,
-  m:{fix:M.id(),muz:[0,.034,-.905],ads:[0,.0872,.1],scope:1,lh:[0,0,-.3],hip:[.13,-.17,.34],rw:[.003,-.03,.05],lw:[-.045,-.024,-.3],mag:[0,-.03,-.27],bolt:[.044,.036,-.066]}}];
+  m:{fix:M.id(),muz:[0,.034,-.905],ads:[0,.0872,.1],scope:1,lh:[0,0,-.3],hip:[.035,-.15,.34],rw:[.003,-.03,.05],lw:[-.045,-.024,-.3],mag:[0,-.03,-.27],bolt:[.044,.036,-.066]}}];
 const wcfg=w=>MODELS[w.model]&&w.m?w.m:w.b;
 const me={id:0,name:CFG.name,kind:'p',pos:[0,0,0],vel:[0,0,0],yaw:0,pitch:0,cy:0,cp:0,hp:100,alive:false,crouch:0,lean:0,onG:true,w:0,ammo:WPN.map(w=>w.mag),res:WPN.map(w=>w.res),reload:0,cool:0,ads:0,fl:1,kills:0,deaths:0,
  bob:0,shake:0,kick:0,bolt:0,breath:1,swT:0,swTo:0,spr:0,chk:0,lastHurt:-99,respawn:0,spd:0,walk:0,fall:0,flash:0,drone:null,droneCd:0,inDrone:false,uavLost:0,land:0};
@@ -1451,6 +1451,14 @@ function switchW(i){if(i===me.w||!WPN[i]||me.reload>0||!me.alive||me.swT>0)retur
 const vmA={w:-1,name:'',t:0,loop:true,blend:0,prev:null,speed:1};
 function vmPlay(name,loop,speed){const mdl=MODELS[WPN[me.w].model];if(!mdl||!mdl.skinned)return 0;const a=mdl.animBy[name];if(!a)return 0;
  if(!vmA.prev||vmA.prev.length!==mdl.pose.length)vmA.prev=new Float32Array(mdl.pose.length);vmA.prev.set(mdl.pose);vmA.blend=1;vmA.name=name;vmA.t=0;vmA.loop=loop;vmA.speed=speed||1;return a.dur/vmA.speed}
+// repère « arme dans l'axe de l'œil » : os de l'arme -> caméra (x local -> avant, z local -> haut, ligne de mire sur l'axe)
+function vmAlign(mdl,v){if(!mdl.nodeNames)return null;if(v._bi===undefined){v._bi=mdl.nodeNames.indexOf(v.bone);
+  const a=mdl.animBy.Walk||mdl.anims[0],pose=new Float32Array(mdl.rest.length);if(a)samplePose(mdl,a,0,true,pose);else pose.set(mdl.rest);const save=mdl.world.slice();solvePose(mdl,pose);v._ref=mdl.world.slice(v._bi*16,v._bi*16+16);mdl.world.set(save)}
+ if(v._bi<0)return null;const e=v.eye,RA=new Float32Array([0,0,-1,0,-1,0,0,0,0,1,0,0,0,0,0,1]);RA[12]=-(RA[0]*e[0]+RA[4]*e[1]+RA[8]*e[2]);RA[13]=-(RA[1]*e[0]+RA[5]*e[1]+RA[9]*e[2]);RA[14]=-(RA[2]*e[0]+RA[6]*e[1]+RA[10]*e[2]);return RA}
+function inv4r(m){const o=new Float32Array(16);for(let c=0;c<3;c++)for(let r=0;r<3;r++)o[c*4+r]=m[r*4+c];const sc=1/(m[0]*m[0]+m[1]*m[1]+m[2]*m[2]);for(let i=0;i<11;i++)if(i%4<3)o[i]*=sc;
+ for(let r=0;r<3;r++)o[12+r]=-(o[r]*m[12]+o[4+r]*m[13]+o[8+r]*m[14]);o[15]=1;return o}
+function orthoLerp(A,B,k){const o=new Float32Array(16);for(let i=0;i<16;i++)o[i]=A[i]+(B[i]-A[i])*k;const c0=[o[0],o[1],o[2]],l0=len(c0);let c2=[o[8],o[9],o[10]];const x=mulS(c0,1/l0);c2=sub(c2,mulS(x,dot(c2,x)));const z=mulS(c2,1/len(c2)),y=cross(z,x);
+ o[0]=x[0];o[1]=x[1];o[2]=x[2];o[4]=y[0];o[5]=y[1];o[6]=y[2];o[8]=z[0];o[9]=z[1];o[10]=z[2];return o}
 function vmUpdate(mdl,w,dt){const an=w.anims,idle=an.walk||an.reload;if(vmA.w!==me.w){vmA.w=me.w;vmA.name=idle;vmA.loop=true;vmA.t=0;vmA.blend=0}
  let a=mdl.animBy[vmA.name];if(!a||(!vmA.loop&&vmA.t>=a.dur)){if(a)vmPlay(idle,true,1);else{vmA.name=idle;vmA.loop=true;vmA.t=0}a=mdl.animBy[idle]}
  if(vmA.loop)vmA.t=an.walk?vmA.t+dt*Math.min(1.5,me.spd/3.2)*(me.onG?1:0):0;else vmA.t+=dt*vmA.speed;
@@ -1485,7 +1493,7 @@ function playerUpdate(dt){
  if(ctl&&(mb0||pad.fire)&&(WPN[me.w].auto||mb0Edge||pad.fireEdge)&&!sprint)fire();
  if(now-me.lastHurt>6&&me.hp<100)me.hp=Math.min(100,me.hp+9*dt);
  // la caméra de poitrine traîne derrière l'arme (free-aim)
- const kc=1-Math.exp(-dt*(7+me.ads*16));me.cy+=angd(me.yaw,me.cy)*kc;me.cp+=(me.pitch-me.cp)*kc;
+ me.cy=me.yaw;me.cp=me.pitch;   // l'arme est toujours dans l'axe de la tête
  const lim=lerp(.24,.03,me.ads),dy=angd(me.yaw,me.cy);if(Math.abs(dy)>lim)me.cy=me.yaw-Math.sign(dy)*lim;const dp=me.pitch-me.cp;if(Math.abs(dp)>lim)me.cp=me.pitch-Math.sign(dp)*lim;
  if(me.droneCd>0)me.droneCd-=dt}
 
@@ -1546,7 +1554,8 @@ function armsInit(){const m=MODELS.arms,akm=WPN.find(w=>w.model==='akm');if(!m||
   const a={up:ix(u),fo:ix(f),ha:ix(h)};if(a.up<0||a.fo<0||a.ha<0)return;a.sUp=sub(a.up);a.sFo=sub(a.fo);a.sHa=sub(a.ha);ARMS.side[s]=a}
  solvePose(m,m.rest);ARMS.base=m.world.slice();const wp=i=>[ARMS.base[i*16+12],ARMS.base[i*16+13],ARMS.base[i*16+14]];
  // poignets de l'AKM dans le repère de l'arme : référence des autres armes
- akm.m.rw=tp(ARMS.fix,wp(ARMS.side.R.ha));akm.m.lw=tp(ARMS.fix,wp(ARMS.side.L.ha));ARMS.ok=true}
+ akm.m.rw=tp(ARMS.fix,wp(ARMS.side.R.ha));akm.m.lw=tp(ARMS.fix,wp(ARMS.side.L.ha));
+ ARMS.sh={L:tp(ARMS.fix,wp(ARMS.side.L.up)),R:tp(ARMS.fix,wp(ARMS.side.R.up))};ARMS.eye=tp(ARMS.fix,wp(m.nodeNames.indexOf('Camera_07')));ARMS.ok=true}
 const _ax=new Float32Array(16),_at=new Float32Array(16);
 // matrice de rotation (colonnes) d'angle t autour de l'axe unitaire a, centrée sur le point c
 function rotAbout(a,t,c){const x=a[0],y=a[1],z=a[2],cs=Math.cos(t),sn=Math.sin(t),k=1-cs,o=_ax;
@@ -1573,6 +1582,11 @@ function armIK(W,a,T,rot){const S=wpos(W,a.up),E=wpos(W,a.fo),H=wpos(W,a.ha);
 function keyPath(u,K){if(u<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(u<=K[i][0]){const a=K[i-1],b=K[i],k=(u-a[0])/(b[0]-a[0]||1),s=k*k*(3-2*k);return[lerp(a[1][0],b[1][0],s),lerp(a[1][1],b[1][1],s),lerp(a[1][2],b[1][2],s)]}return K[K.length-1][1]}
 function drawArms(G,w,c){const m=ARMS.m,W=m.world;W.set(ARMS.base);
  let rw=c.rw,lw=c.lw;
+ // en visée, l'œil (la caméra) est sur la ligne de mire : on recule le haut du corps d'autant, épaules sous la caméra,
+ // en limitant pour que les mains atteignent encore l'arme (allonge 0,40 m)
+ const a=me.ads*me.ads*(3-2*me.ads);let o=[0,0,0];
+ if(a>0&&ARMS.eye){o=mulS(sub(add(c.ads,[0,-.05,.04]),ARMS.eye),a);for(let it=0;it<4;it++)for(const[S,Wr]of[[ARMS.sh.L,lw],[ARMS.sh.R,rw]]){const v=sub(add(S,o),Wr),L=len(v);if(L>.395)o=sub(o,mulS(v,(L-.395)/L))}}
+ G=mm(G,M.trs(o[0],o[1],o[2]));rw=sub(rw,o);lw=sub(lw,o);
  // rechargement : la main gauche va au chargeur, le retire, en remet un, revient
  if(me.reload>0&&c.mag){const u=1-me.reload/w.rl,mg=c.mag,dn=[mg[0]-.04,mg[1]-.3,mg[2]+.12];
   lw=keyPath(u,[[0,lw],[.16,mg],[.24,mg],[.4,dn],[.55,dn],[.7,mg],[.78,add(mg,[0,.012,0])],[.95,lw]])}
@@ -1587,13 +1601,18 @@ function drawWeapon(cam,R,U,F,dt,VPw,asp){
  const bobX=Math.sin(me.bob)*.012*mv*(1-a),bobY=-Math.abs(Math.cos(me.bob))*.012*mv*(1-a),drop=me.swT>0?Math.sin(Math.PI*(1-me.swT/.42)):0,spr=me.spr;
  // En visée, l'arme est placée dans SON repère : la ligne de mire passe exactement par la caméra, donc par l'axe de tir.
  if(w.vm&&mdl){const v=w.vm;vmUpdate(mdl,w,dt);const ar=v.adsRot||[0,0];
-  const G=mm(M.trs(cam[0],cam[1],cam[2]),M.ry(gun.yaw),M.rx(gun.pitch+me.kick*.012*(1-a)),M.rz(-me.lean*.1*(1-a)),M.rx(ar[0]*a-drop*.7-spr*.22+me.chk*.12),M.ry(ar[1]*a+spr*.3),M.rz(me.chk*.42),M.trs(lerp(v.hip[0],v.ads[0],a)+bobX,lerp(v.hip[1],v.ads[1],a)+bobY-me.land*.03*(1-a)-drop*.22-spr*.05,lerp(v.hip[2],v.ads[2],a)+me.kick*.012));
-  gl.useProgram(PM.p);drawModel(mdl,G,{spec:.14});gl.useProgram(PW.p);gun.anchor=tp(G,[v.muz[0]-.06,v.muz[1]+.05,v.muz[2]*.42]);gun.VPw=VPw;
-  const mz=tp(G,v.muz);gun.flashPos=mz;const cw=VPw[3]*mz[0]+VPw[7]*mz[1]+VPw[11]*mz[2]+VPw[15],nx=(VPw[0]*mz[0]+VPw[4]*mz[1]+VPw[8]*mz[2]+VPw[12])/cw,ny=(VPw[1]*mz[0]+VPw[5]*mz[1]+VPw[9]*mz[2]+VPw[13])/cw,ty=Math.tan(camS.fov/2),d=.9;
+  let G=mm(M.trs(cam[0],cam[1],cam[2]),M.ry(gun.yaw),M.rx(gun.pitch+me.kick*.012*(1-a)),M.rz(-me.lean*.1*(1-a)),M.rx(ar[0]*a-drop*.7-spr*.22+me.chk*.12),M.ry(ar[1]*a+spr*.3),M.rz(me.chk*.42),M.trs(lerp(v.hip[0],v.ads[0],a)+bobX,lerp(v.hip[1],v.ads[1],a)+bobY-me.land*.03*(1-a)-drop*.22-spr*.05,lerp(v.hip[2],v.ads[2],a)+me.kick*.012));
+  let mzP=v.muz;const RA=v.bone?vmAlign(mdl,v):null;
+  if(RA){ // arme centrée devant la tête ; en visée, la ligne de mire est exactement l'axe de la caméra
+   const C=mm(M.trs(cam[0],cam[1],cam[2]),M.ry(gun.yaw),M.rx(gun.pitch),M.rz(-me.lean*.1*(1-a)),M.rx(-drop*.7-spr*.22+me.chk*.12),M.ry(spr*.3),M.rz(me.chk*.42)),h=v.hipOff,
+    Wb=mdl.world.slice(v._bi*16,v._bi*16+16),Hp=mm(C,M.trs(h[0]+bobX,h[1]+bobY-me.land*.03-drop*.22-spr*.05,h[2]+me.kick*.03),RA,inv4r(v._ref)),Ad=mm(C,M.trs(0,0,me.kick*.012),RA,inv4r(Wb)),s=a*a*(3-2*a);
+   G=s<=0?Hp:s>=1?Ad:orthoLerp(Hp,Ad,s);mzP=tp(Wb,v.bMuz)}
+  gl.useProgram(PM.p);drawModel(mdl,G,{spec:.14});gl.useProgram(PW.p);gun.anchor=tp(G,RA?tp(mdl.world.slice(v._bi*16,v._bi*16+16),[.2,.045,.1]):[v.muz[0]-.06,v.muz[1]+.05,v.muz[2]*.42]);gun.VPw=VPw;
+  const mz=tp(G,mzP);gun.flashPos=mz;const cw=VPw[3]*mz[0]+VPw[7]*mz[1]+VPw[11]*mz[2]+VPw[15],nx=(VPw[0]*mz[0]+VPw[4]*mz[1]+VPw[8]*mz[2]+VPw[12])/cw,ny=(VPw[1]*mz[0]+VPw[5]*mz[1]+VPw[9]*mz[2]+VPw[13])/cw,ty=Math.tan(camS.fov/2),d=.9;
   gun.muzzle=add(cam,add(add(mulS(R,nx*ty*asp*d),mulS(U,ny*ty*d)),mulS(F,d)))}
  else{const c=wcfg(w),hip=c.hip||[.15,-.2,.46];
   const rl=me.reload>0?Math.sin(Math.min(1,(w.rl-me.reload)*2.5,me.reload*2.5)*1.5708):0;
-  const ck=me.chk,Rg=mm(M.ry(gun.yaw+spr*.45+ck*.2),M.rx(gun.pitch+me.kick*.06*(1-.75*a)-rl*.5-drop*.9-spr*.3+ck*.1),M.rz((-.06-me.lean*.1)*(1-a)+rl*.5+spr*.35+ck*.55));
+  const ck=me.chk,Rg=mm(M.ry(gun.yaw+spr*.45+ck*.2),M.rx(gun.pitch+me.kick*.06*(1-.75*a)-rl*.5-drop*.9-spr*.3+ck*.1),M.rz((-me.lean*.1)*(1-a)+rl*.5+spr*.35+ck*.55));
   const ph=add(add(add(cam,mulS(R,hip[0]+bobX)),mulS(U,hip[1]+bobY-rl*.14-me.land*.03-drop*.25-spr*.04)),mulS(F,hip[2]-me.kick*.03));
   const pa=add(cam,tp(Rg,[-c.ads[0],-c.ads[1]-rl*.14,-c.ads[2]+me.kick*.02]));
   const pos=[lerp(ph[0],pa[0],a),lerp(ph[1],pa[1],a),lerp(ph[2],pa[2],a)],G=mm(M.trs(pos[0],pos[1],pos[2]),Rg);
@@ -1716,7 +1735,7 @@ function render(dt){
   if(m.skinned&&m.anims){samplePose(m,m.anims[v.anim||0],v.t||0,false,m.pose);solvePose(m,m.pose)}
   gl.useProgram(PM.p);drawModel(m,mm(M.trs(c[0],c[1],c[2]),M.ry(camS.yaw+(v.yaw||0)),M.rx(v.pitch||0),M.scl(sz,sz,sz),M.trs(-cn[0],-cn[1],-cn[2])));gl.useProgram(PW.p)}
  discsDraw();fxDraw(VP,P);
- if(firstPerson&&!DBG.view&&!DBG.cam){gl.clear(gl.DEPTH_BUFFER_BIT);const w=WPN[me.w],vmOn=w.vm&&MODELS[w.model],wf=vmOn?Math.min(2.2,2*Math.atan(camS.zoom*Math.tan(lerp(w.vm.fov,w.vm.fovAds||w.vm.fov*.8,me.ads)/2))):camS.fov,VPw=M.mul(M.persp(wf,asp,.012,12),V);
+ if(firstPerson&&!DBG.view&&!DBG.cam){gl.clear(gl.DEPTH_BUFFER_BIT);const w=WPN[me.w],vmOn=w.vm&&MODELS[w.model]&&!w.vm.bone,wf=vmOn?Math.min(2.2,2*Math.atan(camS.zoom*Math.tan(lerp(w.vm.fov,w.vm.fovAds||w.vm.fov*.8,me.ads)/2))):camS.fov,VPw=M.mul(M.persp(wf,asp,.012,12),V);
   if(spots[0]&&spots[0].own){fSC[0]*=.3;fSC[1]*=.3;fSC[2]*=.3}
   for(const PR of[PM,PW]){gl.useProgram(PR.p);gl.uniform4fv(PR.u.uSC,fSC);gl.uniformMatrix4fv(PR.u.uVP,false,VPw)}
   drawWeapon(camS.pos,R,U,F,dt,VPw,asp)}

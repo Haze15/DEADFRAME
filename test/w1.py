@@ -8,10 +8,10 @@ with sync_playwright() as p:
     pg.on('pageerror', lambda e: logs.append('PAGEERROR '+str(e)))
     pg.goto('file:///home/claude/deadframe/page/index.html'); pg.wait_for_timeout(5000)
     pg.evaluate("()=>{DF.CFG.bots=0}"); pg.click('#go'); pg.wait_for_timeout(2500)
-    pg.evaluate("()=>{window.ST={w:0,ads:0,rl:-1,bolt:-1};setInterval(()=>{const m=DF.me;m.pos=[-6,0,-8];m.vel=[0,0,0];m.w=ST.w;m.swT=0;DF.DBG.ads=ST.ads;m.ads=ST.ads;if(ST.rl>=0)m.reload=DF.WPN[ST.w].rl*(1-ST.rl);if(ST.bolt>=0)m.bolt=1-ST.bolt;m.fl=0},5)}")
+    pg.evaluate("()=>{window.ST={w:0,ads:0,rl:-1,bolt:-1};setInterval(()=>{const m=DF.me;m.pos=[-6,0,-8];m.vel=[0,0,0];m.w=ST.w;m.swT=0;DF.DBG.ads=ST.ads;m.ads=ST.ads;m.reload=ST.rl>=0?DF.WPN[ST.w].rl*(1-ST.rl):0;m.swT=0;m.kick=0;if(ST.bolt>=0)m.bolt=1-ST.bolt;m.fl=0},5)}")
     pg.evaluate("()=>DF.setLook(.6,-.1)")
     for s in shots:
-        w,ads,rl,bolt=(s.split(':')+['0','-1','-1'])[:4]
+        q=s.split(':');w,ads,rl,bolt=(q+['0','0','-1','-1'][len(q):])[:4]
         pg.evaluate(f"()=>{{ST.w={w};ST.ads={ads};ST.rl={rl};ST.bolt={bolt}}}")
         pg.wait_for_timeout(3000); pg.screenshot(path=f'/tmp/ak/s_{s.replace(":","_")}.png')
     print(logs[:8]); b.close()
