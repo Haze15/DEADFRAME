@@ -47,7 +47,12 @@ Le menu « Opérateur » propose « Se connecter avec Discord » (OAuth2 *implic
 Limites : le pseudo n'est pas vérifié par le serveur de jeu (un joueur peut toujours taper un autre indicatif) ; ne fonctionne pas dans une page intégrée (iframe).
 
 ## Performances
-Qualité « Automatique » : la résolution interne s'ajuste pour viser 60 i/s (affichée en haut à droite avec les i/s). Seules les lumières proches de la caméra sont calculées, les personnages lointains passent sur un modèle allégé, ceux hors champ ne sont pas dessinés.
+Qualité « Automatique » : la résolution interne s'ajuste pour viser 60 i/s.
+
+**Champ de vision** : seul ce que la caméra voit est dessiné. La carte est découpée en secteurs de 12 m (les très grands blocs — sol, murs d'enceinte, toits — forment leur propre secteur) ; à chaque image, la pyramide de vision exacte de la caméra (champ, inclinaison, roulis, fisheye compris) est comparée aux boîtes des secteurs et des objets : personnages, drones, débris, particules, impacts, traçantes. Ce qui est hors champ n'est ni envoyé ni calculé par la carte graphique. Le pourcentage de carte dessiné s'affiche dans le coin de la caméra (« CHAMP »).
+- Les lumières ne sont pas filtrées ainsi : une lampe hors champ éclaire encore ce qui est visible. Elles sont limitées aux plus proches de la caméra.
+- Les textures restent chargées : les retirer et les recharger à chaque mouvement de tête provoquerait des saccades ; le gain vient de ne pas dessiner.
+
 
 ## Modèles libres repérés pour une future refonte (à télécharger puis à fournir, ils ne sont pas dans le dépôt)
 - Quaternius — Universal Animation Library (CC0, glTF, locomotion 8 directions, sprint, morts…) : https://quaternius.com/packs/universalanimationlibrary.html

@@ -438,7 +438,8 @@ function between(a,b,w,h){const d=sub(b,a),l=len(d)||1e-4,z=[d[0]/l,d[1]/l,d[2]/
 /* ================= monde ================= */
 const boxes=[],verts=[],zones=[],lights=[],spawns=[];
 const COL={conc:[.42,.42,.40],paint:[.52,.50,.45],metal:[.30,.35,.39],roof:[.10,.10,.11],asph:[.17,.17,.175],wood:[.42,.30,.17],red:[.42,.12,.08],blue:[.09,.19,.36],green:[.12,.28,.19],yel:[.52,.40,.08],white:[.58,.58,.56],dark:[.05,.05,.055],floor:[.34,.34,.33],grey:[.25,.26,.27]};
-function box(x0,y0,z0,x1,y1,z1,col,t,solid=true){
+const WB=[];   // boîtes englobantes des blocs de la carte, dans l'ordre des sommets (36 sommets par bloc)
+function box(x0,y0,z0,x1,y1,z1,col,t,solid=true){WB.push(x0,y0,z0,x1,y1,z1);
  const P=[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]];
  const F=[[0,1,2,3,[0,0,-1]],[5,4,7,6,[0,0,1]],[4,0,3,7,[-1,0,0]],[1,5,6,2,[1,0,0]],[3,2,6,7,[0,1,0]],[4,5,1,0,[0,-1,0]]];
  for(const f of F)for(const i of[0,1,2,0,2,3]){const p=P[f[i]],n=f[4];verts.push(p[0],p[1],p[2],n[0],n[1],n[2],col[0],col[1],col[2],t)}
@@ -908,7 +909,7 @@ let hudT=0;
 function updHud(dt){$('hud').classList.toggle('uav',me.inDrone||me.uavLost>0);hudT-=dt;if(tipT>0){tipT-=dt;if(tipT<=0)$('tip').style.opacity=0}
  if(hudT>0)return;hudT=.2;
  const d=new Date(),p=n=>String(n).padStart(2,'0'),tz=-d.getTimezoneOffset(),tzs=(tz>=0?'+':'-')+p(Math.abs(tz)/60|0)+p(Math.abs(tz)%60);
- $('cam').innerHTML=(me.inDrone?'<b>◉ LIAISON DRONE</b>':'<span class="dot"></span>REC')+'&nbsp; '+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' &nbsp;'+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())+' '+tzs+'<br>DEADFRAME '+(me.inDrone?'UAV-3':'BODYCAM X2')+' · '+esc(me.name)+'<br><span style="opacity:.6">'+(online?'NET · '+(Object.keys(players).length+1)+' OP':'SOLO')+' · '+fpsShown+' FPS · '+Math.round(rScale*100)+'%</span>';
+ $('cam').innerHTML=(me.inDrone?'<b>◉ LIAISON DRONE</b>':'<span class="dot"></span>REC')+'&nbsp; '+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' &nbsp;'+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())+' '+tzs+'<br>DEADFRAME '+(me.inDrone?'UAV-3':'BODYCAM X2')+' · '+esc(me.name)+'<br><span style="opacity:.6">'+(online?'NET · '+(Object.keys(players).length+1)+' OP':'SOLO')+' · '+fpsShown+' FPS · '+Math.round(rScale*100)+'% · CHAMP '+Math.round(CULL.drawn/CULL.total*100)+'%</span>';
  const w=WPN[me.w];$('ammo').innerHTML=(me.reload>0?'RECHARGEMENT':'')+'<small>'+w.n+' · '+w.cal+(me.drone?' · DRONE '+({launch:'DÉCOLLAGE',fly:'EN VOL',hold:'STATIONNAIRE',rth:'RETOUR',land:'ATTERRISSAGE',down:'ABATTU'}[me.drone.state])+' '+Math.round(me.drone.bat*100)+' %':me.droneCd>0?' · DRONE '+Math.ceil(me.droneCd)+' s':' · DRONE PRÊT')+'</small>';
  $('hpb').style.width=clamp(me.hp,0,100)+'%';$('hpb').style.background=me.hp<35?'#e5291f':'#e9e6df';
  if($('score').style.display==='block')scoreboard()}
@@ -946,7 +947,7 @@ function fxUpdate(dt){flashFx=Math.max(0,flashFx-dt*5.5);
    if(rnd()<.35)fx({p:[f.p[0],f.p[1]+.5,f.p[2]],v:[(rnd()-.5)*.3,1+rnd()*.6,(rnd()-.5)*.3],life:3+rnd()*2.5,s0:.4,s1:2.6+rnd(),c0:[.12,.11,.1,.55*k+.1],c1:[.08,.08,.08,0],k:2,drag:.6,g:-.35})}}
  for(let i=FXL.length-1;i>=0;i--){FXL[i].age+=dt;if(FXL[i].age>=FXL[i].life)FXL.splice(i,1)}}
 function fxDraw(VP,P){if(!FX.length)return;
- const sm=[],ad=[];for(const p of FX)if(p.age>=0)(p.k===2?sm:ad).push(p);
+ const sm=[],ad=[];for(const p of FX)if(p.age>=0&&inSphere(p.p[0],p.p[1],p.p[2],Math.max(p.s0,p.s1)*.5))(p.k===2?sm:ad).push(p);
  for(const p of sm)p._d=(p.p[0]-camS.pos[0])**2+(p.p[1]-camS.pos[1])**2+(p.p[2]-camS.pos[2])**2;sm.sort((a,b)=>b._d-a._d);
  let n=0;const put=p=>{const t=p.age/p.life,e=1-(1-t)*(1-t),o=n*10;FXB[o]=p.p[0];FXB[o+1]=p.p[1];FXB[o+2]=p.p[2];
   for(let c=0;c<4;c++)FXB[o+3+c]=p.c0[c]+(p.c1[c]-p.c0[c])*(c===3?t:e);if(p.fadeIn)FXB[o+6]*=Math.min(1,p.age/p.fadeIn);FXB[o+7]=p.s0+(p.s1-p.s0)*e;FXB[o+8]=p.k;FXB[o+9]=p.seed;n++};
@@ -958,8 +959,8 @@ function fxDraw(VP,P){if(!FX.length)return;
  if(nSm){gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.uniform1f(u.uAdd,0);gl.drawArrays(gl.POINTS,0,nSm)}
  if(n>nSm){gl.blendFunc(gl.ONE,gl.ONE);gl.uniform1f(u.uAdd,1);gl.drawArrays(gl.POINTS,nSm,n-nSm)}
  gl.disable(gl.BLEND);gl.depthMask(true);gl.bindVertexArray(cubeVAO);gl.useProgram(PW.p)}
-function debrisDraw(){for(const d of DEB){const h=d.hot,col=h>.05?[d.c[0]+h*6,d.c[1]+h*2.2,d.c[2]+h*.5]:d.c;cube(mm(M.trs(d.p[0],d.p[1],d.p[2]),M.ry(d.r[1]),M.rx(d.r[0]),M.rz(d.r[2]),M.scl(d.s[0],d.s[1],d.s[2])),col,h>.05?5:4)}
- for(const sc of SCORCH)for(let k=0;k<3;k++)cube(mm(M.trs(sc.p[0],.008+k*.001,sc.p[2]),M.ry(sc.a+k*.52),M.scl(sc.r*2*(1-k*.18),.004,sc.r*2*(1-k*.18))),[.006,.006,.006])}
+function debrisDraw(){for(const d of DEB){if(!inSphere(d.p[0],d.p[1],d.p[2],.25))continue;const h=d.hot,col=h>.05?[d.c[0]+h*6,d.c[1]+h*2.2,d.c[2]+h*.5]:d.c;cube(mm(M.trs(d.p[0],d.p[1],d.p[2]),M.ry(d.r[1]),M.rx(d.r[0]),M.rz(d.r[2]),M.scl(d.s[0],d.s[1],d.s[2])),col,h>.05?5:4)}
+ for(const sc of SCORCH)if(inSphere(sc.p[0],0,sc.p[2],sc.r*1.5))for(let k=0;k<3;k++)cube(mm(M.trs(sc.p[0],.008+k*.001,sc.p[2]),M.ry(sc.a+k*.52),M.scl(sc.r*2*(1-k*.18),.004,sc.r*2*(1-k*.18))),[.006,.006,.006])}
 // son d'explosion : arrive avec le retard dû à la vitesse du son
 function sndExplosion(pos){if(!AC)return;const d=len(sub(pos,camS.pos)),v=1/(1+d*.045),pan=d>.5?dot(sub(pos,camS.pos),rightOf(camS.yaw))/d:0;
  setTimeout(()=>{thump(1.15*v,58,24,1.7);thump(.55*v,120,38,.45);noise(.95*v,1.8,2400/(1+d*.02),120,pan);noise(.4*v,.22,8000/(1+d*.04),1600,pan,'highpass');
@@ -983,7 +984,7 @@ function explode(pos,sc=1){const q=[pos[0],Math.max(.2,pos[1]),pos[2]],grounded=
 /* ================= DRONE : modèle 3D ================= */
 const DISCQ=[];
 // p position · yaw/pt/rl orientation du châssis · gim tangage absolu de la nacelle · spin vitesse d'hélice 0..1 · ph phase · lit feux de navigation
-function drawUAV(p,yaw,pt,rl,gim,spin,ph,lit,t){const B=mm(M.trs(p[0],p[1],p[2]),M.ry(yaw),M.rx(pt),M.rz(rl)),C=(x,y,z,sx,sy,sz,col,ty,R)=>cube(R?mm(B,M.trs(x,y,z),R,M.scl(sx,sy,sz)):mm(B,M.trs(x,y,z),M.scl(sx,sy,sz)),col,ty||4);
+function drawUAV(p,yaw,pt,rl,gim,spin,ph,lit,t){if(!inSphere(p[0],p[1],p[2],.6))return;const B=mm(M.trs(p[0],p[1],p[2]),M.ry(yaw),M.rx(pt),M.rz(rl)),C=(x,y,z,sx,sy,sz,col,ty,R)=>cube(R?mm(B,M.trs(x,y,z),R,M.scl(sx,sy,sz)):mm(B,M.trs(x,y,z),M.scl(sx,sy,sz)),col,ty||4);
  const body=[.032,.036,.03],top=[.026,.03,.025],dark=[.012,.013,.014],arm=[.018,.019,.018],metal=[.06,.06,.064];
  C(0,0,0,.17,.065,.3,body);C(0,.046,.02,.13,.028,.2,top);C(0,.074,.075,.1,.034,.12,dark);C(0,.006,-.162,.12,.046,.03,dark);C(0,.03,.14,.08,.03,.04,dark);
  C(-.034,.012,-.178,.02,.012,.004,[.12,.16,.22],5);C(.034,.012,-.178,.02,.012,.004,[.12,.16,.22],5);
@@ -1200,7 +1201,7 @@ function playerUpdate(dt){
 
 /* ================= rendu ================= */
 const charQ=[];
-function drawChar(e){if(!MODELS.soldier)return drawCharBox(e);charQ.push(e);
+function drawChar(e){if(!inSphere(e.pos[0],e.pos[1]+.9,e.pos[2],1.6))return;if(!MODELS.soldier)return drawCharBox(e);charQ.push(e);
  if(e.fl&&e.alive){const B=mm(M.trs(e.pos[0],e.pos[1],e.pos[2]),M.ry(e.yaw));cube(mm(B,M.trs(.12,(e.crouch>.5?1.0:1.32),-.2),M.scl(.05,.05,.03)),[7,7,6.2],5)}}
 // squelette procédural du soldat (11 os, voir tools/convert.py) : marche, visée, accroupi, tenue de l'arme
 const RIG={piv:[[0,.95,-.1],[0,1.1,-.1],[0,1.5,-.12],[-.30,1.42,-.1],[-.44,1.12,-.1],[.30,1.42,-.1],[.44,1.12,-.1],[-.12,.88,-.1],[-.22,.47,-.1],[.12,.88,-.1],[.22,.47,-.1]],par:[-1,0,1,1,3,1,5,0,7,0,9]},_cw=new Array(11);
@@ -1213,7 +1214,7 @@ function poseSoldier(m,e,dt){const al=e.alive,a=al?Math.min(1.25,(e.spd||0)/2.6)
   mm(M.rx(-sn*.62*a+cr*1.05),M.rz(-.13)),M.rx(-(.1*a+.85*a*Math.max(0,-cs))-cr*1.95)];
  for(let k=0;k<11;k++){const pv=RIG.piv[k],L=mm(M.trs(pv[0],pv[1],pv[2]),R[k],M.trs(-pv[0],-pv[1],-pv[2]));_cw[k]=RIG.par[k]<0?L:M.mul(_cw[RIG.par[k]],L);m.jm.set(_cw[k],k*16)}
  m.dirty=true;return tp(_cw[6],[.45,.86,-.1])}
-function drawCharModel(e){const dv=sub(e.pos,camS.pos),dist=len(dv);if(dist>110||(dist>3&&dot(dv,dirOf(camS.yaw,camS.pitch))<-2))return;
+function drawCharModel(e){const dv=sub(e.pos,camS.pos),dist=len(dv);if(dist>110)return;
  const m=dist>16&&MODELS.soldier_lod?MODELS.soldier_lod:MODELS.soldier;let B=mm(M.trs(e.pos[0],e.pos[1],e.pos[2]),M.ry(e.yaw));
  if(e.hp<(e._hp===undefined?e.hp:e._hp))e.fz=1;e._hp=e.hp;e.fz=Math.max(0,(e.fz||0)-frameDt*4);
  if(!e.alive){const back=((e.i||0)+(e.d||e.deaths||0)+(typeof e.id==='number'?e.id:0))%2;B=mm(B,M.trs(0,.2,0),M.rx((back?1:-1)*e.fall*1.5))}
@@ -1259,9 +1260,33 @@ function drawWeapon(cam,R,U,F,dt,VPw,asp){
  if(me.flash>0){const m=gun.flashPos,s=.045+rnd()*.05;cube(mm(M.trs(m[0],m[1],m[2]),M.ry(gun.yaw),M.rx(gun.pitch),M.rz(rnd()*3),M.trs(0,0,-s*.6),M.scl(s,s*.3,s*1.6)),[12,8,3],5);cube(mm(M.trs(m[0],m[1],m[2]),M.ry(gun.yaw),M.rx(gun.pitch),M.rz(rnd()*3),M.trs(0,0,-s*.5),M.scl(s*.3,s,s*1.3)),[12,8,3],5)}
 }
 const fPL=new Float32Array(NL*4),fPC=new Float32Array(NL*3),fPZ=new Float32Array(NL),fSP=new Float32Array(12),fSD=new Float32Array(12),fSC=new Float32Array(16),fSZ=new Float32Array(4);
+/* ================= CHAMP DE VISION : on ne dessine que ce que la caméra voit =================
+   La carte est découpée en secteurs de 12 m ; les très grands blocs (sol, murs d'enceinte, toits) forment leur propre secteur.
+   À chaque image, la pyramide de vision est tirée de la matrice de la caméra : secteurs et objets hors champ sont ignorés.
+   Les lumières ne sont pas filtrées ainsi : une lampe hors champ éclaire encore ce qui est visible. */
+const CHUNK=12;let CH=[];
+const CULL={freeze:false,planes:new Float32Array(24),drawn:0,total:1,objIn:0,objOut:0};
+function buildChunks(){const n=WB.length/6,groups=new Map(),lists=[];
+ for(let k=0;k<n;k++){const o=k*6,x0=WB[o],z0=WB[o+2],x1=WB[o+3],z1=WB[o+5];
+  if(x1-x0>CHUNK*2||z1-z0>CHUNK*2){lists.push([k]);continue}
+  const key=Math.floor((x0+x1)/2/CHUNK)*1000+Math.floor((z0+z1)/2/CHUNK);let g=groups.get(key);if(!g)groups.set(key,g=[]);g.push(k)}
+ for(const k of[...groups.keys()].sort((a,b)=>a-b))lists.push(groups.get(k));
+ const out=new Float32Array(verts.length);CH=[];let v=0;
+ for(const L of lists){const mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9],first=v;
+  for(const k of L){const src=k*360;for(let i=0;i<360;i++)out[v*10+i]=verts[src+i];v+=36;for(let a=0;a<3;a++){mn[a]=Math.min(mn[a],WB[k*6+a]);mx[a]=Math.max(mx[a],WB[k*6+3+a])}}
+  CH.push({first,count:v-first,mn,mx})}
+ return out}
+function setFrustum(VP){if(CULL.freeze)return;const m=VP,P=CULL.planes;   // plans gauche, droite, bas, haut, proche, lointain
+ const rows=[[0,1],[0,-1],[1,1],[1,-1],[2,1],[2,-1]];
+ rows.forEach(([r,sg],i)=>{let a=m[3]+sg*m[r],b=m[7]+sg*m[4+r],c=m[11]+sg*m[8+r],d=m[15]+sg*m[12+r];const l=Math.hypot(a,b,c)||1;P[i*4]=a/l;P[i*4+1]=b/l;P[i*4+2]=c/l;P[i*4+3]=d/l})}
+function inSphere(x,y,z,r){if(CULL.off)return true;const P=CULL.planes;for(let i=0;i<24;i+=4)if(P[i]*x+P[i+1]*y+P[i+2]*z+P[i+3]<-r){CULL.objOut++;return false}CULL.objIn++;return true}
+function inBox(mn,mx){if(CULL.off)return true;const P=CULL.planes;for(let i=0;i<24;i+=4){const a=P[i],b=P[i+1],c=P[i+2];if(a*(a>0?mx[0]:mn[0])+b*(b>0?mx[1]:mn[1])+c*(c>0?mx[2]:mn[2])+P[i+3]<0)return false}return true}
+function drawWorld(){let a=-1,b=0,dr=0;for(const c of CH){if(!inBox(c.mn,c.mx))continue;dr+=c.count;if(a>=0&&c.first===b)b+=c.count;else{if(a>=0)gl.drawArrays(gl.TRIANGLES,a,b-a);a=c.first;b=c.first+c.count}}
+ if(a>=0)gl.drawArrays(gl.TRIANGLES,a,b-a);CULL.drawn=dr;CULL.total=worldCount||1}
+
 const zMin=new Float32Array(15).fill(9999),zMax=new Float32Array(15).fill(9998);
-function loadMap(i){i=MAPS[i]?i:0;boxes.length=verts.length=zones.length=lights.length=spawns.length=0;lights.dyn=null;fxClear();MAPS[i].build();buildNav();
- gl.bindBuffer(gl.ARRAY_BUFFER,worldVBO);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);worldCount=verts.length/10;verts.length=0;
+function loadMap(i){i=MAPS[i]?i:0;WB.length=0;boxes.length=verts.length=zones.length=lights.length=spawns.length=0;lights.dyn=null;fxClear();MAPS[i].build();buildNav();
+ gl.bindBuffer(gl.ARRAY_BUFFER,worldVBO);gl.bufferData(gl.ARRAY_BUFFER,buildChunks(),gl.STATIC_DRAW);worldCount=verts.length/10;verts.length=0;WB.length=0;
  zMin.fill(9999);zMax.fill(9998);zones.forEach((z,k)=>{if(k<5){zMin.set([z[0],z[1],z[2]],k*3);zMax.set([z[3],z[4],z[5]],k*3)}});
  decals.length=tracers.length=parts.length=0;curMap=i;
  if(started){me.drone=null;me.inDrone=false;spawnMe();for(const b of bots){b.alive=false;b.fall=1;b.resp=.5+rnd()*2;b.path=[];b.tgt=null;b.last=null}feed('Carte : <i>'+MAPS[i].n+'</i>')}
@@ -1290,7 +1315,7 @@ function computeCam(dt){
 }
 function render(dt){
  const asp=RW/RH,t=now;
- const P=M.persp(camS.fov,asp,.06,320),V=mm(M.rz(-camS.roll),M.rx(-camS.pitch),M.ry(-camS.yaw),M.trs(-camS.pos[0],-camS.pos[1],-camS.pos[2])),VP=M.mul(P,V);
+ const P=M.persp(camS.fov,asp,.06,320),V=mm(M.rz(-camS.roll),M.rx(-camS.pitch),M.ry(-camS.yaw),M.trs(-camS.pos[0],-camS.pos[1],-camS.pos[2])),VP=M.mul(P,V);setFrustum(VP);CULL.objIn=CULL.objOut=0;
  const F=dirOf(camS.yaw,camS.pitch),R=rightOf(camS.yaw),U=cross(R,F);
  // lumières
  let n=0;const maxL=rScale<.7?7:rScale<.95?10:13;
@@ -1312,7 +1337,7 @@ function render(dt){
  for(const PR of[PM,PW]){gl.useProgram(PR.p);const u=PR.u;gl.uniformMatrix4fv(u.uVP,false,VP);gl.uniform3fv(u.uCam,camS.pos);gl.uniform1f(u.uTime,t);gl.uniform1f(u.uExp,2.4);
   gl.uniform4fv(u.uPL,fPL);gl.uniform3fv(u.uPC,fPC);gl.uniform1fv(u.uPZ,fPZ);gl.uniform3fv(u.uSP,fSP);gl.uniform3fv(u.uSD,fSD);gl.uniform4fv(u.uSC,fSC);gl.uniform1fv(u.uSZ,fSZ);gl.uniform3fv(u.uZMin,zMin);gl.uniform3fv(u.uZMax,zMax);gl.uniform1i(u.uNL,nLights);gl.uniform3fv(u.uFog,env.fog);gl.uniform3fv(u.uAmb,env.amb);gl.uniform1f(u.uFogD,env.fd)}
  const u=PW.u;
- gl.uniform1i(u.uDyn,0);gl.bindVertexArray(worldVAO);gl.drawArrays(gl.TRIANGLES,0,worldCount);
+ gl.uniform1i(u.uDyn,0);gl.bindVertexArray(worldVAO);drawWorld();
  gl.uniform1i(u.uDyn,1);gl.bindVertexArray(cubeVAO);
  cube(mm(M.trs(camS.pos[0],camS.pos[1],camS.pos[2]),M.scl(300,300,300)),[0,0,0],6);
  for(const id in players){const p=players[id];drawChar(p);const q=p.drone;if(q)drawUAV([q[0],q[1],q[2]],q[3],q[4]||0,q[5]||0,q[6]||0,q[8]===undefined?.6:q[8],t*(q[8]||.6)*95,q[7]!==1,t)}
@@ -1320,9 +1345,9 @@ function render(dt){
  if(!started&&!DBG.cam)drawChar(menuOp);
  if(started&&!firstPerson)drawChar(me);
  if(me.drone&&!me.inDrone){const d=me.drone;drawUAV(d.pos,d.yawS,d.pt,d.rl,d.gimS,d.spin,d.ph,d.state!=='down',t)}
- for(const d of decals){const a=Math.abs(d.n[0])>.5?[.012,.07,.07]:Math.abs(d.n[1])>.5?[.07,.012,.07]:[.07,.07,.012];cube(mm(M.trs(d.p[0],d.p[1],d.p[2]),M.scl(a[0],a[1],a[2])),[.012,.012,.012])}
- for(const p of parts)cube(mm(M.trs(p.pos[0],p.pos[1],p.pos[2]),M.scl(p.s,p.s,p.s)),p.col,p.em?5:4);
- for(const tr of tracers){const d=sub(tr.b,tr.a),l=len(d);if(l<2)continue;const a=add(tr.a,mulS(d,.04)),b=add(tr.a,mulS(d,Math.min(1,.04+18/l)));cube(between(a,tr.b,.012,.012),[3,2.2,1.1],5)}
+ for(const d of decals){if(!inSphere(d.p[0],d.p[1],d.p[2],.08))continue;const a=Math.abs(d.n[0])>.5?[.012,.07,.07]:Math.abs(d.n[1])>.5?[.07,.012,.07]:[.07,.07,.012];cube(mm(M.trs(d.p[0],d.p[1],d.p[2]),M.scl(a[0],a[1],a[2])),[.012,.012,.012])}
+ for(const p of parts)if(inSphere(p.pos[0],p.pos[1],p.pos[2],p.s))cube(mm(M.trs(p.pos[0],p.pos[1],p.pos[2]),M.scl(p.s,p.s,p.s)),p.col,p.em?5:4);
+ for(const tr of tracers){const d=sub(tr.b,tr.a),l=len(d);if(l<2||!inSphere((tr.a[0]+tr.b[0])/2,(tr.a[1]+tr.b[1])/2,(tr.a[2]+tr.b[2])/2,l/2))continue;const a=add(tr.a,mulS(d,.04)),b=add(tr.a,mulS(d,Math.min(1,.04+18/l)));cube(between(a,tr.b,.012,.012),[3,2.2,1.1],5)}
  debrisDraw();
  if(charQ.length){gl.useProgram(PM.p);for(const e of charQ)drawCharModel(e);gl.useProgram(PW.p);charQ.length=0}
  if(DBG.view&&MODELS[DBG.view.name]){const m=MODELS[DBG.view.name],v=DBG.view,b=m.bbox,cn=[(b[0][0]+b[1][0])/2,(b[0][1]+b[1][1])/2,(b[0][2]+b[1][2])/2],sz=1/Math.max(b[1][0]-b[0][0],b[1][1]-b[0][1],b[1][2]-b[0][2]),c=add(camS.pos,mulS(F,v.dist||1.4));
@@ -1664,7 +1689,7 @@ loadMap(CFG.map|0);{let nn=0;for(let i=0;i<NG*NG;i++)if(adj[i]&&adj[i].length)nn
 Promise.all(MODEL_LIST.map(n=>loadModel(n).then(()=>{const m=MODELS[n];bootLog(m?'Modèle '+n+' — '+fmtN(m.prims.reduce((a,p)=>a+p.count,0)/3)+' triangles · '+(m.bytes/1048576).toFixed(1)+' Mo':'Modèle '+n+' — indisponible, remplacé par des volumes simples',!!m)}))).then(()=>Promise.all(TEXP)).then(()=>{bootLog('Textures — '+TEXP.length+' chargées sur le GPU');requestAnimationFrame(()=>requestAnimationFrame(bootDone))});
 setTimeout(bootDone,20000);
 resize();updNet();connect();showSec('deploy',true);setMenu(true);uiTick();requestAnimationFrame(frame);
-window.DF={UAVX:{fxUpdate,droneDamage,uavZoom,explode,launchDrone,exitDrone,uavRecall,FX,DEB,FIRES,FXL,UAV,get flash(){return flashFx}},PROF,showSec,leaveMatch,STAGES,menuOp,MODELS,DBG,vmA,vmPlay,loadMap,MAPS,pad,act,get map(){return curMap},gun,me,bots,players,CFG,enter,get online(){return online},get host(){return isHost()},nav:{nodeOK,adj,NG},spawns,freeAt,boxes,fire,keys,launchDrone,camS,WPN,gunRef:gun,setLook(y,p){me.yaw=me.cy=y;me.pitch=me.cp=p}};
+window.DF={__CH:()=>CH,__inBox:inBox,__asp:()=>RW/RH,camS,bench(n){gl.finish();const t0=performance.now();for(let i=0;i<n;i++){computeCam(.016);render(.016)}gl.finish();return(performance.now()-t0)/n},CULL,get chunks(){return CH.length},UAVX:{fxUpdate,droneDamage,uavZoom,explode,launchDrone,exitDrone,uavRecall,FX,DEB,FIRES,FXL,UAV,get flash(){return flashFx}},PROF,showSec,leaveMatch,STAGES,menuOp,MODELS,DBG,vmA,vmPlay,loadMap,MAPS,pad,act,get map(){return curMap},gun,me,bots,players,CFG,enter,get online(){return online},get host(){return isHost()},nav:{nodeOK,adj,NG},spawns,freeAt,boxes,fire,keys,launchDrone,camS,WPN,gunRef:gun,setLook(y,p){me.yaw=me.cy=y;me.pitch=me.cp=p}};
 </script>
 </body>
 </html>
