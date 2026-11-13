@@ -5,10 +5,18 @@
 FPS « bodycam » : caméra de poitrine fisheye, visée libre sans viseur, drone de reconnaissance, bots, multijoueur LAN. Prototype sans moteur externe (WebGL2 + Go).
 
 ## Jouer
-- **Dans le navigateur (solo contre les bots)** : GitHub Pages sert `index.html` à la racine du dépôt.
-- **Multijoueur** : télécharger [`download/DEADFRAME.exe`](download/DEADFRAME.exe) (Windows 64 bits). Il démarre un serveur sur le port 7777, ouvre le jeu et affiche l'adresse à donner aux amis du même réseau (ex. `http://192.168.1.20:7777`). Eux n'ont besoin que d'un navigateur.
-  - Premier lancement : autoriser le pare-feu ; SmartScreen peut avertir (exe non signé) → « Informations complémentaires » → « Exécuter quand même ».
-  - Options : `DEADFRAME.exe -port 9000 -noopen` (serveur dédié).
+- **En ligne (Internet)** : ouvrir la page GitHub Pages (`https://haze15.github.io/DEADFRAME/`) ou directement l'adresse du serveur hébergé. Le jeu rejoint automatiquement le serveur public ; une autre adresse peut être saisie dans DEPLOY → « Serveur en ligne ». Tout le monde joue dans la même partie (16 joueurs max) ; le premier connecté est l'hôte (carte et bots).
+- **Réseau local** : `download/DEADFRAME.exe` (Windows 64 bits) démarre un serveur sur le port 7777, ouvre le jeu et affiche l'adresse à donner aux amis du même réseau. Premier lancement : autoriser le pare-feu ; SmartScreen peut avertir (exe non signé).
+- La page publiée dans Claude reste en solo : elle ne peut pas ouvrir de connexion vers un autre site.
+
+## Serveur hébergé (Render, gratuit)
+Le fichier `render.yaml` décrit le service : Render construit le serveur Go (le jeu est intégré dans le binaire) à chaque push sur `main`.
+1. Créer un compte sur https://render.com avec « Sign in with GitHub ».
+2. New → Blueprint → choisir le dépôt `Haze15/DEADFRAME` → Apply.
+3. Une fois déployé, Render affiche l'adresse (ex. `https://deadframe.onrender.com`). Si elle diffère, mettre à jour `ONLINE_SERVER` dans `src/game.html`.
+- Mode public (activé d'office sur Render via la variable `PORT`) : pas d'arrêt à distance, pas d'adresses internes, 16 joueurs, débit limité à 90 messages/s par joueur.
+- Offre gratuite : le serveur se met en veille après 15 min sans connexion et met jusqu'à une minute à se réveiller (le menu l'indique).
+- Pas d'anti-triche : les dégâts sont déclarés par le tireur.
 
 ## Menu principal
 - **DEPLOY** : zone d'opération (la scène en arrière-plan suit la carte choisie), nombre d'hostiles, adresse réseau à donner aux amis, bouton Déployer (ou Entrée).

@@ -382,6 +382,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
     <button class="cta" id="go"><span>Déployer</span><kbd>ENTRÉE</kbd></button>
     <div class="lbl">Réseau</div>
     <div class="data" id="net"></div>
+    <label class="fld wide" style="margin-top:10px">Serveur en ligne <input type="text" id="isrv" spellcheck="false" autocomplete="off" placeholder="deadframe.onrender.com"></label>
     <select id="imap" hidden><option value="0"></option><option value="1"></option><option value="2"></option><option value="3"></option></select>
    </div>
 
@@ -478,7 +479,7 @@ const gl=cv.getContext('webgl2',{antialias:false,alpha:false,powerPreference:'hi
 if(!gl){$('err').style.display='flex';$('err').textContent='WebGL2 est requis pour DEADFRAME (navigateur ou carte graphique non compatible).';throw new Error('no webgl2')}
 
 /* ================= réglages ================= */
-const CFG={sens:1,fish:.17,scale:0,bots:6,name:'',vol:.8,map:0,dcid:'',dc:null,loadout:0};
+const CFG={sens:1,fish:.17,scale:0,bots:6,name:'',vol:.8,map:0,dcid:'',dc:null,loadout:0,server:''};
 try{Object.assign(CFG,JSON.parse(localStorage.getItem('deadframe')||'{}'))}catch(e){}
 const saveCfg=()=>{try{localStorage.setItem('deadframe',JSON.stringify(CFG))}catch(e){}};
 if(!CFG.name)CFG.name='UNIT-'+(100+Math.random()*900|0);
@@ -938,11 +939,24 @@ const listenPos=()=>camS.pos;
 let quitting=false,ws=null,online=false,myId=0,hostId=0,netInfo=null;
 const isHost=()=>!online||hostId===myId;
 function send(o){if(online&&ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
-function connect(){if(location.protocol!=='http:')return;try{ws=new WebSocket('ws://'+location.host+'/ws')}catch(e){return}
+/* ---- connexion au serveur de jeu ----
+   1) la page est servie par un serveur DEADFRAME (DEADFRAME.exe en réseau local, ou le serveur hébergé) : on s'y connecte directement ;
+   2) sinon (GitHub Pages, fichier local) : on rejoint le serveur public ci-dessous, ou celui saisi dans le menu.
+   La page intégrée à Claude ne peut pas ouvrir de connexion vers un autre site : elle reste en solo. */
+const ONLINE_SERVER='https://deadframe.onrender.com/';
+let srvBase='',srvTries=0;
+const normSrv=u=>{u=String(u||'').trim();if(!u)return'';if(!/^https?:\/\//i.test(u))u='https://'+u;try{const x=new URL(u);return x.origin+'/'}catch(e){return''}};
+async function findServer(){if(window.top!==window.self)return'';
+ if(/^https?:$/.test(location.protocol)){try{const r=await fetch('info',{cache:'no-store'});if(r.ok){const j=await r.json();if(j&&j.game==='deadframe'){netInfo=j;return location.href.replace(/[?#].*$/,'').replace(/[^/]*$/,'')}}}catch(e){}}
+ return normSrv(CFG.server)||ONLINE_SERVER}
+async function connect(){if(quitting||ws)return;srvBase=await findServer();if(!srvBase){updNet();return}
+ if(location.protocol==='https:'&&srvBase.startsWith('http:')){srvBase='';updNet();return}   // un site sécurisé ne peut pas joindre un serveur non sécurisé
+ srvTries++;updNet();try{ws=new WebSocket(srvBase.replace(/^http/,'ws')+'ws')}catch(e){ws=null;setTimeout(connect,4000);return}
  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(_){return}try{onNet(m.f,m.d)}catch(err){console.error(err)}};
- ws.onclose=()=>{if(quitting)return;const was=online;online=false;ws=null;for(const k in players)delete players[k];myId=0;me.id=0;if(was)feed('<i>Connexion au serveur perdue</i> — mode solo');updNet();setTimeout(connect,3000)};
- ws.onerror=()=>{};
- fetch('/info').then(r=>r.json()).then(j=>{netInfo=j;updNet()}).catch(()=>{})}
+ ws.onopen=()=>{srvTries=0;fetch(srvBase+'info',{cache:'no-store'}).then(r=>r.json()).then(j=>{netInfo=j;updNet()}).catch(()=>{})};
+ ws.onclose=()=>{const was=online;online=false;ws=null;for(const k in players)delete players[k];myId=0;me.id=0;if(was)feed('<i>Connexion au serveur perdue</i> — mode solo');updNet();if(!quitting)setTimeout(connect,was?2000:4000)};
+ ws.onerror=()=>{}}
+function reconnect(){srvTries=0;if(ws){try{ws.close()}catch(e){}}else connect()}
 const nameOf=id=>id===myId||id===me.id?me.name:typeof id==='string'?(bots.find(b=>b.id===id)||{}).name||'BOT':(players[id]||{}).name||'#'+id;
 function onNet(f,d){
  if(f===0){
@@ -969,12 +983,14 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 function feed(html){const d=document.createElement('div');d.innerHTML=html;const f=$('feed');f.appendChild(d);while(f.children.length>6)f.firstChild.remove();setTimeout(()=>{d.style.opacity=0;setTimeout(()=>d.remove(),700)},6000)}
 function feedKill(k,v){feed(esc(nameOf(k))+' <i>▸</i> '+esc(nameOf(v)))}
 let tipT=0;function tip(s,t=3){$('tip').textContent=s;$('tip').style.opacity=.9;tipT=t}
-function updNet(){const n=$('net'),t=$('mmNet');if(!n||!t)return;
+function updNet(){const n=$('net'),t=$('mmNet');if(!n||!t)return;let host='';try{host=srvBase?new URL(srvBase).host:''}catch(e){}
+ const lan=/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host),pub=netInfo&&netInfo.public;
  if(online){const c=Object.keys(players).length+1;
-  n.innerHTML='<span class="on">■ SERVEUR LAN ACTIF</span> — <b>'+c+'</b> opérateur'+(c>1?'s connectés':' connecté')+(isHost()?' · tu es l\'hôte':'')+(netInfo&&netInfo.urls&&netInfo.urls.length?'<br>Adresse pour tes amis (même réseau) : <b>'+netInfo.urls.map(esc).join('</b> ou <b>')+'</b>':'');
-  t.innerHTML='<i class="led ok"></i>EN LIGNE · LAN · <b>'+c+'</b> OP'}
- else if(location.protocol==='http:'&&!quitting){n.innerHTML='Connexion au serveur de jeu…';t.innerHTML='<i class="led wait"></i>CONNEXION…'}
- else{n.innerHTML='Mode solo contre les bots. Pour jouer à plusieurs, lance <b>DEADFRAME.exe</b> : il affiche l\'adresse à donner à tes amis.';t.innerHTML='<i class="led"></i>HORS LIGNE · SOLO'}}
+  n.innerHTML='<span class="on">■ '+(pub?'SERVEUR EN LIGNE':'SERVEUR LAN')+'</span> — <b>'+esc(host)+'</b> · <b>'+c+'</b> opérateur'+(c>1?'s connectés':' connecté')+(isHost()?' · tu es l\'hôte (carte et bots)':'')+
+   (!pub&&netInfo&&netInfo.urls&&netInfo.urls.length?'<br>Adresse pour tes amis (même réseau) : <b>'+netInfo.urls.map(esc).join('</b> ou <b>')+'</b>':'')+(pub?'<br>Tes amis rejoignent avec <b>'+esc(host)+'</b> ou <b>haze15.github.io/DEADFRAME</b>.':'');
+  t.innerHTML='<i class="led ok"></i>EN LIGNE · '+(pub?'INTERNET':'LAN')+' · <b>'+c+'</b> OP'}
+ else if(srvBase&&!quitting){n.innerHTML='Connexion à <b>'+esc(host)+'</b>…'+(!lan&&srvTries>1?'<br>Le serveur gratuit se met en veille sans joueur : son réveil peut prendre jusqu\'à une minute.':'')+(srvTries>6&&!lan?'<br>Toujours pas de réponse : vérifie l\'adresse du serveur ci-dessous.':'');t.innerHTML='<i class="led wait"></i>CONNEXION…'}
+ else{n.innerHTML=window.top!==window.self?'Mode solo : cette page intégrée ne peut pas se connecter à un serveur. Joue en ligne sur <b>haze15.github.io/DEADFRAME</b>.':'Mode solo contre les bots.';t.innerHTML='<i class="led"></i>HORS LIGNE · SOLO'}}
 function scoreboard(){const rows=[{n:me.name,k:me.kills,d:me.deaths,me:1,av:CFG.dc&&CFG.dc.av?CFG.dc.id+'/'+CFG.dc.av:null}];for(const id in players){const p=players[id];rows.push({n:p.name,k:p.kills||0,d:p.deaths||0,av:p.av})}for(const b of bots)rows.push({n:b.name+' ·bot',k:b.k,d:b.d});
  rows.sort((a,b)=>b.k-a.k||a.d-b.d);$('score').innerHTML='<h3>DEADFRAME — MATCH À MORT '+(online?'· EN LIGNE':'· SOLO')+'</h3><table><tr><th>OPÉRATEUR</th><th>ÉLIM.</th><th>MORTS</th></tr>'+rows.map(r=>'<tr'+(r.me?' class="me"':'')+'><td>'+(r.av?'<img src="https://cdn.discordapp.com/avatars/'+r.av+'.png?size=32" width="18" height="18" style="border-radius:50%;vertical-align:-4px;margin-right:8px" alt="">':'')+esc(r.n)+'</td><td>'+r.k+'</td><td>'+r.d+'</td></tr>').join('')+'</table>'}
 let hudT=0;
@@ -1804,6 +1820,7 @@ setInterval(uiTick,1000);
 // curseurs : remplissage de la piste
 function rangeFill(r){r.style.setProperty('--p',((r.value-r.min)/(r.max-r.min)*100)+'%')}
 document.querySelectorAll('#menu input[type=range]').forEach(r=>{r.addEventListener('input',()=>rangeFill(r));rangeFill(r)});
+$('isrv').value=CFG.server||'';$('isrv').addEventListener('change',e=>{CFG.server=normSrv(e.target.value);e.target.value=CFG.server;saveCfg();if(location.protocol!=='http:'||!netInfo||netInfo.public)reconnect()});
 $('iname').addEventListener('input',e=>{const v=e.target.value.trim().toUpperCase().slice(0,12);if(v){me.name=v;CFG.name=v;saveCfg();drawOpBar()}});
 
 /* ---- plateau du menu : un opérateur posé dans la carte, filmé par une caméra lente ---- */

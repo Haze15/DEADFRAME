@@ -36,10 +36,11 @@ type client struct {
 }
 
 var (
-	mu      sync.Mutex
-	clients = map[int]*client{}
-	nextID  = 1
-	port    int
+	publicMode bool // serveur hébergé sur Internet (Render…) : pas d'arrêt à distance, pas d'adresses locales
+	mu         sync.Mutex
+	clients    = map[int]*client{}
+	nextID     = 1
+	port       int
 )
 
 func hostID() int { // appelé sous verrou
@@ -104,7 +105,7 @@ func readFrame(br *bufio.Reader) (op byte, fin bool, payload []byte, err error) 
 		}
 		n = binary.BigEndian.Uint64(b[:])
 	}
-	if n > 1<<16 {
+	if n > 1<<14 {
 		err = errors.New("frame too large")
 		return
 	}
@@ -181,6 +182,8 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	broadcast(frame([]byte(fmt.Sprintf(`{"f":0,"d":{"t":"join","id":%d,"host":%d}}`, c.id, host))), c.id)
 
 	var frag []byte
+	// limite de débit par joueur : 90 messages/s en moyenne (pointes à 180), le surplus est ignoré
+	tokens, last := 180.0, time.Now()
 	for {
 		conn.SetReadDeadline(time.Now().Add(30 * time.Second))
 		op, fin, p, err := readFrame(rw.Reader)
@@ -202,12 +205,23 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		default:
 			frag = append(frag[:0], p...)
 		}
-		if !fin || len(frag) > 1<<16 {
-			if len(frag) > 1<<16 {
+		if !fin || len(frag) > 1<<14 {
+			if len(frag) > 1<<14 {
 				break
 			}
 			continue
 		}
+		nowT := time.Now()
+		tokens += nowT.Sub(last).Seconds() * 90
+		last = nowT
+		if tokens > 180 {
+			tokens = 180
+		}
+		if tokens < 1 {
+			frag = frag[:0]
+			continue
+		}
+		tokens--
 		if len(frag) > 0 && frag[0] == '{' && json.Valid(frag) {
 			msg := make([]byte, 0, len(frag)+24)
 			msg = append(msg, fmt.Sprintf(`{"f":%d,"d":`, c.id)...)
@@ -269,20 +283,32 @@ func openBrowser(url string) {
 func main() {
 	p := flag.Int("port", 7777, "port d'écoute")
 	noOpen := flag.Bool("noopen", false, "ne pas ouvrir le jeu automatiquement (serveur dédié)")
+	public := flag.Bool("public", os.Getenv("PORT") != "", "serveur public hébergé (activé d'office si la variable PORT est définie)")
 	flag.Parse()
+	publicMode = *public
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", wsHandler)
 	mux.HandleFunc("/info", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*") // la page GitHub Pages interroge le serveur hébergé
+		w.Header().Set("Cache-Control", "no-store")
 		mu.Lock()
 		n := len(clients)
 		mu.Unlock()
-		json.NewEncoder(w).Encode(map[string]any{"urls": lanURLs(), "players": n})
+		urls := []string{}
+		if !publicMode {
+			urls = lanURLs()
+		}
+		json.NewEncoder(w).Encode(map[string]any{"game": "deadframe", "public": publicMode, "urls": urls, "players": n, "max": 16})
 	})
 	mux.Handle("/assets/", http.FileServer(http.FS(assetsFS)))
 	// QUIT depuis le menu : arrête le serveur, uniquement à la demande du joueur local (pas des autres joueurs du réseau)
 	mux.HandleFunc("/quit", func(w http.ResponseWriter, r *http.Request) {
+		if publicMode {
+			http.NotFound(w, r)
+			return
+		}
 		host, _, _ := net.SplitHostPort(r.RemoteAddr)
 		ip := net.ParseIP(host)
 		origin := r.Header.Get("Origin")
@@ -306,7 +332,14 @@ func main() {
 
 	var ln net.Listener
 	var err error
-	for port = *p; port < *p+10; port++ {
+	if env := os.Getenv("PORT"); env != "" {
+		fmt.Sscanf(env, "%d", p)
+	}
+	tries := 10
+	if publicMode {
+		tries = 1
+	}
+	for port = *p; port < *p+tries; port++ {
 		if ln, err = net.Listen("tcp", fmt.Sprintf(":%d", port)); err == nil {
 			break
 		}
@@ -319,6 +352,11 @@ func main() {
 	}
 
 	local := fmt.Sprintf("http://localhost:%d", port)
+	if publicMode {
+		fmt.Printf("DEADFRAME — serveur public à l'écoute sur le port %d (16 joueurs max)\n", port)
+		http.Serve(ln, mux)
+		return
+	}
 	fmt.Println()
 	fmt.Println("  ██████  DEADFRAME  ██████   serveur de jeu")
 	fmt.Println("  ----------------------------------------------")

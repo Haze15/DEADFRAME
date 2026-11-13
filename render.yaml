@@ -1,0 +1,13 @@
+# Déploiement du serveur de jeu sur Render (offre gratuite) — Render → New → Blueprint → ce dépôt.
+# Render construit le serveur Go à chaque push sur main ; le jeu (index.html + assets) est intégré dans le binaire.
+services:
+  - type: web
+    name: deadframe
+    runtime: go
+    plan: free
+    region: frankfurt
+    branch: main
+    buildCommand: go build -o deadframe .
+    startCommand: ./deadframe -public
+    healthCheckPath: /info
+    autoDeploy: true
