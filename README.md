@@ -34,9 +34,10 @@ Dépôt industriel · Hôpital abandonné · Tranchées · Hôtel · Front — c
 
 ### Front (décor en modèles 3D, sol en relief)
 Deux lignes de tranchées face à face (coffrage en planches, caillebotis, parapets de sacs de sable, lanternes), reliées par des T, un croisement et un boyau vers l'arrière ; un no man's land de 34 trous d'obus avec flaques, deux maisons en ruine (un feu brûle dans chacune) et des arbres morts.
+- **Couverts du no man's land** : une épave de char (8 m), deux canons de campagne, six nids de sacs de sable (1,25 m, ouverts à l'arrière), quatre piles de rondins (1,1 m), huit chevaux de frise barbelés devant les lignes et deux piles de caisses de munitions. Tous arrêtent les balles à hauteur d'un tireur accroupi ; les bots les contournent.
 - **Sol en relief** : la carte des hauteurs `assets/fr_hf.bin` (pas de 12,5 cm) remplace le sol plat. On tombe dans les tranchées, les parois arrêtent les joueurs, les bots et les balles ; on en sort par les **rampes** (trois vers le no man's land et une vers l'arrière pour chaque ligne, plus les deux bouts). Un saut ne suffit pas pour remonter une paroi de 2 m. Les sacs de sable arrêtent les balles et se franchissent en sautant.
 - **Collisions** : murs des ruines et troncs en boîtes invisibles, gravats et cratères dans le relief. Les bots naviguent sur le relief (pas de marche de plus de 30 cm).
-- **Chargement** : les modèles (~6 Mo) ne sont téléchargés que lorsqu'on choisit la carte.
+- **Chargement** : les modèles (~8 Mo) ne sont téléchargés que lorsqu'on choisit la carte.
 - **Régénérer** : `sh tools/modeles/construire.sh` (python3, numpy, pillow, scipy) refait tous les modèles, `assets/fr_*` et les données de la carte dans `src/game.html`, à l'identique (graines fixes). La disposition se règle dans `tools/modeles/make_front.py` (tuiles sur une grille de 8 m, ruines, arbres, lanternes, points d'apparition).
 
 ## Commandes (clavier AZERTY)
@@ -93,7 +94,7 @@ Qualité « Automatique » : la résolution interne s'ajuste pour viser 60 i/s.
 | `src/game.html` | Tout le jeu : moteur WebGL2, shaders, IA, audio, réseau |
 | `main.go` | Serveur HTTP + relais WebSocket (bibliothèque standard), embarque `index.html` et `assets/` |
 | `tools/convert.py` | Convertisseur glTF → `.dfm` (décimation, squelette, animations) |
-| `tools/modeles/` | Générateurs des modèles de décor (tranchées, ruines, arbres morts, meubles, sol boueux) et de la carte Front |
+| `tools/modeles/` | Générateurs des modèles de décor (tranchées, ruines, arbres morts, meubles, sol boueux, couverts) et de la carte Front |
 | `logo/` | Logo et icône |
 
 ## Compiler

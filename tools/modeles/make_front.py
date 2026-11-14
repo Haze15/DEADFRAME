@@ -68,6 +68,14 @@ RUINS = [(-22.0, 4.0, 0), (22.0, -3.0, 180)]
 TREES = [('fr_arbre1', -31, -8, 40), ('fr_arbre2', -6, 9, 200), ('fr_arbre3', 7, -10, 10), ('fr_arbre2', 31, 9, 90), ('fr_arbre4', -35, 34, 300),
          ('fr_arbre1', 13, 35, 120), ('fr_arbre3', 35, -35, 60), ('fr_arbre4', -13, -35, 150), ('fr_arbre3', -2, -2, 250), ('fr_arbre1', 9, 4, 330),
          ('fr_arbre2', -30, -35, 20), ('fr_arbre3', 26, 36, 270)]
+# couverts du no man's land : (modèle, x, z, rotation en degrés, rayon d'emprise)
+COVERS = [('fr_char', -9.0, 1.0, -35, 5.0), ('fr_canon', 12.0, -11.0, 160, 3.0), ('fr_canon', -27.0, -12.0, 20, 3.0),
+          ('fr_nid', -31.0, 12.0, 190, 2.2), ('fr_nid', -5.0, 13.0, 170, 2.2), ('fr_nid', 25.0, 12.0, 160, 2.2),
+          ('fr_nid', 30.0, -12.0, 10, 2.2), ('fr_nid', 4.0, -13.0, 0, 2.2), ('fr_nid', -19.0, -14.0, 350, 2.2),
+          ('fr_tronc', 17.0, 8.0, 70, 3.0), ('fr_tronc', -15.0, -6.0, 20, 3.0), ('fr_tronc', 1.0, 8.5, 100, 3.0), ('fr_tronc', -35.0, -1.0, 85, 3.0),
+          ('fr_frise', -25.0, 16.0, 0, 1.8), ('fr_frise', -9.0, 15.5, 10, 1.8), ('fr_frise', 8.0, 16.0, -8, 1.8), ('fr_frise', 26.0, 16.5, 5, 1.8),
+          ('fr_frise', -26.0, -16.5, 175, 1.8), ('fr_frise', -8.0, -16.0, 185, 1.8), ('fr_frise', 9.0, -15.5, 172, 1.8), ('fr_frise', 25.0, -16.0, 180, 1.8),
+          ('fr_caisses', -12.0, 11.0, 40, 1.6), ('fr_caisses', 11.0, -2.0, 15, 1.6)]
 def rot2(deg):
     a = math.radians(deg); c, s = math.cos(a), math.sin(a)
     return np.array([[c, 0, s], [0, 1, 0], [-s, 0, c]])
@@ -122,6 +130,7 @@ def smooth_field(cells, seed, amp, size=84.0):
 und = smooth_field(9, 5, .5)+smooth_field(21, 6, .18)
 dist_ruin = np.full((CN, CN), 99.0)
 for rx, rz, _ in RUINS: dist_ruin = np.minimum(dist_ruin, np.maximum(np.abs(GX-rx)-4.4, np.abs(GZ-rz)-3.4).clip(0))
+for _, cx_, cz_, _, cr_ in COVERS: dist_ruin = np.minimum(dist_ruin, (np.hypot(GX-cx_, GZ-cz_)-cr_*.8).clip(0))
 craters = []
 for _ in range(3000):
     R = rng.choice([1.4, 1.9, 2.5, 3.2, 4.0], p=[.28, .28, .22, .14, .08]); x, z = rng.uniform(-38, 38, 2)
@@ -250,6 +259,10 @@ raster(H, HX0, HST, np.concatenate([glb_tris(OUT+'/fr_sol.glb', {'Sol', 'Terre'}
 for m, x, z, d in TILES: raster(H, HX0, HST, place(tile_all[m], x, 0, z, d))
 rub = glb_tris(OUT+'/fr_ruine.glb', {'Gravats'})
 for rx, rz, deg in RUINS: raster(H, HX0, HST, place(rub, rx, SURF, rz, deg))
+COVPL = []
+for nm, x, z, deg, r in COVERS:
+    y = min(gh(x+dx, z+dz) for dx in (-r*.5, 0, r*.5) for dz in (-r*.5, 0, r*.5)) - .03; COVPL.append((nm, x, y, z, deg))
+    raster(H, HX0, HST, place(glb_tris(f'{OUT}/{nm}.glb'), x, y, z, deg))
 H[H < -4] = SURF
 H = np.maximum(H, np.where(H < .12, .12, H))                       # caillebotis : on marche à 12 cm
 q = np.clip(np.round((H+10)*200), 0, 65535).astype(np.uint16)
@@ -259,11 +272,13 @@ np.save(OUT+'/hf.npy', H)
 # ======================= 7. modèles -> .dfm, données JS
 for nm, tex in (('fr_sol', 2048), ('fr_droite', 512), ('fr_rampe', 512), ('fr_rampe_m', 512), ('fr_T', 512), ('fr_X', 512), ('fr_ruine', 512)):
     convert.convert_static(f'{OUT}/{nm}.glb', nm, ASSETS, 10**7, tex=tex)
+for nm in sorted(set(c[0] for c in COVERS)): convert.convert_static(f'{OUT}/{nm}.glb', nm, ASSETS, 10**7, tex=512)
 for i in range(1, 5): convert.convert_static(f'tools/modeles/arbre_mort_{i}.glb', f'fr_arbre{i}', ASSETS, 10**7, tex=512)
 props = [{'m': 'fr_sol', 'p': [0, 0, 0], 'r': 0}]
 props += [{'m': m, 'p': [x, 0, z], 'r': round(math.radians(d), 5)} for m, x, z, d in TILES]
 props += [{'m': 'fr_ruine', 'p': [rx, SURF, rz], 'r': round(math.radians(d), 5)} for rx, rz, d in RUINS]
 props += [{'m': nm, 'p': [x, round(y-.05, 3), z], 'r': round(math.radians(d), 5)} for nm, x, y, z, d in TREEPL]
+props += [{'m': nm, 'p': [x, round(y, 3), z], 'r': round(math.radians(d), 5)} for nm, x, y, z, d in COVPL]
 lights = []
 for sgn in (1, -1):
     for x in (-28, -20, -12, -4, 4, 12, 20, 28):
@@ -279,5 +294,7 @@ import re
 gp = 'src/game.html'; gs = open(gp, encoding='utf-8').read()
 data = json.dumps({k: json.load(open(OUT+'/front.json'))[k] for k in ('props', 'boxes', 'lights', 'spawns')}, separators=(',', ':'))
 gs2 = re.sub(r'const FRONT=\{.*?\};\n', lambda m: 'const FRONT=' + data + ';\n', gs, count=1, flags=re.S)
+assets_js = "const FR_ASSETS=" + json.dumps(sorted(set(p['m'] for p in props)), separators=(',', ':')) + ";"
+gs2 = re.sub(r'const FR_ASSETS=\[.*?\];', lambda m: assets_js, gs2, count=1)
 if gs2 != gs: open(gp, 'w', encoding='utf-8').write(gs2); print('src/game.html : données FRONT mises à jour')
 else: print('src/game.html : données FRONT déjà à jour')
