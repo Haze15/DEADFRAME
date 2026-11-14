@@ -1624,7 +1624,7 @@ function xfSub(W,X,list){for(const i of list){mul4(_at,0,X,0,W,i*16);W.set(_at,i
 function swing(W,list,c,from,to){const a=cross(from,to),l=len(a),d=dot(from,to);if(l<1e-7)return;xfSub(W,rotAbout(mulS(a,1/l),Math.atan2(l,d),c),list)}
 const wpos=(W,i)=>[W[i*16+12],W[i*16+13],W[i*16+14]];
 // place le poignet en T (repère des bras) ; rot = rotation supplémentaire de la main [axe x,y,z en radians, repère de l'arme]
-function armIK(W,a,T,rot){const S=wpos(W,a.up),E=wpos(W,a.fo),H=wpos(W,a.ha);
+function armIK(W,a,T,rot,Rm){const S=wpos(W,a.up),E=wpos(W,a.fo),H=wpos(W,a.ha);
  const R0=W.slice(a.ha*16,a.ha*16+12),l1=len(sub(E,S)),l2=len(sub(H,E));let dv=sub(T,S),d=len(dv);d=clamp(d,Math.abs(l1-l2)+1e-3,(l1+l2)*.999);const dir=mulS(dv,1/(len(dv)||1));
  let pole=sub(E,S);pole=sub(pole,mulS(dir,dot(pole,dir)));const pl=len(pole)||1;pole=mulS(pole,1/pl);
  const x=(l1*l1-l2*l2+d*d)/(2*d),y=Math.sqrt(Math.max(0,l1*l1-x*x)),E2=add(S,add(mulS(dir,x),mulS(pole,y))),T2=add(S,mulS(dir,d));
@@ -1636,7 +1636,8 @@ function armIK(W,a,T,rot){const S=wpos(W,a.up),E=wpos(W,a.fo),H=wpos(W,a.ha);
  for(let c=0;c<3;c++)for(let r=0;r<3;r++)X[c*4+r]=(R0[r]*R1[c]+R0[4+r]*R1[4+c]+R0[8+r]*R1[8+c])*sc;
  X[3]=X[7]=X[11]=0;X[15]=1;X[12]=cn[0]-(X[0]*cn[0]+X[4]*cn[1]+X[8]*cn[2]);X[13]=cn[1]-(X[1]*cn[0]+X[5]*cn[1]+X[9]*cn[2]);X[14]=cn[2]-(X[2]*cn[0]+X[6]*cn[1]+X[10]*cn[2]);xfSub(W,X,a.sHa);
  // axes de l'arme dans le repère des bras (demi-tour autour de Y) : x -> -x, z -> -z
- if(rot)for(let k=0;k<3;k++)if(rot[k]){const ax=[0,0,0];ax[k]=k===1?1:-1;xfSub(W,rotAbout(ax,rot[k],cn),a.sHa)}}
+ if(rot)for(let k=0;k<3;k++)if(rot[k]){const ax=[0,0,0];ax[k]=k===1?1:-1;xfSub(W,rotAbout(ax,rot[k],cn),a.sHa)}
+ if(Rm){const Y=M.ry(Math.PI),A=mm(Y,Rm,Y);A[12]=A[13]=A[14]=0;xfSub(W,mm(M.trs(cn[0],cn[1],cn[2]),A,M.trs(-cn[0],-cn[1],-cn[2])),a.sHa)}}
 // courbe d'images clés [u, point] -> point interpolé (lissé)
 function keyPath(u,K){if(u<=K[0][0])return K[0][1];for(let i=1;i<K.length;i++)if(u<=K[i][0]){const a=K[i-1],b=K[i],k=(u-a[0])/(b[0]-a[0]||1),s=k*k*(3-2*k);return[lerp(a[1][0],b[1][0],s),lerp(a[1][1],b[1][1],s),lerp(a[1][2],b[1][2],s)]}return K[K.length-1][1]}
 function drawArms(G,w,c){const m=ARMS.m,W=m.world;W.set(ARMS.base);
@@ -1652,7 +1653,10 @@ function drawArms(G,w,c){const m=ARMS.m,W=m.world;W.set(ARMS.base);
  // réarmement du verrou (fusil de précision) : main droite à la culasse, levier levé, tiré, repoussé, rabattu
  if(me.bolt>0&&c.bolt){const u=1-me.bolt,b=add(c.bolt,[.02,-.035,.04]);
   rw=keyPath(u,[[0,rw],[.18,b],[.3,add(b,[.012,.025,0])],[.48,add(b,[.012,.025,.085])],[.66,add(b,[.012,.025,0])],[.76,b],[1,rw]])}
- armIK(W,ARMS.side.R,tp(ARMS.ifix,rw),c.rrot);armIK(W,ARMS.side.L,tp(ARMS.ifix,lw),c.lrot);
+ armIK(W,ARMS.side.R,tp(ARMS.ifix,rw),c.rrot,c.rwM);
+ // main gauche occupée hors champ (bouclier, couteau, grenade) : le bras gauche n'est pas dessiné (repli sur l'épaule)
+ if(c.hideL||ARMS.hideL){const S=wpos(W,ARMS.side.L.up);for(const i of ARMS.side.L.sUp){W.fill(0,i*16,i*16+16);W[i*16+12]=S[0];W[i*16+13]=S[1];W[i*16+14]=S[2];W[i*16+15]=1}}
+ else armIK(W,ARMS.side.L,tp(ARMS.ifix,lw),c.lrot,c.lwM);
  for(let k=0;k<m.joints.length;k++)mul4(m.jm,k*16,W,m.joints[k]*16,m.ibm,k*16);m.dirty=true;
  drawModel(m,mm(G,ARMS.fix),{spec:.1})}
 /* ================= CLASSES SPÉCIALES =================
@@ -1736,16 +1740,19 @@ function actUpdate(dt){if(me.blind>0)me.blind=Math.max(0,me.blind-dt);const a=me
  if(a.k==='throw'&&!a.thrown&&a.t>.36){a.thrown=true;releaseGren(a.g)}
  if(a.t>=a.d)me.act=null}
 function hipFrame(cam,R,U,F){const h=[.13,-.17,.36],p=add(add(add(cam,mulS(R,h[0])),mulS(U,h[1])),mulS(F,h[2]));return mm(M.trs(p[0],p[1],p[2]),M.ry(gun.yaw),M.rx(gun.pitch))}
-function drawActVM(cam,R,U,F){const a=me.act,u=clamp(a.t/a.d,0,1),Gh=hipFrame(cam,R,U,F);let obj,Mo,rw;
- if(a.k==='knife'){obj=MODELS.couteau;   // en garde, armé à droite, tranche de droite à gauche, retour en garde
-  const K=[[0,[.02,.04,-.04,.3,.25,0]],[.22,[.14,.14,0,1,.4,-.55]],[.5,[-.24,.07,-.16,-.6,-.05,.4]],[.7,[-.18,.03,-.08,-.3,.05,.2]],[1,[.02,.04,-.04,.3,.25,0]]];
-  let q=K[K.length-1][1];for(let i=1;i<K.length;i++)if(u<=K[i][0]){const k0=K[i-1],k1=K[i],t=(u-k0[0])/(k1[0]-k0[0]),e=t*t*(3-2*t);q=k0[1].map((v,j)=>lerp(v,k1[1][j],e));break}
-  Mo=mm(Gh,M.trs(q[0],q[1],q[2]),M.ry(q[3]),M.rx(q[4]),M.rz(q[5]));rw=[0,-.012,.115]}
- else{obj=MODELS[a.g==='frag'?'gfrag':'gflash'];   // grenade ramenée en arrière puis lancée
-  const back=u<.36?Math.sin(u/.36*Math.PI*.5):1-Math.min(1,(u-.36)/.2),pos=[lerp(.02,.08,back),lerp(-.02,.2,back),lerp(-.08,.12,back)-(u>.36?(u-.36)*1.4:0)];
-  Mo=mm(Gh,M.trs(pos[0],pos[1],pos[2]),M.rx(-back*.6));rw=[0,-.035,.07];if(a.thrown)obj=null}
- gl.useProgram(PM.p);if(obj)drawModel(obj,Mo,{spec:.35});
- if(ARMS.ok){const G0=Mo,inv=inv4r(Gh),hand=tp(inv,tp(G0,rw)),c={rw:hand,lw:[-.12,-.32,.02],ads:sub(ARMS.eye,[0,-.05,.04])};const ad=me.ads;me.ads=0;drawArms(Gh,WPN[me.w],c);me.ads=ad}
+// poignée de l'AKM (repère de l'arme) : c'est là que la main droite serre ; couteau et grenade y sont placés
+const GRIP_KNIFE=mm(M.trs(0,-.012,-.012),M.rx(1.42)),GRIP_GREN=M.trs(.004,-.05,-.004);
+function keyQ(u,K){let q=K[K.length-1][1];for(let i=1;i<K.length;i++)if(u<=K[i][0]){const k0=K[i-1],k1=K[i],t=(u-k0[0])/(k1[0]-k0[0]),e=t*t*(3-2*t);q=k0[1].map((v,j)=>lerp(v,k1[1][j],e));break}return q}
+function drawActVM(cam,R,U,F){const a=me.act,u=clamp(a.t/a.d,0,1),Gh=hipFrame(cam,R,U,F);let obj,Rel,grip;
+ if(a.k==='knife'){obj=MODELS.couteau;grip=GRIP_KNIFE;   // en garde lame en avant, armé à droite, tranche vers la gauche, retour
+  const q=keyQ(u,[[0,[.0,.05,-.02,-.95,.1,-.2]],[.22,[.12,.13,.05,-.35,.85,-.95]],[.5,[-.22,.03,-.16,-1.35,-.75,.55]],[.72,[-.15,0,-.08,-1.15,-.4,.3]],[1,[.0,.05,-.02,-.95,.1,-.2]]]);
+  Rel=mm(M.trs(q[0],q[1],q[2]),M.ry(q[4]),M.rx(q[3]),M.rz(q[5]))}
+ else{obj=a.thrown?null:MODELS[a.g==='frag'?'gfrag':'gflash'];grip=GRIP_GREN;   // grenade ramenée derrière l'épaule, bras lancé vers l'avant
+  const q=keyQ(u,[[0,[.02,0,0,-.2]],[.45,[.1,.17,.13,.55]],[.6,[.05,.13,-.22,-.9]],[.8,[-.02,-.08,-.24,-1.4]],[1,[0,-.25,-.1,-1.4]]]);
+  Rel=mm(M.trs(q[0],q[1],q[2]),M.rx(q[3]))}
+ gl.useProgram(PM.p);if(obj)drawModel(obj,mm(Gh,Rel,grip),{spec:.35});
+ if(ARMS.ok){const akm=WPN[2].m,R0=Rel.slice();R0[12]=R0[13]=R0[14]=0;
+  const c={rw:tp(Rel,akm.rw),rwM:R0,lw:[-.2,-.5,.25],hideL:1,ads:sub(ARMS.eye,[0,-.05,.04])};const ad=me.ads;me.ads=0;ARMS.lwOver=null;drawArms(Gh,WPN[me.w],c);me.ads=ad}
  gl.useProgram(PW.p)}
 // bouclier tenu à gauche : en visée il s'écarte et s'abaisse pour dégager la ligne de tir
 function shieldVM(cam,R,U,F){const m=MODELS.bouclier;if(!m)return null;const a=me.ads,bobY=-Math.abs(Math.cos(me.bob))*.02*Math.min(1,me.spd/3.3);
@@ -1753,7 +1760,7 @@ function shieldVM(cam,R,U,F){const m=MODELS.bouclier;if(!m)return null;const a=m
  const S=mm(M.trs(p[0],p[1],p[2]),M.ry(camS.yaw+lerp(.22,.42,a)),M.rx(camS.pitch*.35),M.rz(lerp(.05,.12,a)));gl.useProgram(PM.p);drawModel(m,S,{spec:.25});gl.useProgram(PW.p);return S}
 function drawWeapon(cam,R,U,F,dt,VPw,asp){
  if(me.act){drawActVM(cam,R,U,F);return}
- const shS=me.shield?shieldVM(cam,R,U,F):null;ARMS.lwOver=null;
+ const shS=me.shield?shieldVM(cam,R,U,F):null;ARMS.lwOver=null;ARMS.hideL=!!shS;
  const w=WPN[me.w],mdl=MODELS[w.model],a=me.ads,mv=Math.min(1,me.spd/3.3);
  const bobX=Math.sin(me.bob)*.012*mv*(1-a),bobY=-Math.abs(Math.cos(me.bob))*.012*mv*(1-a),drop=me.swT>0?Math.sin(Math.PI*(1-me.swT/.42)):0,spr=me.spr;
  // En visée, l'arme est placée dans SON repère : la ligne de mire passe exactement par la caméra, donc par l'axe de tir.
@@ -1775,10 +1782,9 @@ function drawWeapon(cam,R,U,F,dt,VPw,asp){
   if(c.sR&&a>0){const d=sub(c.sF,c.sR),f=mulS(d,1/len(d)),r0=c.lat||[1,0,0];let r=sub(r0,mulS(f,dot(r0,f)));r=mulS(r,1/len(r));const u=cross(mulS(f,-1),r);
    // repère mesuré de l'arme (droite r, haut u, avant f) -> repère de visée (x, y, -z)
    const B=new Float32Array(16);for(let k=0;k<3;k++){B[k*4]=r[k];B[k*4+1]=u[k];B[k*4+2]=-f[k]}B[15]=1;Rs=mm(Rg,B);
-   const gf=tp(Rg,[0,0,-1]),sr=tp(Rs,c.sR);pa=add(add(cam,mulS(gf,c.rel+me.kick*.02)),mulS(sr,-1));pa=add(pa,tp(Rg,[0,-rl*.14,0]))}
+   const gf=tp(Rg,[0,0,-1]),sr=tp(Rs,c.sR);pa=add(add(cam,mulS(gf,c.rel+(me.shield?.12:0)+me.kick*.02)),mulS(sr,-1));pa=add(pa,tp(Rg,[0,-rl*.14,0]))}
   const pos=[lerp(ph[0],pa[0],a),lerp(ph[1],pa[1],a),lerp(ph[2],pa[2],a)],G=mm(M.trs(pos[0],pos[1],pos[2]),a>0&&Rs!==Rg?orthoLerp(Rg,Rs,a):Rg);
   const scoped=c.scope&&a>.9;   // dans la lunette : l'arme sort du champ, la vue passe par l'optique (voir scopeHUD)
-  if(shS)ARMS.lwOver=tp(inv4r(G),tp(shS,[-.02,-.06,.04]));
   if(c.fix&&!scoped){gl.useProgram(PM.p);drawModel(mdl,mm(G,c.fix),{spec:.3});if(ARMS.ok&&c.rw)drawArms(G,w,c);gl.useProgram(PW.p)}
   else if(!c.fix)for(const p of c.parts)cube(mm(G,M.trs(p[0],p[1],p[2]),M.scl(p[3],p[4],p[5])),[.022,.022,.025]);
   gun.muzzle=gun.flashPos=tp(G,c.muz);gun.anchor=tp(G,[c.ads[0]-.07,.09,-.1]);gun.VPw=VPw;
