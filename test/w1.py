@@ -4,7 +4,7 @@ ARGS = ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-u
 shots = sys.argv[1].split(',')
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path='/usr/bin/google-chrome', args=ARGS)
-    pg = b.new_page(viewport={'width': 960, 'height': 540}); logs=[]
+    pg = b.new_page(viewport={'width': 1280, 'height': 600}); logs=[]
     pg.on('pageerror', lambda e: logs.append('PAGEERROR '+str(e)))
     pg.goto('file:///home/claude/deadframe/page/index.html'); pg.wait_for_timeout(5000)
     pg.evaluate("()=>{DF.CFG.bots=0}"); pg.click('#go'); pg.wait_for_timeout(2500)

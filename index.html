@@ -997,7 +997,7 @@ const WPN=[
  {n:'HK416',cal:'5.56×45',mag:30,res:150,cd:.08,auto:true,dmg:34,rec:.02,spread:.0035,rl:2.4,rifle:1,model:'hk416',b:BOXR,
   m:{fix:mm(M.scl(4.2,4.2,4.2),M.trs(-.002,-.005,-.026)),muz:[-.009,.052,-.66],ads:[-.009,.133,.2],holo:1,sR:[-.009,.133,-.24],sF:[-.009,.133,-.29],rel:.44,lh:[0,.0,-.34],hip:[.13,-.17,.36],rw:[-.006,-.014,.094],lw:[-.05,-.012,-.3],mag:[-.01,-.03,-.16]}},
  {n:'AKS-74',cal:'5.45×39',mag:30,res:150,cd:.092,auto:true,dmg:36,rec:.024,spread:.004,rl:2.8,rifle:1,model:'aks74',b:BOXR,
-  vm:{hip:[.02,-.27,-.2],ads:[-.088,-.2,-.1],adsRot:[0,0],muz:[.088,.13,-1.12],fov:.66,fovAds:.5,bone:'wpn_body_03',sR:[.25,.038,.0915],sF:[.688,.037,.0842],lat:[.0049,.9999,-.0157],rel:.3,bMuz:[.79,.045,.03]},anims:{shot:'Shot',reload:'Reload_t',walk:'Walk',inspect:'Inspect'}},
+  vm:{hip:[.02,-.27,-.2],ads:[-.088,-.2,-.1],adsRot:[0,0],muz:[.088,.13,-1.12],fov:.66,fovAds:.5,bone:'wpn_body_03',sR:[.25,.038,.0915],sF:[.688,.037,.0842],lat:[.0049,.9999,-.0157],rel:.36,bMuz:[.79,.045,.03]},anims:{shot:'Shot',reload:'Reload_t',walk:'Walk',inspect:'Inspect'}},
  {n:'AKM',cal:'7.62×39',mag:30,res:120,cd:.1,auto:true,dmg:44,rec:.031,spread:.0045,rl:2.7,rifle:1,model:'akm',b:BOXR,
   m:{fix:mm(M.scl(.0232,.0232,.0232),M.ry(Math.PI),M.trs(4.24,4.2,-6.6)),muz:[-.016,.056,-.62],ads:[-.016,.089,.3],sR:[-.013,.0885,-.212],sF:[-.0201,.0998,-.5355],lat:[.9999,.0061,-.0159],rel:.34,lh:[0,.01,-.3],hip:[.13,-.17,.36],mag:[-.016,-.04,-.2]}},
  {n:'P43',cal:'9×19',mag:12,res:60,cd:.15,auto:false,dmg:26,rec:.036,spread:.006,rl:1.6,rifle:0,model:'pistol',b:BOXP,
@@ -1742,7 +1742,7 @@ function render(dt){
   if(m.skinned&&m.anims){samplePose(m,m.anims[v.anim||0],v.t||0,false,m.pose);solvePose(m,m.pose)}
   gl.useProgram(PM.p);drawModel(m,mm(M.trs(c[0],c[1],c[2]),M.ry(camS.yaw+(v.yaw||0)),M.rx(v.pitch||0),M.scl(sz,sz,sz),M.trs(-cn[0],-cn[1],-cn[2])));gl.useProgram(PW.p)}
  discsDraw();fxDraw(VP,P);
- if(firstPerson&&!DBG.view&&!DBG.cam){gl.clear(gl.DEPTH_BUFFER_BIT);const w=WPN[me.w],vmOn=w.vm&&MODELS[w.model],wf=vmOn?Math.min(2.2,2*Math.atan(camS.zoom*Math.tan(lerp(w.vm.fov,w.vm.fovAds||w.vm.fov*.8,me.ads)/2))):camS.fov,VPw=M.mul(M.persp(wf,asp,.012,12),V);
+ if(firstPerson&&!DBG.view&&!DBG.cam){gl.clear(gl.DEPTH_BUFFER_BIT);const w=WPN[me.w],vmOn=w.vm&&MODELS[w.model],wf=vmOn?lerp(Math.min(2.2,2*Math.atan(camS.zoom*Math.tan(lerp(w.vm.fov,w.vm.fovAds||w.vm.fov*.8,me.ads)/2))),camS.fov,w.vm.bone?me.ads*me.ads*(3-2*me.ads):0):camS.fov,VPw=M.mul(M.persp(wf,asp,.012,12),V);
   if(spots[0]&&spots[0].own){fSC[0]*=.3;fSC[1]*=.3;fSC[2]*=.3}
   for(const PR of[PM,PW]){gl.useProgram(PR.p);gl.uniform4fv(PR.u.uSC,fSC);gl.uniformMatrix4fv(PR.u.uVP,false,VPw)}
   drawWeapon(camS.pos,R,U,F,dt,VPw,asp)}
