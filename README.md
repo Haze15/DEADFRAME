@@ -31,6 +31,7 @@ Le fichier `render.yaml` décrit le service : Render construit le serveur Go (le
 
 ## Cartes
 Dépôt industriel · Hôpital abandonné · Tranchées · Hôtel · Front — choix dans le menu (en multijoueur, c'est l'hôte qui choisit).
+- **Hôpital abandonné** : modèle 3D complet fourni (trois niveaux, cour, parking aux voitures abandonnées, arbres). Les collisions sont calculées depuis la géométrie du modèle (`tools/hopital.py` : cases de 20 × 10 × 20 cm fusionnées en boîtes) ; on enjambe les obstacles de 75 cm au plus. Les collisions passent par une grille de 4 m, ce qui garde les tirs et déplacements rapides malgré les 13 000 boîtes.
 
 ### Front (décor en modèles 3D, sol en relief)
 Deux lignes de tranchées face à face (coffrage en planches, caillebotis, parapets de sacs de sable, lanternes), reliées par des T, un croisement et un boyau vers l'arrière ; un no man's land de 34 trous d'obus avec flaques, deux maisons en ruine (un feu brûle dans chacune) et des arbres morts.
