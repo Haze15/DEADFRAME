@@ -414,7 +414,7 @@ body.touch.uav #tMenu{left:50%;margin-left:-28px;top:64px}#touch .d{display:none
    </div>
 
    <div class="pane" id="t-loadout">
-    <header class="ph"><em>02 — ÉQUIPEMENT</em><h2>Classe</h2><p>La classe fixe les armes, les grenades et la vitesse. Changée en zone, elle s'applique au prochain déploiement. Touches : 1 arme principale, 2 pistolet, 3 ou V couteau, 4 grenade à fragmentation, 5 flash.</p></header>
+    <header class="ph"><em>02 — ÉQUIPEMENT</em><h2>Classe</h2><p>La classe fixe les armes, les grenades et la vitesse. Changée en zone, elle s'applique au prochain déploiement. Touches : 1 arme principale, 2 pistolet, 3 ou V couteau, 4 grenade à fragmentation, 5 flash, 6 mine (SAPEUR).</p></header>
     <div class="lo" id="clsl"></div>
     <div class="lbl" id="armsLbl">Armes de la classe</div>
     <div class="lo" id="arms"></div>
@@ -1117,6 +1117,7 @@ function onNet(f,d){
   else if(typeof d.to==='string'&&isHost()){const b=bots.find(b=>b.id===d.to);if(b)hurtBot(b,d.dmg,by)}}
  else if(d.t==='kill'){feedKill(d.k,d.v);if(d.k===myId){me.kills++;creditKill(d.v)}if(isHost()&&typeof d.k==='string'){const b=bots.find(b=>b.id===d.k);if(b)b.k++}}
  else if(d.t==='gr'||d.t==='gx')grenNet(f,d);
+ else if(d.t==='mn'||d.t==='mr'||d.t==='mx')mineNet(f,d);
  else if(d.t==='rl'){const p=typeof d.b==='string'?bots.find(b=>b.id===d.b):players[f];if(p)p.rlS=now}
  else if(d.t==='dx'&&Array.isArray(d.p)&&d.p.length===3&&d.p.every(Number.isFinite))explode(d.p,1);
  else if(d.t==='b'){if(!isHost()&&f===hostId)syncBots(d.l)}
@@ -1144,7 +1145,7 @@ function updHud(dt){$('hud').classList.toggle('uav',me.inDrone||me.uavLost>0);hu
  if(hudT>0)return;hudT=.2;
  const d=new Date(),p=n=>String(n).padStart(2,'0'),tz=-d.getTimezoneOffset(),tzs=(tz>=0?'+':'-')+p(Math.abs(tz)/60|0)+p(Math.abs(tz)%60);
  $('cam').innerHTML=(me.inDrone?'<b>◉ LIAISON DRONE</b>':'<span class="dot"></span>REC')+'&nbsp; '+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' &nbsp;'+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())+' '+tzs+'<br>DEADFRAME '+(me.inDrone?'UAV-3':'BODYCAM X2')+' · '+esc(me.name)+'<br><span style="opacity:.6">'+(online?'NET · '+(Object.keys(players).length+1)+' OP':'SOLO')+' · '+fpsShown+' FPS · '+Math.round(rScale*100)+'% · CHAMP '+Math.round(CULL.drawn/CULL.total*100)+'%</span>';
- const w=WPN[me.w];$('ammo').innerHTML=(me.reload>0?'RECHARGEMENT':'')+'<small>'+w.n+' · '+w.cal+(me.gren?' · FRAG '+me.gren.frag+' · FLASH '+me.gren.flash:'')+(me.drone?' · DRONE '+({launch:'DÉCOLLAGE',fly:'EN VOL',hold:'STATIONNAIRE',rth:'RETOUR',land:'ATTERRISSAGE',down:'ABATTU'}[me.drone.state])+' '+Math.round(me.drone.bat*100)+' %':me.droneCd>0?' · DRONE '+Math.ceil(me.droneCd)+' s':' · DRONE PRÊT')+'</small>';
+ const w=WPN[me.w];$('ammo').innerHTML=(me.reload>0?'RECHARGEMENT':'')+'<small>'+w.n+' · '+w.cal+(me.gren?' · FRAG '+me.gren.frag+' · FLASH '+me.gren.flash+(me.gren.mine||MINES.some(m=>m.own===myId)?' · MINES '+me.gren.mine+' (posées '+MINES.filter(m=>m.own===myId).length+')':''):'')+(me.drone?' · DRONE '+({launch:'DÉCOLLAGE',fly:'EN VOL',hold:'STATIONNAIRE',rth:'RETOUR',land:'ATTERRISSAGE',down:'ABATTU'}[me.drone.state])+' '+Math.round(me.drone.bat*100)+' %':me.droneCd>0?' · DRONE '+Math.ceil(me.droneCd)+' s':' · DRONE PRÊT')+'</small>';
  $('hpb').style.width=clamp(me.hp,0,100)+'%';$('hpb').style.background=me.hp<35?'#e5291f':'#e9e6df';
  if($('score').style.display==='block')scoreboard()}
 function showMsg(html){const m=$('msg');if(html){m.innerHTML=html;m.style.display='block'}else m.style.display='none'}
@@ -1501,6 +1502,7 @@ function fire(){const w=WPN[me.w];if(me.cool>0||me.reload>0||me.act)return;
  const d=dirOf(gun.yaw+(rnd()-.5)*sp*2,gun.pitch+(rnd()-.5)*sp*2),o=camS.pos.slice();
  const rw=rayWorld(o,d,300);let end=add(o,mulS(d,rw.t)),rc=rayChars(o,d,rw.t,null),hitDrone=null;
  for(const id in players){const p=players[id];if(p.drone){const q=p.drone,t=rayBox(o,d,[q[0]-.35,q[1]-.2,q[2]-.35,q[0]+.35,q[1]+.2,q[2]+.35],rc?rc.t:rw.t);if(t>=0){hitDrone=p;end=add(o,mulS(d,t))}}}
+ const rmn=rayMines(o,d,rc?rc.t:rw.t);if(rmn&&now>=rmn.m.arm){rc=null;end=add(o,mulS(d,rmn.t));mineBoom(rmn.m)}
  const rsh=rayShields(o,d,rc?rc.t:(hitDrone?len(sub(end,o)):rw.t),me);
  if(rsh){rc=null;hitDrone=null;end=add(o,mulS(d,rsh.t));shieldSpark(end,d)}
  else if(hitDrone){send({t:'hit',to:hitDrone.id,dr:1,dmg:w.dmg});impact(end,[0,1,0]);for(let i=0;i<5;i++)parts.push({pos:end.slice(),vel:[(rnd()-.5)*4,rnd()*3,(rnd()-.5)*4],life:.15+rnd()*.2,col:[6,4,1.5],s:.015,em:1,g:9})}
@@ -1543,7 +1545,7 @@ function playerUpdate(dt){
  const wantCr=ctl&&(keys.KeyC||pad.crouch);me.crouch+=((wantCr?1:0)-me.crouch)*Math.min(1,dt*9);
  const wantAds=(ctl&&(mb2||pad.ads)&&me.reload<=0)||!!DBG.ads;me.ads+=((wantAds?1:0)-me.ads)*Math.min(1,dt*11);
  const sprint=ctl&&(keys.ShiftLeft||pad.sprint)&&f>.5&&!wantCr&&!wantAds&&!(camS.scope>.3)&&!me.shield;
- const sp=(sprint?5.7:wantCr?1.7:wantAds?2.0:3.3)*(me.cls?me.cls.spd:1)*(me.act&&me.act.k==='throw'?.8:1),F=dirOf(me.yaw,0),R=rightOf(me.yaw);
+ const sp=(sprint?5.7:wantCr?1.7:wantAds?2.0:3.3)*(me.cls?me.cls.spd:1)*(me.act&&me.act.k==='throw'?.8:me.act&&me.act.k==='mine'?.15:1),F=dirOf(me.yaw,0),R=rightOf(me.yaw);
  let wx=F[0]*f+R[0]*s,wz=F[2]*f+R[2]*s;const wl=Math.hypot(wx,wz);if(wl>0){const kk=Math.min(1,wl)*sp/wl;wx*=kk;wz*=kk}
  const k=Math.min(1,dt*(me.onG?10:2));me.vel[0]+=(wx-me.vel[0])*k;me.vel[2]+=(wz-me.vel[2])*k;
  if(ctl&&(keys.Space||pad.jump)&&me.onG){me.vel[1]=6.3;me.onG=false}
@@ -1675,16 +1677,18 @@ function drawArms(G,w,c){const m=ARMS.m,W=m.world;W.set(ARMS.base);
    BOUCLIER : bouclier balistique (arrête les balles de face) + P43, 2 flashs, déplacement réduit.
    MITRAILLEUR : mitrailleuse 100 coups + P43, 1 grenade à fragmentation, déplacement réduit.
    TIREUR D'ÉLITE : LUNARIS + P43, 1 flash.
+   SAPEUR : AKS-74 + P43, 3 mines de proximité (6), 1 grenade à fragmentation.
    Tous : couteau (V ou 3) — mortel dans le dos. Grenades : 4 fragmentation, 5 flash. */
 const CLASSES=[
  {id:'assaut',n:'ASSAUT',d:'Fusil au choix (HK416, AKS-74 ou AKM) et pistolet. Polyvalent.',kit:null,sec:3,frag:2,flash:1,spd:1},
  {id:'bouclier',n:'BOUCLIER',d:'Bouclier balistique tenu à gauche : il arrête les balles et réduit les éclats de face. Pistolet seulement, pas de sprint.',kit:[3],frag:0,flash:2,spd:.8,shield:1},
  {id:'mitrailleur',n:'MITRAILLEUR',d:'Mitrailleuse à bande de 100 coups, rechargement long. Plus lent.',kit:[5,3],frag:1,flash:0,spd:.86},
- {id:'tireur',n:'TIREUR D\'ÉLITE',d:'Fusil de précision LUNARIS à lunette x8 et pistolet.',kit:[4,3],frag:0,flash:1,spd:1}];
+ {id:'tireur',n:'TIREUR D\'ÉLITE',d:'Fusil de précision LUNARIS à lunette x8 et pistolet.',kit:[4,3],frag:0,flash:1,spd:1},
+ {id:'sapeur',n:'SAPEUR',d:'AKS-74 et pistolet, 3 mines de proximité (touche 6) : posées au sol, armées après 2 s, elles sautent quand un ennemi s\'approche à moins de 1,6 m.',kit:[1,3],frag:1,flash:0,mine:3,spd:.95}];
 const PRIM=[0,1,2];  // fusils proposés à la classe ASSAUT
 function myClass(){return CLASSES[clamp(CFG.cls|0,0,CLASSES.length-1)]}
 function kitOf(c){return c.kit?c.kit.slice():[PRIM.includes(CFG.loadout|0)?CFG.loadout|0:0,c.sec]}
-function applyClass(){const c=myClass();me.cls=c;me.kit=kitOf(c);me.shield=c.shield?1:0;me.gren={frag:c.frag,flash:c.flash};me.w=me.kit[0];vmA.w=-1;me.act=null;me.blind=0}
+function applyClass(){const c=myClass();me.cls=c;me.kit=kitOf(c);me.shield=c.shield?1:0;me.gren={frag:c.frag,flash:c.flash,mine:c.mine||0};me.w=me.kit[0];vmA.w=-1;me.act=null;me.blind=0}
 
 /* ---- bouclier : boîte orientée devant le torse ---- */
 function shieldFrame(e){const cr=e.crouch>.5?.4:0,y=e.yaw,f=[-Math.sin(y),0,-Math.cos(y)],r=[Math.cos(y),0,-Math.sin(y)];
@@ -1725,10 +1729,10 @@ function grenUpdate(dt){for(let i=GREN.length-1;i>=0;i--){const g=GREN[i];g.t+=d
   if(g.mine&&g.t>=g.fuse){GREN.splice(i,1);send({t:'gx',id:g.id,k:g.k,p:g.p.map(x=>+x.toFixed(2))});detonate(g.k,g.p,g.own)}
   else if(!g.mine&&g.t>g.fuse+3)GREN.splice(i,1)}}
 function lineClear(a,b){const d=sub(b,a),L=len(d);if(L<.05)return true;const r=rayWorld(a,mulS(d,1/L),L);return!r.hit||r.t>L-.05}
-function detonate(k,p,own){const q=[p[0],p[1]+.12,p[2]];
- if(k==='frag'){explode(q,.75);
+function detonate(k,p,own){const q=[p[0],p[1]+.12,p[2]],R=k==='mine'?5.5:8,D=k==='mine'?160:150;
+ if(k==='frag'||k==='mine'){explode(q,k==='mine'?.65:.75);
   // éclats : dégâts décroissants jusqu'à 8 m, à couvert si un mur s'interpose ; le bouclier de face en arrête l'essentiel
-  const dmgAt=(e,chestY)=>{const c=[e.pos[0],e.pos[1]+chestY,e.pos[2]],d=len(sub(c,q));if(d>8||!lineClear(q,c))return 0;let dm=150*Math.pow(1-d/8,1.4);if(shieldBlocks(e,q))dm*=.25;return dm};
+  const dmgAt=(e,chestY)=>{const c=[e.pos[0],e.pos[1]+chestY,e.pos[2]],d=len(sub(c,q));if(d>R||!lineClear(q,c))return 0;let dm=D*Math.pow(1-d/R,1.4);if(shieldBlocks(e,q))dm*=.25;return dm};
   if(me.alive&&started){const dm=dmgAt(me,me.crouch>.5?.8:1.2);if(dm>1){hurt(dm,own)}}
   if(isHost())for(const b of bots)if(b.alive){const dm=dmgAt(b,1.1);if(dm>1){impact([b.pos[0],b.pos[1]+1.1,b.pos[2]],[0,1,0],true,sub(b.pos,q),dm);hurtBot(b,dm,own)}}}
  else{ // flash : éclair, détonation sèche, éblouissement selon distance, ligne de vue et direction du regard
@@ -1745,16 +1749,46 @@ function grenNet(f,d){if(d.t==='gr'){if(!GREN.find(g=>g.id===d.id))GREN.push({id
  else if(d.t==='gx'){const i=GREN.findIndex(g=>g.id===d.id);if(i>=0)GREN.splice(i,1);detonate(d.k==='flash'?'flash':'frag',d.p,f)}}
 function grenDraw(){for(const g of GREN){const m=MODELS[g.k==='frag'?'gfrag':'gflash'];if(!m||!inSphere(g.p[0],g.p[1],g.p[2],.15))continue;const a=g.t*g.spin;drawModel(m,mm(M.trs(g.p[0],g.p[1],g.p[2]),M.ry(a*.7),M.rx(a),M.rz(a*.4)),{spec:.4})}}
 
+/* ---- mines de proximité (classe SAPEUR) : posées au sol devant soi (touche 6), armées après 2 s (bip),
+   déclenchées par un ennemi à moins de 1,6 m (double bip puis explosion), détruites si on leur tire dessus.
+   3 au plus par joueur ; le poseur ne les déclenche pas mais n'est pas à l'abri de l'explosion. */
+const MINES=[];let mineSeq=0;
+function placeMine(){if(!me.alive||me.inDrone||me.act||me.swT>0||!me.gren||!(me.gren.mine>0))return;
+ const F=dirOf(me.yaw,0),o=add(me.pos,add(mulS(F,.9),[0,.6,0])),r=rayWorld(o,[0,-1,0],1.5);if(!r.hit||r.n[1]<.7){tip('Pas de sol plat ici pour la mine',2);return}
+ me.gren.mine--;me.act={k:'mine',t:0,d:.9,placed:false,p:add(o,[0,-r.t+.005,0])}}
+function dropMine(p){const own=MINES.filter(m=>m.own===myId);if(own.length>=3){const o=own[0];MINES.splice(MINES.indexOf(o),1);send({t:'mr',id:o.id})}
+ const id=myId+':m'+(mineSeq++),m={id,p:p.map(v=>+v.toFixed(3)),own:myId,yaw:me.yaw,arm:now+2,trip:0};MINES.push(m);send({t:'mn',id,p:m.p,yaw:+me.yaw.toFixed(2)});
+ thump(.15,700,500,.05);setTimeout(()=>{noise(.12,.05,3200,3000,0,'bandpass',20)},2000)}
+function mineNet(f,d){if(d.t==='mn'){if(!MINES.find(m=>m.id===d.id))MINES.push({id:d.id,p:d.p,own:f,yaw:d.yaw||0,arm:now+2,trip:0})}
+ else if(d.t==='mr'){const i=MINES.findIndex(m=>m.id===d.id);if(i>=0)MINES.splice(i,1)}
+ else if(d.t==='mx'){const i=MINES.findIndex(m=>m.id===d.id);const m=i>=0?MINES.splice(i,1)[0]:null;detonate('mine',d.p,m?m.own:f)}}
+function mineBoom(m){const i=MINES.indexOf(m);if(i<0)return;MINES.splice(i,1);send({t:'mx',id:m.id,p:m.p});detonate('mine',m.p,m.own)}
+function mineUpdate(dt){for(const m of MINES.slice()){if(now<m.arm)continue;
+  if(m.trip){if(now>=m.trip)mineBoom(m);continue}
+  // chacun surveille son propre opérateur ; l'hôte surveille les bots
+  const near=e=>e.alive&&Math.hypot(e.pos[0]-m.p[0],e.pos[2]-m.p[2])<1.6&&Math.abs(e.pos[1]-m.p[1])<1.2;
+  let hit=(started&&m.own!==myId&&near(me))||(isHost()&&bots.some(b=>b.id!==m.own&&near(b)));
+  if(hit){m.trip=now+.35;const dd=len(sub(m.p,listenPos()));for(const k of[0,1])setTimeout(()=>noise(.5/(1+dd*.1),.06,3600,3500,0,'bandpass',25),k*150)}}}
+// tir sur une mine : elle saute
+function rayMines(o,d,maxT){let best=null,bt=maxT;for(const m of MINES){const t=rayBox(sub(o,m.p),d,[-.13,0,-.13,.13,.08,.13],bt);if(t>=0&&t<bt){bt=t;best=m}}return best?{m:best,t:bt}:null}
+function mineDraw(){for(const m of MINES){if(!inSphere(m.p[0],m.p[1],m.p[2],.3))continue;const B=mm(M.trs(m.p[0],m.p[1],m.p[2]),M.ry(m.yaw));
+  for(const a of[0,.785])cube(mm(B,M.ry(a),M.trs(0,.03,0),M.scl(.22,.06,.22)),[.07,.075,.05],4);cube(mm(B,M.trs(0,.07,0),M.scl(.07,.025,.07)),[.05,.05,.045],4);
+  const on=now>=m.arm&&(m.trip||Math.sin(now*6+m.p[0])>.85);cube(mm(B,M.trs(.06,.075,0),M.scl(.012,.012,.012)),on?[9,.6,.3]:[.1,.02,.02],on?5:4)}}
+// animation : la mine descend posée au sol, la caméra s'abaisse
+function mineVM(Gh,u){gl.useProgram(PW.p);const d=u<.55?u/.55:1,q=[.02,lerp(-.02,-.42,d),lerp(-.05,-.32,d)],G=mm(Gh,M.trs(q[0],q[1],q[2]),M.rx(-.25));
+ if(u<.6)for(const a of[0,.785])cube(mm(G,M.ry(a),M.scl(.22,.06,.22)),[.07,.075,.05],4);return mm(M.trs(q[0],q[1]+.04,q[2]+.06))}
 /* ---- vue à la première personne : couteau, lancer, bouclier ---- */
 function actUpdate(dt){if(me.blind>0)me.blind=Math.max(0,me.blind-dt);const a=me.act;if(!a)return;a.t+=dt;
  if(a.k==='knife'&&!a.hit&&a.t>.17){a.hit=true;knifeStrike()}
  if(a.k==='throw'&&!a.thrown&&a.t>.36){a.thrown=true;releaseGren(a.g)}
+ if(a.k==='mine'&&!a.placed&&a.t>.5){a.placed=true;dropMine(a.p)}
  if(a.t>=a.d)me.act=null}
 function hipFrame(cam,R,U,F){const h=[.13,-.17,.36],p=add(add(add(cam,mulS(R,h[0])),mulS(U,h[1])),mulS(F,h[2]));return mm(M.trs(p[0],p[1],p[2]),M.ry(gun.yaw),M.rx(gun.pitch))}
 // poignée de l'AKM (repère de l'arme) : c'est là que la main droite serre ; couteau et grenade y sont placés
 const GRIP_KNIFE=mm(M.trs(0,-.012,-.012),M.rx(1.42)),GRIP_GREN=M.trs(.004,-.05,-.004);
 function keyQ(u,K){let q=K[K.length-1][1];for(let i=1;i<K.length;i++)if(u<=K[i][0]){const k0=K[i-1],k1=K[i],t=(u-k0[0])/(k1[0]-k0[0]),e=t*t*(3-2*t);q=k0[1].map((v,j)=>lerp(v,k1[1][j],e));break}return q}
 function drawActVM(cam,R,U,F){const a=me.act,u=clamp(a.t/a.d,0,1),Gh=hipFrame(cam,R,U,F);let obj,Rel,grip;
+ if(a.k==='mine'){const H=mineVM(Gh,u);gl.useProgram(PW.p);if(ARMS.ok){gl.useProgram(PM.p);const R0=M.rx(-.25),c={rw:tp(H,WPN[2].m.rw),rwM:R0,lw:[-.2,-.5,.25],hideL:1,ads:sub(ARMS.eye,[0,-.05,.04])};const ad=me.ads;me.ads=0;ARMS.lwOver=null;drawArms(Gh,WPN[me.w],c);me.ads=ad;gl.useProgram(PW.p)}return}
  if(a.k==='knife'){obj=MODELS.couteau;grip=GRIP_KNIFE;   // en garde lame en avant, armé à droite, tranche vers la gauche, retour
   const q=keyQ(u,[[0,[.0,.05,-.02,-.95,.1,-.2]],[.22,[.12,.13,.05,-.35,.85,-.95]],[.5,[-.22,.03,-.16,-1.35,-.75,.55]],[.72,[-.15,0,-.08,-1.15,-.4,.3]],[1,[.0,.05,-.02,-.95,.1,-.2]]]);
   Rel=mm(M.trs(q[0],q[1],q[2]),M.ry(q[4]),M.rx(q[3]),M.rz(q[5]))}
@@ -1838,7 +1872,7 @@ const zMin=new Float32Array(15).fill(9999),zMax=new Float32Array(15).fill(9998);
 function loadMap(i){i=MAPS[i]?i:0;WB.length=0;boxes.length=verts.length=zones.length=lights.length=spawns.length=0;lights.dyn=null;fxClear();TERR=null;curMap=i;MAPS[i].build();buildBoxGrid();loadMapAssets(i);buildNav();
  gl.bindBuffer(gl.ARRAY_BUFFER,worldVBO);gl.bufferData(gl.ARRAY_BUFFER,buildChunks(),gl.STATIC_DRAW);worldCount=verts.length/10;verts.length=0;WB.length=0;
  zMin.fill(9999);zMax.fill(9998);zones.forEach((z,k)=>{if(k<5){zMin.set([z[0],z[1],z[2]],k*3);zMax.set([z[3],z[4],z[5]],k*3)}});
- decals.length=tracers.length=parts.length=BLOOD.length=LENS.length=0;curMap=i;
+ decals.length=tracers.length=parts.length=BLOOD.length=LENS.length=MINES.length=0;curMap=i;
  if(started){me.drone=null;me.inDrone=false;spawnMe();for(const b of bots){b.alive=false;b.fall=1;b.resp=.5+rnd()*2;b.path=[];b.tgt=null;b.last=null}feed('Carte : <i>'+MAPS[i].n+'</i>')}
  const sel=$('imap');if(sel)sel.value=i;if(typeof drawMaps==='function'&&$('maps'))drawMaps()}
 let gain=1.6,lastCamYaw=0,lastCamPitch=0,fpsAcc=0,fpsN=0,slowT=0;
@@ -1907,7 +1941,7 @@ function render(dt){
  if(me.drone){const d=me.drone;drawUAV(d.pos,d.eu[0],d.eu[1],d.eu[2],d.eu[1]+d.tilt,d.spin,d.ph,d.state!=='down',t,me.inDrone);
   // ombre au sol : aide à juger la hauteur, comme dans la réalité
   if(d.agl<14&&d.state!=='down'){const gy=d.pos[1]-d.agl+.012,r=.22+d.agl*.02;DISCQ.push(mm(M.trs(d.pos[0],gy,d.pos[2]),M.ry(d.eu[0]),M.scl(r*1.15,.002,r)))}}
- bloodDraw();
+ bloodDraw();mineDraw();
  for(const d of decals){if(!inSphere(d.p[0],d.p[1],d.p[2],.08))continue;const a=Math.abs(d.n[0])>.5?[.012,.07,.07]:Math.abs(d.n[1])>.5?[.07,.012,.07]:[.07,.07,.012];cube(mm(M.trs(d.p[0],d.p[1],d.p[2]),M.scl(a[0],a[1],a[2])),[.012,.012,.012])}
  for(const p of parts)if(inSphere(p.pos[0],p.pos[1],p.pos[2],p.s))cube(mm(M.trs(p.pos[0],p.pos[1],p.pos[2]),M.scl(p.s,p.s,p.s)),p.col,p.em?5:4);
  for(const tr of tracers){const d=sub(tr.b,tr.a),l=len(d);if(l<2||!inSphere((tr.a[0]+tr.b[0])/2,(tr.a[1]+tr.b[1])/2,(tr.a[2]+tr.b[2])/2,l/2))continue;const a=add(tr.a,mulS(d,.04)),b=add(tr.a,mulS(d,Math.min(1,.04+18/l)));cube(between(a,tr.b,.012,.012),[3,2.2,1.1],5)}
@@ -2046,7 +2080,7 @@ function update(dt){if(started&&playing)PROF.time+=dt;
  if(started&&isHost())for(const b of bots)botUpdate(b,dt);
  else for(const b of bots){const k=Math.min(1,dt*12),ox=b.pos[0],oz=b.pos[2];for(let i=0;i<3;i++)b.pos[i]+=(b.tpos[i]-b.pos[i])*k;b.yaw+=angd(b.tyaw,b.yaw)*k;b.spd=Math.hypot(b.pos[0]-ox,b.pos[2]-oz)/Math.max(dt,1e-4);b.walk+=b.spd*dt*2.4;if(!b.alive)b.fall=Math.min(1,b.fall+dt*1.5)}
  for(const id in players){const p=players[id],k=Math.min(1,dt*12),ox=p.pos[0],oz=p.pos[2];for(let i=0;i<3;i++)p.pos[i]+=(p.tpos[i]-p.pos[i])*k;p.yaw+=angd(p.tyaw,p.yaw)*k;p.pitch+=(p.tpitch-p.pitch)*k;p.spd=Math.hypot(p.pos[0]-ox,p.pos[2]-oz)/Math.max(dt,1e-4);p.walk+=p.spd*dt*2.4;if(!p.alive)p.fall=Math.min(1,p.fall+dt*1.5)}
- playerUpdate(dt);actUpdate(dt);grenUpdate(dt);droneUpdate(dt);
+ playerUpdate(dt);actUpdate(dt);grenUpdate(dt);mineUpdate(dt);droneUpdate(dt);
  for(let i=tracers.length-1;i>=0;i--)if((tracers[i].life-=dt)<=0)tracers.splice(i,1);
  for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=dt;if(p.life<=0){parts.splice(i,1);continue}p.vel[1]-=p.g*dt;for(let a=0;a<3;a++)p.pos[a]+=p.vel[a]*dt;if(p.pos[1]<.02){p.pos[1]=.02;p.vel=[0,0,0]}}
  bloodUpdate(dt);
@@ -2098,7 +2132,7 @@ function act(code){ // actions ponctuelles (clavier et manette)
  if(code==='KeyR')reload();
  const K=me.kit||[me.w],ki=Math.max(0,K.indexOf(me.w));
  if(code==='NextW')switchW(K[(ki+1)%K.length]);if(code==='PrevW')switchW(K[(ki+K.length-1)%K.length]);
- if(code==='KeyV'||code==='Digit3'||code==='Knife'){knife();return}if(code==='Digit4'||code==='Frag'){throwGren('frag');return}if(code==='Digit5'||code==='Flash'){throwGren('flash');return}
+ if(code==='KeyV'||code==='Digit3'||code==='Knife'){knife();return}if(code==='Digit6'||code==='Mine'){placeMine();return}if(code==='Digit4'||code==='Frag'){if(me.gren&&me.gren.mine>0&&!(me.gren.frag>0)&&code==='Frag'){placeMine();return}throwGren('frag');return}if(code==='Digit5'||code==='Flash'){throwGren('flash');return}
  if(code==='Digit1'||code==='Digit2'){const i=K[+code[5]-1];if(i!==undefined)switchW(i)}
  if(code==='KeyI'){const w=WPN[me.w];if(w.anims&&w.anims.inspect&&me.reload<=0&&vmA.loop)vmPlay(w.anims.inspect,false,1)}}
 addEventListener('keydown',e=>{
@@ -2127,7 +2161,7 @@ function pollPad(dt){let g=null;try{for(const p of(navigator.getGamepads?navigat
  else if(playing){
   pad.fireEdge=edge(7);pad.fire=b(7);pad.ads=b(6);pad.jump=b(0);if(me.inDrone&&edge(0))act('KeyX');pad.lean=(b(5)?1:0)-(b(4)?1:0);
   if(edge(1)){if(me.inDrone)exitDrone();else pad.crouch=!pad.crouch}if(edge(10))pad.sprint=true;if(Math.hypot(pad.lx,pad.ly)<.5)pad.sprint=false;
-  if(edge(2)){if(!me.inDrone)rT=now}else if(!b(2)&&pad.prev[2]&&!me.inDrone&&now-rT<.3)act('KeyR');pad.rHeld=b(2);if(edge(3))act(me.inDrone?'KeyT':'NextW');if(edge(12))act('KeyG');if(edge(13))act('KeyF');if(edge(14)){if(me.inDrone)uavZoom(-1);else act('Frag')}if(edge(15)){if(me.inDrone)uavZoom(1);else act('Flash')}if(edge(11))act('Knife');
+  if(edge(2)){if(!me.inDrone)rT=now}else if(!b(2)&&pad.prev[2]&&!me.inDrone&&now-rT<.3)act('KeyR');pad.rHeld=b(2);if(edge(3))act(me.inDrone?'KeyT':'NextW');if(edge(12))act('KeyG');if(edge(13))act('KeyF');if(edge(14)){if(me.inDrone)uavZoom(-1);else act(me.gren&&me.gren.mine>0?'Mine':'Frag')}if(edge(15)){if(me.inDrone)uavZoom(1);else act('Flash')}if(edge(11))act('Knife');
   if(edge(8)){scoreboard();$('score').style.display='block'}else if(!b(8)&&pad.prev[8])$('score').style.display='none';
   if(!me.inDrone){const cv_=v=>Math.sign(v)*Math.pow(Math.abs(v),1.7),sl=1-.5*me.ads;mdx+=cv_(pad.rx)*3.1*sl*dt/.0022;mdy+=cv_(pad.ry)*2.1*sl*dt/.0022}}
  for(let i=0;i<g.buttons.length;i++)pad.prev[i]=b(i)}
@@ -2169,7 +2203,7 @@ function touchState(){document.body.classList.toggle('play',TOUCH.on&&playing&&s
  $('tFire').addEventListener('pointermove',e=>{const b=$('tFire');if(!TOUCH.fire||b.lx===undefined)return;mdx+=(e.clientX-b.lx)*1.7;mdy+=(e.clientY-b.ly)*1.7;b.lx=e.clientX;b.ly=e.clientY});
  btn('tAds',()=>{TOUCH.ads=!TOUCH.ads});btn('tJump',()=>{TOUCH.jump=true},()=>{TOUCH.jump=false});btn('tCr',()=>{TOUCH.crouch=!TOUCH.crouch});
  btn('tRl',()=>{TOUCH.rHeld=true;TOUCH.rT=now},()=>{TOUCH.rHeld=false;if(now-TOUCH.rT<.3)act('KeyR')});
- btn('tSw',()=>act('NextW'));btn('tKn',()=>act('Knife'));btn('tGr',()=>act(me.gren&&me.gren.frag>0?'Frag':'Flash'));btn('tDr',()=>act('KeyG'));btn('tLamp',()=>act('KeyF'));
+ btn('tSw',()=>act('NextW'));btn('tKn',()=>act('Knife'));btn('tGr',()=>act(me.gren&&me.gren.mine>0?'Mine':me.gren&&me.gren.frag>0?'Frag':'Flash'));btn('tDr',()=>act('KeyG'));btn('tLamp',()=>act('KeyF'));
  btn('tMode',()=>act('KeyT'));btn('tTurt',()=>act('KeyX'));btn('tRec',()=>act('KeyF'));btn('tOut',()=>act('KeyG'));
  btn('tMenu',()=>{setMenu(true)});
  touchApply()})();
@@ -2258,7 +2292,7 @@ function drawMaps(){const el=$('maps');if(!el)return;
 const wpnCard=(w,i,pick)=>{const rpm=Math.round(60/w.cd),sb=(l,v,t)=>'<div class="sb">'+l+'<div><i style="--v:'+clamp(v,0,1).toFixed(3)+'"></i></div><em>'+t+'</em></div>';
  return'<button class="wpn'+(pick?'':' fixe')+'" data-i="'+i+'"><div><b>'+w.n+'</b><small>'+w.cal+'<br>'+(w.auto?'AUTO':w.sniper?'VERROU':'SEMI-AUTO')+'</small></div><div class="sbs">'+sb('DÉGÂTS',w.dmg/50,w.dmg)+sb('CADENCE',rpm/800,w.auto?rpm+' CPM':w.sniper?'VERROU':'SEMI')+sb('RECUL',w.rec/.04,Math.round(w.rec*1000))+sb('CHARGEUR',w.mag/30,w.mag+' + '+w.res)+'</div><div class="st"></div></button>'};
 function drawLoadout(){const c=myClass();
- $('clsl').innerHTML=CLASSES.map((k,i)=>'<button class="wpn cls" data-c="'+i+'"><div><b>'+k.n+'</b><small>'+(k.shield?'BOUCLIER · ':'')+'FRAG '+k.frag+' · FLASH '+k.flash+'<br>VITESSE '+Math.round(k.spd*100)+' %</small></div><div class="cd">'+esc(k.d)+'</div><div class="st">'+(i===(CFG.cls|0)?'ÉQUIPÉE':'CHOISIR')+'</div></button>').join('');
+ $('clsl').innerHTML=CLASSES.map((k,i)=>'<button class="wpn cls" data-c="'+i+'"><div><b>'+k.n+'</b><small>'+(k.shield?'BOUCLIER · ':'')+'FRAG '+k.frag+' · FLASH '+k.flash+(k.mine?' · MINES '+k.mine:'')+'<br>VITESSE '+Math.round(k.spd*100)+' %</small></div><div class="cd">'+esc(k.d)+'</div><div class="st">'+(i===(CFG.cls|0)?'ÉQUIPÉE':'CHOISIR')+'</div></button>').join('');
  $('clsl').querySelectorAll('.cls').forEach(b=>{b.classList.toggle('on',+b.dataset.c===(CFG.cls|0));b.addEventListener('mouseenter',()=>uiSnd('hover'));b.addEventListener('click',()=>{if(+b.dataset.c===(CFG.cls|0))return;CFG.cls=+b.dataset.c;saveCfg();uiSnd('sel');drawLoadout();if(started)tip('Classe '+myClass().n+' : appliquée au prochain déploiement',4)})});
  const list=c.kit?c.kit.map(i=>[i,false]):PRIM.map(i=>[i,true]).concat([[c.sec,false]]);$('armsLbl').textContent=c.kit?'Armes de la classe':'Fusil de la classe ASSAUT (au choix) et pistolet';
  $('arms').innerHTML=list.map(([i,pk])=>wpnCard(WPN[i],i,pk)).join('');
@@ -2335,7 +2369,7 @@ loadMap(CFG.map|0);{let nn=0;for(let i=0;i<NG*NG;i++)if(adj[i]&&adj[i].length)nn
 Promise.all(MODEL_LIST.map(n=>loadModel(n).then(()=>{const m=MODELS[n];bootLog(m?'Modèle '+n+' — '+fmtN(m.prims.reduce((a,p)=>a+p.count,0)/3)+' triangles · '+(m.bytes/1048576).toFixed(1)+' Mo':'Modèle '+n+' — indisponible, remplacé par des volumes simples',!!m)}))).then(()=>{armsInit();return Promise.all(TEXP)}).then(()=>{bootLog('Textures — '+TEXP.length+' chargées sur le GPU');requestAnimationFrame(()=>requestAnimationFrame(bootDone))});
 setTimeout(bootDone,20000);
 resize();updNet();connect();showSec('deploy',true);setMenu(true);uiTick();requestAnimationFrame(frame);
-window.DF={GREN,CLASSES,applyClass,throwGren,knife,detonate,__fire:()=>fire(),__net:(f,d)=>onNet(f,d),get now(){return now},ARMS,BLOOD,LENS,TOUCH,WPN,bloodFx,lensBlood,touchApply,__frame(dt){update(dt);computeCam(dt)},__sim(n,dt){for(let i=0;i<n;i++){mdx=mdy=0;droneUpdate(dt)}},__setMouse(x,y){mdx=x;mdy=y},__CH:()=>CH,__inBox:inBox,__asp:()=>RW/RH,camS,bench(n){gl.finish();const t0=performance.now();for(let i=0;i<n;i++){computeCam(.016);render(.016)}gl.finish();return(performance.now()-t0)/n},CULL,get chunks(){return CH.length},UAVX:{fxUpdate,droneDamage,uavZoom,explode,launchDrone,exitDrone,uavRecall,FX,DEB,FIRES,FXL,UAV,get flash(){return flashFx}},PROF,showSec,leaveMatch,STAGES,menuOp,MODELS,DBG,vmA,vmPlay,loadMap,MAPS,pad,act,get map(){return curMap},gun,me,bots,players,CFG,enter,get online(){return online},get host(){return isHost()},nav:{nodeOK,adj,NG},spawns,freeAt,boxes,gY,rayWorld,fire,keys,launchDrone,camS,WPN,gunRef:gun,setLook(y,p){me.yaw=me.cy=y;me.pitch=me.cp=p}};
+window.DF={MINES,placeMine,mineUpdate,GREN,CLASSES,applyClass,throwGren,knife,detonate,__fire:()=>fire(),__net:(f,d)=>onNet(f,d),get now(){return now},ARMS,BLOOD,LENS,TOUCH,WPN,bloodFx,lensBlood,touchApply,__frame(dt){update(dt);computeCam(dt)},__sim(n,dt){for(let i=0;i<n;i++){mdx=mdy=0;droneUpdate(dt)}},__setMouse(x,y){mdx=x;mdy=y},__CH:()=>CH,__inBox:inBox,__asp:()=>RW/RH,camS,bench(n){gl.finish();const t0=performance.now();for(let i=0;i<n;i++){computeCam(.016);render(.016)}gl.finish();return(performance.now()-t0)/n},CULL,get chunks(){return CH.length},UAVX:{fxUpdate,droneDamage,uavZoom,explode,launchDrone,exitDrone,uavRecall,FX,DEB,FIRES,FXL,UAV,get flash(){return flashFx}},PROF,showSec,leaveMatch,STAGES,menuOp,MODELS,DBG,vmA,vmPlay,loadMap,MAPS,pad,act,get map(){return curMap},gun,me,bots,players,CFG,enter,get online(){return online},get host(){return isHost()},nav:{nodeOK,adj,NG},spawns,freeAt,boxes,gY,rayWorld,fire,keys,launchDrone,camS,WPN,gunRef:gun,setLook(y,p){me.yaw=me.cy=y;me.pitch=me.cp=p}};
 </script>
 </body>
 </html>
