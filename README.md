@@ -23,14 +23,21 @@ Le fichier `render.yaml` décrit le service : Render construit le serveur Go (le
 - **DEPLOY** : zone d'opération (la scène en arrière-plan suit la carte choisie), nombre d'hostiles, adresse réseau à donner aux amis, bouton Déployer (ou Entrée).
 - **LOADOUT** : arme en main à chaque insertion (les cinq restent accessibles en jeu avec 1–5) et dotation fixe.
 - **OPERATORS** : indicatif, niveau, grade, états de service, connexion Discord.
-- **MISSIONS** : 13 contrats permanents suivis sur toutes les parties (éliminations par arme, par carte, tirs à la tête, série, temps de vol du drone), chacun récompensé en XP.
+- **MISSIONS** : 15 contrats permanents suivis sur toutes les parties (éliminations par arme, par carte, tirs à la tête, série, temps de vol du drone), chacun récompensé en XP.
 - **SETTINGS** : affichage, contrôles, audio, touches, crédits.
 - **QUIT** : en partie, « Quitter la partie » ramène au menu ; « Quitter le jeu » ferme la fenêtre et, avec `DEADFRAME.exe`, arrête aussi le serveur (uniquement depuis le PC qui l'héberge).
 - Progression : 100 XP par élimination, +50 à la tête, plus les contrats. Grades de Recrue (niv. 1) à Major (niv. 42). Enregistrée dans le navigateur (localStorage) : elle ne suit pas d'un navigateur ou d'un PC à l'autre.
 - Navigation : souris, ↑/↓ + Entrée, ou croix de la manette + A.
 
 ## Cartes
-Dépôt industriel · Hôpital abandonné · Tranchées · Hôtel — choix dans le menu (en multijoueur, c'est l'hôte qui choisit).
+Dépôt industriel · Hôpital abandonné · Tranchées · Hôtel · Front — choix dans le menu (en multijoueur, c'est l'hôte qui choisit).
+
+### Front (décor en modèles 3D, sol en relief)
+Deux lignes de tranchées face à face (coffrage en planches, caillebotis, parapets de sacs de sable, lanternes), reliées par des T, un croisement et un boyau vers l'arrière ; un no man's land de 34 trous d'obus avec flaques, deux maisons en ruine (un feu brûle dans chacune) et des arbres morts.
+- **Sol en relief** : la carte des hauteurs `assets/fr_hf.bin` (pas de 12,5 cm) remplace le sol plat. On tombe dans les tranchées, les parois arrêtent les joueurs, les bots et les balles ; on en sort par les **rampes** (trois vers le no man's land et une vers l'arrière pour chaque ligne, plus les deux bouts). Un saut ne suffit pas pour remonter une paroi de 2 m. Les sacs de sable arrêtent les balles et se franchissent en sautant.
+- **Collisions** : murs des ruines et troncs en boîtes invisibles, gravats et cratères dans le relief. Les bots naviguent sur le relief (pas de marche de plus de 30 cm).
+- **Chargement** : les modèles (~6 Mo) ne sont téléchargés que lorsqu'on choisit la carte.
+- **Régénérer** : `sh tools/modeles/construire.sh` (python3, numpy, pillow, scipy) refait tous les modèles, `assets/fr_*` et les données de la carte dans `src/game.html`, à l'identique (graines fixes). La disposition se règle dans `tools/modeles/make_front.py` (tuiles sur une grille de 8 m, ruines, arbres, lanternes, points d'apparition).
 
 ## Commandes (clavier AZERTY)
 ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher · clic gauche tir · clic droit visée · R recharger · 1–5 arme (HK416, AKS-74, AKM, P43, LUNARIS) · V inspecter l'arme · F lampe · G drone · Tab scores · Échap menu.
@@ -86,6 +93,7 @@ Qualité « Automatique » : la résolution interne s'ajuste pour viser 60 i/s.
 | `src/game.html` | Tout le jeu : moteur WebGL2, shaders, IA, audio, réseau |
 | `main.go` | Serveur HTTP + relais WebSocket (bibliothèque standard), embarque `index.html` et `assets/` |
 | `tools/convert.py` | Convertisseur glTF → `.dfm` (décimation, squelette, animations) |
+| `tools/modeles/` | Générateurs des modèles de décor (tranchées, ruines, arbres morts, meubles, sol boueux) et de la carte Front |
 | `logo/` | Logo et icône |
 
 ## Compiler
@@ -96,6 +104,7 @@ GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o download/DEADFR
 
 ## Limites connues
 - Rendu stylisé (décors en blocs, textures procédurales, pas d'ombres portées).
+- Front : le relief ne gère pas les surplombs (pas d'abri souterrain jouable) ; quelques effets posés à y = 0 (brûlures et feux d'explosion du drone) peuvent flotter au-dessus des tranchées. Carte plus lourde (~300 000 triangles visibles au maximum) : prévoir la qualité « Automatique » sur mobile.
 - Le soldat n'a pas de squelette d'origine : un squelette de 11 os est généré automatiquement (`tools/convert.py`) et animé par le jeu (marche, visée, accroupi) ; les épaules se déforment un peu.
 - Bras de l'AKM : l'export d'origine a des sommets de bras à une mauvaise échelle (corrigée à la conversion, bras droit en miroir). Les doigts gardent la prise de l'AKM sur toutes les armes ; seul l'AKS-74 a ses propres bras et animations.
 - Réseau : relais simple, dégâts déclarés par le tireur (pas d'anti-triche). Par Internet : rediriger le port 7777 ou VPN type LAN.
