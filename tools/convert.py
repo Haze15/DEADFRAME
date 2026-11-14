@@ -486,7 +486,7 @@ if __name__ == '__main__':
     if 'pistol' in which:
         convert_static(U + 'ccae6623-pistol_43_tactical__free_lowpoly.glb', 'pistol', out, 99999, 1024)
     if 'hk416' in which:
-        convert_static(U + 'hk416_full_reworked.glb', 'hk416', out, 110000, 1024, lods=[('_lod', 3500)], skip_mats=('Glass',),
+        convert_static(U + 'hk416_full_reworked.glb', 'hk416', out, 30000, 1024, lods=[('_lod', 3500)], skip_mats=('Glass',),
                        cut=[([-1, .0298, .0105], [1, 1, .0278]), BULLET])  # retire la hausse rabattable (masquait le viseur holographique) et la cartouche isolée
     if 'aks74' in which:
         convert_skinned(U + '817a8f72-stalker_aks-74_reanimation.glb', 'aks74', out, 1024, skip_mats=('wpn_upgrade_S', 'wpn_vog_S'))
