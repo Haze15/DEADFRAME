@@ -477,7 +477,7 @@ SNIPER_FIX = np.array([[0, 0, _s, 0], [0, _s, 0, -.075 * _s], [-_s, 0, 0, -.14 *
 if __name__ == '__main__':
     U = '/mnt/user-data/uploads/'
     out = sys.argv[1]
-    which = sys.argv[2:] or ['soldier', 'pistol', 'hk416', 'aks74', 'akm', 'arms', 'sniper']
+    which = sys.argv[2:] or ['soldier', 'pistol', 'hk416', 'aks74', 'akm', 'arms', 'sniper', 'classes']
     os.makedirs(out, exist_ok=True)
     if 'soldier' in which:
         S = 1.8 / .98
@@ -494,6 +494,10 @@ if __name__ == '__main__':
         convert_skinned(U + 'akm_reload_animation.glb', 'akm', out, 1024, bake={'keep': ('AK_mat',), 'drop_joints': ('mag2',)})
     if 'arms' in which:  # bras de l'AKM (gants), réutilisés sur toutes les armes
         convert_arms(U + 'akm_reload_animation.glb', 'arms', out, 1024, scales={20: 1 / 3062., 22: -1 / 3062.})
+    if 'classes' in which:  # équipement des classes spéciales : modèles déjà en mètres, repère du jeu (-Z devant, +Y haut)
+        for src, name, tx in (('b3906285-bouclier_balistique', 'bouclier', 512), ('feec6d48-grenade_frag', 'gfrag', 256),
+                              ('9266cf16-grenade_flash', 'gflash', 256), ('0381fd27-couteau', 'couteau', 256), ('af63dcbd-mitrailleuse', 'mitrailleuse', 512)):
+            convert_static(U + src + '.glb', name, out, 99999, tex=tx)
     if 'sniper' in which:  # « Lunaris » (export obj2glb, sans texture) : canon le long de +X, unités ~ 0,16 m
         s = .16
         convert_static(U + '8892ad09-Lunaris-sniper.glb', 'sniper', out, 99999, fix=SNIPER_FIX,

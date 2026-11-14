@@ -16,6 +16,7 @@ Les modèles ont été modifiés pour le jeu : conversion au format `.dfm`, déc
 
 | Utilisation dans le jeu | Titre | Auteur | Source |
 |---|---|---|---|
+| Bouclier balistique, grenades à fragmentation et flash, couteau, mitrailleuse ML-100 | — | créés pour DEADFRAME (générateurs `make_*.py`, fournis par le propriétaire du projet) | — |
 | Arme 5 (fusil de précision LUNARIS) | Lunaris sniper | fourni par le propriétaire du projet (export « velocite obj2glb », sans métadonnées d'auteur) | — |
 
 ## Polices

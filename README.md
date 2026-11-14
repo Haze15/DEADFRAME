@@ -41,9 +41,17 @@ Deux lignes de tranchées face à face (coffrage en planches, caillebotis, parap
 - **Régénérer** : `sh tools/modeles/construire.sh` (python3, numpy, pillow, scipy) refait tous les modèles, `assets/fr_*` et les données de la carte dans `src/game.html`, à l'identique (graines fixes). La disposition se règle dans `tools/modeles/make_front.py` (tuiles sur une grille de 8 m, ruines, arbres, lanternes, points d'apparition).
 
 ## Commandes (clavier AZERTY)
-ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher · clic gauche tir · clic droit visée · R recharger · 1–5 arme (HK416, AKS-74, AKM, P43, LUNARIS) · V inspecter l'arme · F lampe · G drone · Tab scores · Échap menu.
+ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher · clic gauche tir · clic droit visée · R recharger · 1 / 2 arme principale / pistolet · 3 ou V couteau · 4 grenade · 5 flash · I inspecter l'arme · F lampe · G drone · Tab scores · Échap menu.
 
 **Munitions** : aucun compteur à l'écran. R bref = recharger ; R maintenu = l'arme se penche et le compte s'affiche à côté d'elle (X maintenu à la manette). Aucun viseur ni point de visée : seuls les organes de visée comptent.
+
+**Classes** (LOADOUT) — la classe fixe les armes, les grenades et la vitesse ; changée en partie, elle s'applique au prochain déploiement :
+- **ASSAUT** : fusil au choix (HK416, AKS-74, AKM) + P43, 2 grenades à fragmentation, 1 flash.
+- **BOUCLIER** : bouclier balistique tenu à gauche + P43, 2 flashs, 80 % de vitesse, pas de sprint. Le bouclier arrête les balles qui le touchent (joueurs et bots, étincelles et ricochet) et les trois quarts des éclats de grenade venant de face ; les autres joueurs le voient porté devant le soldat.
+- **MITRAILLEUR** : mitrailleuse ML-100 (bande de 100 coups, rechargement 5,4 s) + P43, 1 grenade à fragmentation, 86 % de vitesse.
+- **TIREUR D'ÉLITE** : LUNARIS + P43, 1 flash.
+- Pour tous : **couteau** (V ou 3) — 120 de dégâts dans le dos, 55 de face, arrêté par un bouclier de face. **Grenades** : 4 fragmentation (3,2 s, éclats jusqu'à 8 m, un mur protège), 5 flash (1,8 s, éblouit selon la distance, la ligne de vue et la direction du regard, sifflement d'oreilles ; les bots éblouis cessent de tirer). Les grenades rebondissent sur les murs et le sol et sont vues par tous en ligne. Touches 1 / 2 : arme principale / pistolet. Inspecter l'arme passe sur I.
+- Manette : croix ← grenade à fragmentation, croix → flash, R3 couteau. Tactile : boutons COUT. et GREN.
 
 **Armes** : HK416, AKS-74 (bras et animations d'origine), AKM, P43, et le fusil de précision **LUNARIS** (.338, 5 coups, un tir au buste est mortel). Le HK416, l'AKM, le P43 et le LUNARIS sont tenus par les bras gantés du modèle AKM : les mains sont replacées sur chaque arme par cinématique inverse (poignée, garde-main), la main gauche va chercher le chargeur pendant le rechargement, la main droite manœuvre le verrou du LUNARIS après chaque tir.
 - **Visée** : hors visée, l'arme est tenue comme une caméra de poitrine la voit (en bas à droite, elle suit le regard avec un léger retard). En visée, l'œil se place derrière l'arme : la ligne cran de mire → guidon (mesurée sur chaque modèle) est tournée sur l'axe de la caméra, donc cran, guidon et cible forment une ligne droite au centre de l'image, qui est aussi la direction du tir. HK416 : point holographique au centre ; LUNARIS : lunette.
@@ -63,7 +71,7 @@ ZQSD déplacement · Maj sprint · Espace saut · C accroupi · A/E se pencher �
 - Pilote automatique (décollage, stationnaire quand on rend la main, retour si liaison perdue ou rappel, atterrissage sur batterie critique) : il passe par la même physique. Chocs : dégâts, et destruction au-delà d'environ 40 km/h d'impact.
 - Clavier QWERTY : utilise C plutôt que Ctrl pour baisser les gaz (Ctrl+W ferme l'onglet).
 
-**Manette** (Xbox / PlayStation, disposition standard) : stick gauche bouger · stick droit viser · RT tir · LT visée · A saut · B accroupi · X recharger (maintenu : chargeur) · Y arme suivante · LB/RB se pencher · L3 sprint · R3 inspecter · croix ↑ drone, ↓ lampe, ←/→ arme · Start menu · Select scores.
+**Manette** (Xbox / PlayStation, disposition standard) : stick gauche bouger · stick droit viser · RT tir · LT visée · A saut · B accroupi · X recharger (maintenu : chargeur) · Y arme suivante · LB/RB se pencher · L3 sprint · R3 couteau · croix ↑ drone, ↓ lampe, ← grenade, → flash · Start menu · Select scores.
 
 ## Connexion Discord
 Le menu « Opérateur » propose « Se connecter avec Discord » (OAuth2 *implicit grant*, scope `identify` : pseudo et avatar, aucun secret dans le jeu).
