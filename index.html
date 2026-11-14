@@ -891,7 +891,8 @@ function cube(m,col,type=4){gl.uniformMatrix4fv(PW.u.uM,false,m);gl.uniform3fv(P
 const MODELS={},TEXP=[],WHITE=[1,1,1],NOLEG=[0,0,0,0];
 const whiteTex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,whiteTex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([150,150,150,255]));
 // un fichier d'asset : soit embarqué dans la page (version « page unique »), soit téléchargé depuis assets/
-async function assetBuf(file){const el=document.getElementById('asset:'+file);if(el){const b=atob(el.textContent),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);el.textContent='';return u.buffer}
+async function assetBuf(file){const el=document.getElementById('asset:'+file);if(el){const b=atob(el.textContent),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);el.textContent='';
+  if(el.dataset.gz)return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();return u.buffer}
  const r=await fetch('assets/'+file);if(!r.ok)throw new Error(r.status);return r.arrayBuffer()}
 // matériau sans texture (ex. sniper) : texture 1×1 de sa couleur (facteur linéaire -> sRVB)
 function colorTex(c){if(!c)return whiteTex;const t=gl.createTexture(),v=c.map(x=>Math.round(255*Math.pow(clamp(x,0,1),1/2.2)));gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([v[0],v[1],v[2],255]));return t}
