@@ -1,0 +1,24 @@
+name: ios-ipa
+on:
+  workflow_dispatch:
+  push:
+    paths: ['ios/**', 'page/index.html', '.github/workflows/ios.yml']
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compiler
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          mkdir -p build/Payload/DEADFRAME.app/www
+          swiftc -O -sdk "$SDK" -target arm64-apple-ios15.0 ios/main.swift -o build/Payload/DEADFRAME.app/DEADFRAME
+          cp ios/Info.plist build/Payload/DEADFRAME.app/Info.plist
+          cp page/index.html build/Payload/DEADFRAME.app/www/index.html
+          cd build && zip -qr ../DEADFRAME.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with: {name: DEADFRAME-ipa, path: DEADFRAME.ipa}
+      - name: Release
+        env: {GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"}
+        run: gh release create ipa-latest DEADFRAME.ipa --title "DEADFRAME.ipa" --notes "IPA non signé pour LiveContainer" --clobber 2>/dev/null || gh release upload ipa-latest DEADFRAME.ipa --clobber
+    permissions: {contents: write}
