@@ -31,6 +31,15 @@ Le fichier `render.yaml` décrit le service : Render construit le serveur Go (le
 
 ## Cartes
 Dépôt industriel · Hôpital abandonné · Tranchées · Hôtel · Front — choix dans le menu (en multijoueur, c'est l'hôte qui choisit).
+### Refonte des cartes (novembre 2026)
+Les cinq cartes ont été redessinées une à une (plans vérifiés par rendu vu de dessus, captures en jeu et parties de bots).
+- **Dépôt industriel** : gare de marchandises de nuit (rame de wagons, quai couvert, entrepôt à mezzanine et passerelle, bureaux sur deux niveaux, parc à conteneurs sous portique, station-service).
+- **Tranchées** : front d'hiver sous la neige (`snow:1`), tranchées de 2 m, boyaux, sapes, casemate, blockhaus, ferme en ruine et chars détruits au centre.
+- **Hôtel** : palace sous la pluie (`rain:1`), hall à double hauteur, restaurant, club, cuisines, étages, toit-terrasse avec piscine, escaliers de service et de secours.
+- **Hôpital** : navigation des bots reconnectée (gravats dégagés dans le hall, le couloir et aux jonctions des ailes, nœuds fins posés sur les dessus de boîtes) ; les 18 points d'apparition sont reliés.
+- **Front** : parapets de sacs sur les lèvres des tranchées, caillebotis, réseaux de barbelés, murets d'abri dans le no man's land, épaves en flammes.
+- **Navigation des bots** : grille de 2 m, étages (`navLevel`), escaliers validés par simulation de marche (`navLink`), portes automatiques, surface fine (`navSurface`). Test : `DF.nav`.
+
 - **Dépôt industriel** : entrepôt à rayonnages chargés (palettes, cartons, fûts), chariot élévateur, **mezzanine** accessible par un escalier (vue sur l'entrepôt, garde-corps qui couvre à moitié), quai de chargement avec remorque à quai, portique à conteneurs au-dessus du parc, château d'eau, bureaux meublés, garage avec pont élévateur, poste de garde avec barrière levante, clôture barbelée et silhouettes d'usines dans le brouillard.
 - **Tranchées** : parois coffrées en planches, **parapets bas en sacs de sable** sur la première ligne et **banquettes de tir** (50 cm) : debout dessus, on vise par-dessus les sacs ; accroupi, on est à couvert. On sort de la tranchée en sautant depuis la banquette. Lanternes le long des lignes, caisses de munitions, trous d'obus dans le no man's land, barbelés plus denses, deux canons de campagne à l'arrière.
 - **Hôtel** : hall à lustre et tapis, comptoir, salon et fauteuils, restaurant avec chaises et bar (tabourets, bouteilles), cuisine (fourneaux, hotte, plonge), salle de réunion, chambres meublées (lampes de chevet, commode et télévision, rideaux), couloir moquetté avec appliques et sorties de secours. **Escalier de secours** sur la façade est (cinq volées) jusqu'au **toit** : acrotère, édicule, climatiseurs, réservoir, antenne. Balcons en façade, transats et parasols autour de la piscine, filet de tennis, haies.
