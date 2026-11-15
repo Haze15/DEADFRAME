@@ -837,71 +837,134 @@ function mapHopital(){const r=atob(HOP.col),n=r.length/12,dv=new DataView(new Ar
  for(const[x,y,z,r]of HOP.lights)lights.push({p:[x,y,z],r,c:z>9?[1.2,.12,.08]:[.62,.7,.62],z:zoneOf([x,y,z]),fl:z>9?0:(Math.abs(x*7+z*3)%5<1?1:0)});
  for(const sp of HOP.spawns)spawns.push(sp)}
 /*<TRENCH>*/
-function sandbags(aX,a0,a1,b0,b1,y){aX?solid(a0,y,b0,a1,y+.36,b1):solid(b0,y,a0,b1,y+.36,a1);const bag=[.34,.3,.2];
- for(let L=0;L<2;L++){const off=L?.25:0;for(let a=a0-off;a<a1;a+=.5){const p=Math.max(a0,a)+.012,q=Math.min(a1,a+.5)-.012;if(q-p<.12)continue;boxA(aX,p,q,y+L*.18,y+L*.18+.17,b0+.02+L*.04,b1-.02-L*.04,tint(bag,.75+srnd()*.4),9,false)}}}
-function fieldGun(x,z,s){const G=[.2,.22,.17],D=COL.dark,Z=(a,b)=>[Math.min(z+a,z+b),Math.max(z+a,z+b)];let q;
- q=Z(-.6,.6);box(x-.85,0,q[0],x+.85,.95,q[1],G,1);for(const dx of[-1.05,.95]){deco(x+dx,0,q[0]+.05,x+dx+.1,1.1,q[1]-.05,D,4);deco(x+dx-.02,.5,z-.08,x+dx+.12,.6,z+.08,G,1)}
- q=Z(-s*.6,-s*3.4);deco(x-.1,.85,q[0],x+.1,1.05,q[1],D,1);q=Z(-s*.6,-s*1.6);deco(x-.15,.8,q[0],x+.15,1.1,q[1],G,1);q=Z(-s*.62,-s*.68);deco(x-1,.55,q[0],x+1,1.75,q[1],G,1);
- q=Z(s*.6,s*2.5);deco(x-.09,0,q[0],x+.09,.3,q[1],G,1);for(let k=0;k<3;k++){const c=z+s*(1.2+k*.5);deco(x+1.3,0,c-.2,x+1.9,.4,c+.2,[.3,.24,.13],3)}}
-function lantern(x,y,z,s,fl){deco(x-.03,y+.2,z-.03,x+.03,y+.45,z+.03,COL.dark,1);deco(x-.03,y+.42,Math.min(z,z+s*.17),x+.03,y+.47,Math.max(z,z+s*.17),COL.dark,1);
- deco(x-.07,y-.09,z-.07,x+.07,y+.11,z+.07,[3.6,1.9,.6],5);deco(x-.1,y+.12,z-.1,x+.1,y+.17,z+.1,COL.dark,1);lights.push({p:[x,y,z],r:7.5,c:[1.35,.72,.28],z:0,fl})}
-function trenchDetail(g,I){SEED=11;const earth=[.2,.15,.095],W=[.3,.22,.13];
- const band=(x,z)=>Math.abs(z)>=12&&Math.abs(z)<=32&&Math.abs(x)<=36,isE=(x,z)=>band(x,z)&&g[I(x,z)]===1,isT=(x,z)=>band(x,z)&&!g[I(x,z)],hOf=z=>Math.abs(z)<=16?1.3:2.2;
- const noSp=[[-28,22],[20,22],[-12,-22],[4,-22]];
- for(let z=-32;z<=32;z+=2){if(Math.abs(z)<12)continue;const s=Math.sign(z);for(let x=-36;x<=36;x+=2){
-  if(isT(x,z)){
-   // revêtement : planches contre chaque paroi de terre, un poteau à chaque bout
-   for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){if(!isE(x+dx*2,z+dz*2))continue;const h=hOf(z+dz*2)-.04,c=tint(W,.7+srnd()*.45);
-    if(dx){const f=x+dx;deco(Math.min(f,f-dx*.05),0,z-1,Math.max(f,f-dx*.05),h,z+1,c,3);deco(Math.min(f,f-dx*.13),0,z-1,Math.max(f,f-dx*.13),h+.06,z-.89,tint(W,.55),3)}
-    else{const f=z+dz;deco(x-1,0,Math.min(f,f-dz*.05),x+1,h,Math.max(f,f-dz*.05),c,3);deco(x-1,0,Math.min(f,f-dz*.13),x-.89,h+.06,Math.max(f,f-dz*.13),tint(W,.55),3)}}
-   // banquette de tir contre le parapet avant (0,5 m) : debout dessus, la tête et l'arme dépassent des sacs de sable
-   const zi=z-s*2;if(isE(x,zi)&&Math.abs(zi)<=16){const e=z-s;box(x-1,0,Math.min(e,e+s*.6),x+1,.5,Math.max(e,e+s*.6),tint(W,.95),3)}
-   // caisses de munitions contre la paroi arrière
-   else if(isE(x,z+s*2)&&srnd()<.14&&!noSp.some(p=>p[0]===x&&p[1]===z)){const e=z+s,o=(srnd()-.5)*1.1;box(x+o-.32,0,Math.min(e,e-s*.42),x+o+.32,.34,Math.max(e,e-s*.42),[.22,.24,.15],3);deco(x+o-.33,.3,Math.min(e,e-s*.43),x+o+.33,.34,Math.max(e,e-s*.43),[.15,.17,.1],3)}}
-  else if(isE(x,z)&&Math.abs(z)<=16){
-   // sacs de sable sur les bords du parapet qui donnent sur une tranchée
-   for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){if(!isT(x+dx*2,z+dz*2))continue;
-    if(dz){const f=z+dz;sandbags(true,x-1,x+1,Math.min(f,f-dz*.55),Math.max(f,f-dz*.55),1.3)}else{const f=x+dx;sandbags(false,z-1,z+1,Math.min(f,f-dx*.55),Math.max(f,f-dx*.55),1.3)}}}}}
- // lanternes accrochées à la paroi arrière des tranchées
- let k=0;for(const s of[-1,1])for(const x of[-34,-30,-24,-14,-6,2,8,16,26,32])for(const z0 of[16,18,26,28]){const z=s*z0;if(!isT(x,z)||!isE(x,z+s*2))continue;if((z0<20)!==([-30,-14,2,16,32].includes(x)))continue;lantern(x,1.7,z+s*.86,s,k++%3===0?1:0);break}
- // trous d'obus dans le no man's land : lèvres de terre, fond noirci
- for(const[cx,cz,r]of[[-24,3,2.2],[-12,-5,1.8],[4,-3,2],[20,-4,1.6],[30,3,2],[-32,-1,1.6],[-2,6,1.5]]){deco(cx-r*.75,0,cz-r*.75,cx+r*.75,.02,cz+r*.75,[.06,.045,.03],9);deco(cx-r*.42,.01,cz-r*.42,cx+r*.42,.03,cz+r*.42,[.025,.02,.015],9);
-  const n=Math.round(r*5);for(let j=0;j<n;j++){const a=j/n*6.283,x=cx+Math.cos(a)*r,z=cz+Math.sin(a)*r,e=.32+srnd()*.25;box(x-e,0,z-e,x+e,.22+srnd()*.3,z+e,tint(earth,.75+srnd()*.35),9)}}
- // pièces d'artillerie derrière chaque ligne
- fieldGun(-8,36.5,1);fieldGun(8,-36.5,-1);
- // piquets supplémentaires et fils bas dans les barbelés
- for(const z of[-9,9])for(let x=-32;x<=34;x+=4){deco(x-.04,0,z-.6,x+.04,.7,z-.52,[.1,.08,.06],3);deco(x-.04,0,z+.52,x+.04,.7,z+.6,[.1,.08,.06],3);if(x<34)for(const dz of[-.56,.56])deco(x,.3,z+dz-.012,x+4,.32,z+dz+.012,[.08,.08,.08],4)}
-}
-function mapTranchees(){
- const mud=[.17,.125,.08],earth=[.2,.15,.095];base(mud,2,earth);
- const N=41,g=new Uint8Array(N*N),I=(x,z)=>((z+40)/2)*N+(x+40)/2,carve=(x,z)=>{g[I(x,z)]=0};
- for(const s of[-1,1])for(let z=12;z<=32;z+=2)for(let x=-36;x<=36;x+=2)g[I(x,s*z)]=1;
- const wood=[];
- for(const s of[-1,1]){let pz=null;
-  for(let x=-34;x<=34;x+=2){const z=s*(16+(Math.floor((x+34)/8)%2)*2);carve(x,z);if(pz!==null&&pz!==z)carve(x,pz);pz=z}
-  pz=null;for(let x=-34;x<=34;x+=2){const z=s*(26+(Math.floor((x+38)/12)%2)*2);carve(x,z);if(pz!==null&&pz!==z)carve(x,pz);pz=z}
-  for(const x of[-28,-12,4,20])for(let z=16;z<=28;z+=2)carve(x,s*z);
-  for(const x of[-20,0,22])for(let z=12;z<=18;z+=2)carve(x,s*z);
-  for(const x of[-34,-4,12,34])for(let z=26;z<=32;z+=2)carve(x,s*z);
-  for(const[x0,sd]of[[4,1],[-12,-1]]){const xa=x0+sd*2,xb=x0+sd*4;for(const x of[xa,xb])for(const z of[22,24])carve(x,s*z);
-   const X0=Math.min(xa,xb)-1,X1=Math.max(xa,xb)+1,Z0=Math.min(s*22,s*24)-1,Z1=Math.max(s*22,s*24)+1;zones.push([X0,-1,Z0,X1,2.2,Z1]);box(X0-.3,2.2,Z0-.3,X1+.3,2.5,Z1+.3,COL.wood,3);
-   lights.push({p:[(X0+X1)/2,1.9,(Z0+Z1)/2],r:7,c:[1.3,.7,.3],z:zones.length,fl:1});box((X0+X1)/2-.08,1.85,(Z0+Z1)/2-.08,(X0+X1)/2+.08,2.05,(Z0+Z1)/2+.08,[7,4,1.5],5,false);
-   box(xb+sd*.2-.5,0,s*24-.4,xb+sd*.2+.5,.5,s*24+.6,COL.wood,3);crate(xb,s*22+s*.3,.7)}
+// ---- TRANCHÉES : front d'hiver, de nuit. Le sol est à 2 m ; les tranchées sont creusées dedans.
+// Deux réseaux identiques (symétrie centrale) : tranchée de tir à redans, tranchée de soutien, boyaux, sapes,
+// abris enterrés, casemate de mitrailleuse, poste de commandement, batterie. Au centre : ferme en ruine, chemin creux, cratères, épaves de chars.
+function mapTranchees(){SEED=11;
+ const N=41,GL=2,H=new Float32Array(N*N).fill(GL),I=(x,z)=>((z+40)/2|0)*N+((x+40)/2|0);
+ const EA=[.19,.14,.095],MUD=[.12,.095,.07],WD=[.3,.22,.13],WDd=[.2,.15,.09],BAG=[.36,.33,.25],IRON=[.24,.22,.2],CO=[.4,.4,.38],DK=COL.dark,LAN=[1.1,.62,.26],ST=[.33,.31,.29],TR=[.1,.08,.06];
+ // repère local d'un camp (S=+1 : sud ; S=-1 : nord, tourné d'un demi-tour)
+ let S=1;const W=(x,z)=>[S*x,S*z];
+ const cv=(x,z,h=0)=>{const[a,b]=W(x,z);if(Math.abs(a)<=40&&Math.abs(b)<=40)H[I(a,b)]=h};
+ const B=(x0,y0,z0,x1,y1,z1,col,t=4,sol=true)=>{const[a,b]=W(x0,z0),[c,d]=W(x1,z1);box(Math.min(a,c),y0,Math.min(b,d),Math.max(a,c),y1,Math.max(b,d),col,t,sol)};
+ const D=(x0,y0,z0,x1,y1,z1,col,t=4)=>B(x0,y0,z0,x1,y1,z1,col,t,false);
+ const Sd=(x0,y0,z0,x1,y1,z1)=>{const[a,b]=W(x0,z0),[c,d]=W(x1,z1);solid(Math.min(a,c),y0,Math.min(b,d),Math.max(a,c),y1,Math.max(b,d))};
+ const Pp=(x,z,o,y=0)=>{const[a,b]=W(x,z);return[a,b,(o+(S<0?2:0))%4,y]};
+ const Lt=(x,y,z,r,c,fl=0)=>{const[a,b]=W(x,z);lit(a,y,b,r,c,fl)};
+ const ZN=(x0,y0,z0,x1,y1,z1)=>{const[a,b]=W(x0,z0),[c,d]=W(x1,z1);zones.push([Math.min(a,c),y0,Math.min(b,d),Math.max(a,c),y1,Math.max(b,d)])};
+ const isT=(x,z)=>Math.abs(x)<=40&&Math.abs(z)<=40&&H[I(x,z)]===0,isTL=(x,z)=>isT(...W(x,z));
+ const zf=x=>14+((Math.floor((x+36)/6))%2)*2,zs=x=>26+((Math.floor((x+40)/10))%2)*2;
+ const lantern=(x,y,z,fl)=>{D(x-.07,y-.1,z-.07,x+.07,y+.12,z+.07,[3.4,1.8,.6],5);D(x-.09,y+.12,z-.09,x+.09,y+.16,z+.09,DK);D(x-.01,y+.16,z-.01,x+.01,y+.4,z+.01,DK);Lt(x,y-.3,z,8,LAN,fl)};
+ // rangée de sacs de sable (n couches de 19 cm), une seule boîte de collision
+ const bagRow=(aX,a0,a1,b0,b1,y,n=1)=>{aX?Sd(a0,y,b0,a1,y+n*.19,b1):Sd(b0,y,a0,b1,y+n*.19,a1);
+  for(let L=0;L<n;L++){const off=L%2?.24:0;for(let a=a0-off;a<a1;a+=.48){const u=Math.max(a0,a)+.012,v=Math.min(a1,a+.48)-.012;if(v-u<.12)continue;const c=tint(BAG,.72+srnd()*.4);aX?D(u,y+L*.19,b0+.02,v,y+L*.19+.18,b1-.02,c,9):D(b0+.02,y+L*.19,u,b1-.02,y+L*.19+.18,v,c,9)}}};
+ const stL=(x,zA,zB)=>stairs('z',S*zA,S*zB,S*x-.7,S*x+.7,0,GL,8,WD,3,true);
+ for(S of[1,-1]){
+  // ---- tracé
+  for(let x=-36;x<=36;x+=2){cv(x,zf(x));if(x>-36&&zf(x)!==zf(x-2))cv(x,zf(x-2));cv(x,zs(x));if(x>-36&&zs(x)!==zs(x-2))cv(x,zs(x-2))}
+  for(const x of[-30,12,34])for(let z=14;z<=28;z+=2)cv(x,z);
+  for(let z=14;z<=20;z+=2)cv(-8,z);for(let x=-8;x<=-2;x+=2)cv(x,20);for(let z=20;z<=28;z+=2)cv(-2,z);
+  for(let x=-2;x<=2;x+=2)cv(x,14);
+  for(let z=8;z<=zf(-18);z+=2)cv(-18,z);cv(-20,8);cv(-16,8);for(let z=10;z<=zf(24);z+=2)cv(24,z);
+  for(const x of[-26,6,28])cv(x,zf(x)-2);for(const x of[-20,22])cv(x,zs(x)+2);
+  for(const x of[-16,-14,4,6])for(const z of[28,30])cv(x,z);
+  for(const x of[-2,0,2])cv(x,12);
+  // chemin creux (1 m sous le sol), rampes aux deux bouts
+  for(let x=16;x<=36;x+=2)cv(x,0,1);cv(14,0,1.5);cv(38,0,1.5);
+  // cratères (fond à 1,3 m)
+  for(const[x,z]of[[-30,6],[-22,4],[-12,8],[-4,6],[0,8],[2,8],[10,6],[30,4],[34,8]])cv(x,z,1.3)
  }
- for(let zi=0;zi<N;zi++){const z=-40+2*zi;let x0=null;for(let xi=0;xi<=N;xi++){const on=xi<N&&g[zi*N+xi];if(on&&x0===null)x0=-40+2*xi;if(!on&&x0!==null){const x1=-40+2*(xi-1);
-   box(x0-1,0,z-1,x1+1,Math.abs(z)<=16?1.3:2.2,z+1,earth,9);if(Math.abs(z)===32)box(x0-1,2.2,z-.9,x1+1,2.5,z+.9,[.3,.26,.18],0,false);x0=null}}}
- trenchDetail(g,I);
- for(let zi=0;zi<N;zi++)for(let xi=0;xi<N;xi++){const x=-40+2*xi,z=-40+2*zi;if(!g[zi*N+xi]&&Math.abs(z)>=12&&Math.abs(z)<=32&&Math.abs(x)<=36)box(x-.75,0,z-.55,x+.75,.05,z+.55,[.3,.22,.13],3,false)}
- // no man's land
- for(const[x,z,w,d]of[[-26,-4,3,1.6],[-14,5,2.4,2],[8,-6,3,1.4],[18,6,2.6,1.8],[30,-2,2.2,2],[-34,6,2,1.6],[-4,8,2.2,1.4],[26,-8,2,1.4]])box(x-w/2,0,z-d/2,x+w/2,.75,z+d/2,earth,9);
- box(-8.6,0,-3.2,-5.4,1.3,3.2,[.13,.16,.1],1);box(-8,1.3,-1.6,-6,2,1,[.12,.15,.09],1);box(-7.2,1.55,-5.2,-6.8,1.75,-1.6,[.1,.12,.08],1,false);box(-9,0,-3.4,-8.6,.8,3.4,COL.dark,4);box(-5.4,0,-3.4,-5,.8,3.4,COL.dark,4);
- wall('x',3,12,17,2.4,.4,COL.conc,0,[[13.6,15,1,2.4]]);wall('z',17,-1,3,1.6,.4,COL.conc,0);
- for(const z of[-9,9])for(let x=-34;x<=34;x+=4){box(x-.05,0,z-.05,x+.05,1.1,z+.05,[.1,.08,.06],3,false);if(x<34){box(x,.95,z-.015,x+4,.98,z+.015,[.08,.08,.08],4,false);box(x,.5,z-.015,x+4,.53,z+.015,[.08,.08,.08],4,false)}}
- for(const[x,z]of[[-30,2],[-18,-2],[2,4],[12,-3],[24,2],[34,-6],[-36,-6],[-2,-7]])tree(x,z,true);
- for(const[x,z]of[[-38,36],[10,37],[38,-36],[-10,-37]]){box(x-.3,0,z-.3,x+.3,.9,z+.3,[.12,.1,.09],1);box(x-.2,.9,z-.2,x+.2,1,z+.2,[8,3.5,.8],5,false);lights.push({p:[x,1.5,z],r:13,c:[1.6,.75,.25],z:0,fl:1})}
- box(-30,0,35,-24,2,38.5,[.2,.23,.16],4);box(22,0,-38.5,28,2,-35,[.2,.23,.16],4);van(24,37,false,[.2,.24,.17]);van(-26,-37,false,[.2,.24,.17]);
- crate(0,36,1.2);crate(1.3,36,1);crate(-16,-36,1.2);crate(16,36,1);crate(4,-36,1.1);crate(-38,10,1);crate(38,-10,1);
- for(const s of[[-38,38],[0,38],[38,38],[-38,-38],[0,-38],[38,-38],[-38,0],[38,0],[-28,22],[20,22],[-12,-22],[4,-22],[-20,34],[20,-34],[10,0],[-16,0]])spawns.push(s);
+ // ---- terrain : bandes de hauteur égale ; terre gelée sur les flancs, neige dessus
+ for(let zi=0;zi<N;zi++){let x0=null,h0=0;for(let xi=0;xi<=N;xi++){const h=xi<N?H[zi*N+xi]:-1;if(x0!==null&&h!==h0){if(h0>0)box(-41+2*x0,0,-41+2*zi,-41+2*xi,h0,-39+2*zi,EA,36);x0=null}if(x0===null&&h>0){x0=xi;h0=h}}}
+ box(-70,-1,-70,70,0,70,MUD,35,false);
+ for(const[x0,z0,x1,z1]of[[-70,-70,70,-41],[-70,41,70,70],[-70,-41,-41,41],[41,-41,70,41]])box(x0,0,z0,x1,GL,z1,EA,36,false);
+ solid(-42,0,41,42,10,42);solid(-42,0,-42,42,10,-41);solid(41,0,-42,42,10,42);solid(-42,0,-42,-41,10,42);
+ // ---- parois : planches, tôle ondulée ou sacs ; caillebotis au fond
+ for(let z=-40;z<=40;z+=2)for(let x=-40;x<=40;x+=2){if(!isT(x,z))continue;
+  const ex=isT(x-2,z)||isT(x+2,z),ez=isT(x,z-2)||isT(x,z+2);
+  if(ex&&!ez)for(let k=-.75;k<.8;k+=.5)deco(x+k-.2,0,z-.38,x+k+.2,.06,z+.38,tint(WD,.75+srnd()*.3),3);else for(let k=-.75;k<.8;k+=.5)deco(x-.38,0,z+k-.2,x+.38,.06,z+k+.2,tint(WD,.75+srnd()*.3),3);
+  for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx*2,nz=z+dz*2;if(Math.abs(nx)>40||Math.abs(nz)>40)continue;const h=H[I(nx,nz)];if(h<=0)continue;const r=srnd(),hh=h-.03;
+   const f=dx?x+dx:z+dz,th=r>.82?.24:.05,c=r<.6?tint(WD,.7+srnd()*.45):r<.82?tint(IRON,.8+srnd()*.4):BAG,tt=r<.6?27:r<.82?30:9;
+   if(dx)deco(Math.min(f,f-dx*th),0,z-1,Math.max(f,f-dx*th),hh,z+1,c,tt);else deco(x-1,0,Math.min(f,f-dz*th),x+1,hh,Math.max(f,f-dz*th),c,tt);
+   if(r<=.82)for(const o of[-.94,.94]){if(dx)deco(Math.min(f,f-dx*.13),0,z+o-.06,Math.max(f,f-dx*.13),hh+.08,z+o+.06,WDd,3);else deco(x+o-.06,0,Math.min(f,f-dz*.13),x+o+.06,hh+.08,Math.max(f,f-dz*.13),WDd,3)}}}
+ for(S of[1,-1]){
+  // ---- tranchée de tir : banquette de 75 cm côté ennemi, parapet de sacs à créneaux
+  for(let x=-36;x<=36;x+=2){const z=zf(x);if(isTL(x,z-2))continue;B(x-1,0,z-1,x+1,.75,z-.42,WD,27);D(x-1,.75,z-1.02,x+1,.78,z-.4,WDd,3);
+   if((x+40)%6!==2)bagRow(true,x-1,x+1,z-1.62,z-1.02,GL,1);else{bagRow(true,x-1,x-.25,z-1.62,z-1.02,GL,1);bagRow(true,x+.25,x+1,z-1.62,z-1.02,GL,1);D(x-.25,GL,z-1.62,x+.25,GL+.04,z-1.02,WDd,3)}}
+  for(const x of[-34,-28,-22,-16,-10,-4,4,10,16,22,30,36]){const z=zf(x);if(!isTL(x,z+2))lantern(x,1.65,z+.85,x===16?1:0)}
+  for(const x of[-32,-24,-12,-6,2,8,14,26,32]){const z=zs(x);if(!isTL(x,z+2))lantern(x,1.65,z+.85,x===-6?1:0)}
+  for(const[x,z]of[[-30,21],[12,19],[34,21],[-8,17],[-2,24]]){if(!isTL(x+2,z))lantern(x+.85,1.65,z,0)}
+  // sorties vers le no man's land et vers l'arrière (marches de bois)
+  for(const x of[-26,6,28]){const z=zf(x);stL(x,z-1,z-3);navLink([S*x,0,S*z],[S*x,GL,S*(z-4)])}
+  for(const x of[-20,22]){const z=zs(x);stL(x,z+1,z+3);navLink([S*x,0,S*z],[S*x,GL,S*(z+4)])}
+  // sape et poste d'écoute
+  bagRow(true,-21,-15,6.4,7,GL,2);bagRow(false,6.4,9,-21.6,-21,GL,2);bagRow(false,6.4,9,-15,-14.4,GL,2);B(-20.8,0,7.1,-19.2,.75,7.6,WD,27);B(-16.8,0,7.1,-15.2,.75,7.6,WD,27);
+  D(-19.9,.75,7.2,-19.5,.93,7.5,[.22,.24,.15],3);lantern(-18,1.5,9.2,1);
+  bagRow(true,23,25,8.4,9,GL,2);B(23,0,9.1,25,.75,9.6,WD,27);
+  // casemate de mitrailleuse : plancher à 0,6 m, meurtrière au ras du sol, toit en béton couvert de sacs
+  {B(-3,0,11,3,.6,13,CO,0);D(-3,.6,11,3,.61,13,WD,3);B(-3.3,GL+.35,10.6,3.3,2.7,11,CO,0);for(const x of[-3.3,-1.15,.85,2.9])B(x,GL,10.6,x+.4,GL+.35,11,CO,0);
+   B(-3.3,GL,11,-3,2.7,13.3,CO,0);B(3,GL,11,3.3,2.7,13.3,CO,0);B(-3.4,2.7,10.5,3.4,3.05,13.4,CO,0);bagRow(true,-3.4,3.4,10.5,11.2,3.05,2);bagRow(true,-3.4,3.4,12.7,13.4,3.05,1);
+   B(-.55,.6,11.05,.55,1.05,11.6,[.1,.1,.1],19);D(-.06,1.05,10.3,.06,1.17,11.4,DK,19);D(-.18,1.0,11.3,.18,1.25,11.75,DK,19);D(-.3,.6,12.2,.3,.95,12.6,[.22,.24,.15],3);D(.6,.6,12.3,1.2,.9,12.7,[.22,.24,.15],3);
+   ZN(-3,-.5,11,3,2.7,13);Lt(1.8,2.3,12.6,5,[1.1,.6,.25],0);D(1.73,2.4,12.53,1.87,2.6,12.67,[3,1.6,.5],5)}
+  // abris enterrés : toit de rondins sous la neige, couchettes, table, poêle
+  for(const x0 of[-17,3]){const x1=x0+4;B(x0,1.9,27,x1,GL,31,WDd,3);for(let x=x0+.2;x<x1;x+=.45)D(x,1.78,27,x+.3,1.9,31,tint(WD,.7+srnd()*.3),3);
+   D(x0,GL,27,x1,GL+.12,31,[.62,.64,.7],36);B(x0,0,27,x0+1.4,1.9,27.15,WD,27);B(x1-1.4,0,27,x1,1.9,27.15,WD,27);D(x0+1.4,1.75,27,x1-1.4,1.9,27.15,WD,27);
+   for(const y of[.35,1.15]){D(x0+.05,y,27.2,x0+.9,y+.12,30.9,WD,3);D(x0+.08,y+.12,27.3,x0+.85,y+.25,30.8,[.3,.3,.26],13)}Sd(x0+.05,0,27.2,x0+.9,1.4,30.9);
+   tableP(Pp(x0+2.6,29.6,0),1.1,.7,.72,WD,3);chairP(Pp(x0+2.6,28.7,2),WD);B(x1-.75,0,30.2,x1-.15,.7,30.8,[.08,.08,.08],19);D(x1-.55,.7,30.4,x1-.35,1.9,30.6,[.08,.08,.08],19);D(x1-.7,.3,30.18,x1-.2,.5,30.2,[5,1.6,.3],5);
+   D(x0+2.3,.72,29.4,x0+2.9,.73,29.8,[.75,.7,.55],4);crateP(Pp(x1-.5,27.8,0),.6,[.22,.24,.15]);ZN(x0,-.5,27,x1,1.9,31);Lt(x0+2.4,1.2,29.2,6,[1.4,.7,.28],0);Lt(x1-.45,.6,30.1,3,[1.6,.5,.15],1);
+   D(x0+2.33,1.45,29.13,x0+2.47,1.65,29.27,[3.4,1.8,.6],5)}
+  // poste de commandement : blockhaus de béton à l'arrière, meurtrière vers le front, porte à l'ouest
+  {const x0=24,x1=31,z0=31.5,z1=37,Y=GL,h=2.6;B(x0,Y,z0,x1,Y+1.4,z0+.3,CO,0);B(x0,Y+1.75,z0,x1,Y+h,z0+.3,CO,0);B(x0,Y+1.4,z0,x0+1.2,Y+1.75,z0+.3,CO,0);B(x1-1.2,Y+1.4,z0,x1,Y+1.75,z0+.3,CO,0);
+   B(x0,Y,z1-.3,x1,Y+h,z1,CO,0);B(x1-.3,Y,z0+.3,x1,Y+h,z1-.3,CO,0);B(x0,Y,z0+.3,x0+.3,Y+h,z0+1.8,CO,0);B(x0,Y,z0+3.2,x0+.3,Y+h,z1-.3,CO,0);B(x0,Y+2.15,z0+1.8,x0+.3,Y+h,z0+3.2,CO,0);
+   B(x0-.2,Y+h,z0-.2,x1+.2,Y+h+.35,z1+.2,CO,0);bagRow(true,x0-.2,x1+.2,z0-.2,z0+.4,Y+h+.35,2);bagRow(true,x0-.2,x1+.2,z1-.4,z1+.2,Y+h+.35,2);
+   D(x0+.3,Y,z0+.3,x1-.3,Y+.01,z1-.3,[.3,.22,.14],3);tableP(Pp(27.4,34.4,0,Y),1.8,1.1,.8,WD,3);D(26.7,Y+.8,33.9,28.2,Y+.81,34.9,[.75,.7,.55],4);
+   B(29.8,Y,35.9,30.65,Y+1.1,36.65,[.2,.24,.17],19);D(29.9,Y+.7,35.88,30.55,Y+1,35.9,[.6,1.5,.4],26);D(30.5,Y+1.1,36.4,30.55,Y+2.2,36.45,DK);
+   D(x0+.35,Y+.45,z1-1.1,x0+2.2,Y+.6,z1-.35,WD,3);D(x0+.4,Y+.6,z1-1.05,x0+2.15,Y+.75,z1-.4,[.3,.3,.26],13);Sd(x0+.35,Y,z1-1.1,x0+2.2,Y+.6,z1-.35);crateP(Pp(30,32.4,0,Y),.8,[.22,.24,.15]);
+   ZN(x0,Y-.1,z0,x1,Y+h,z1);Lt(27.5,Y+2.2,34.4,7,[1.25,.9,.55],0);D(27.43,Y+2.3,34.33,27.57,Y+2.5,34.47,[4,3,1.8],5)}
+  // batterie : canon de campagne derrière un merlon de sacs, obus empilés
+  {const x=-26,z=35;bagRow(true,x-3,x+3,z-2.6,z-2,GL,3);bagRow(false,z-2,z+1,x-3,x-2.4,GL,3);bagRow(false,z-2,z+1,x+2.4,x+3,GL,3);
+   B(x-.9,GL,z-.5,x+.9,GL+.95,z+.6,[.2,.22,.17],19);for(const dx of[-1.1,.95])D(x+dx,GL,z-.5,x+dx+.12,GL+1.15,z+.55,DK,19);D(x-.1,GL+.82,z-3.6,x+.1,GL+1.02,z-.5,DK,19);D(x-.95,GL+.5,z-.75,x+.95,GL+1.7,z-.62,[.2,.22,.17],19);
+   D(x-.08,GL,z+.6,x+.08,GL+.3,z+2.7,[.2,.22,.17],19);for(let k=0;k<4;k++)D(x+2,GL+k*.16,z+.8,x+2.6,GL+k*.16+.15,z+1.8,[.3,.24,.13],3);Sd(x+2,GL,z+.8,x+2.6,GL+.64,z+1.8)}
+  // tentes, dépôt de caisses, brasero
+  for(const[x,z]of[[-8,35],[-2.5,36.5]]){B(x-1.6,GL,z-1.4,x+1.6,GL+1.1,z+1.4,[.32,.31,.24],32);D(x-1.65,GL+1.1,z-1.1,x+1.65,GL+1.6,z+1.1,[.3,.29,.22],32);D(x-1.65,GL+1.6,z-.6,x+1.65,GL+1.9,z+.6,[.28,.27,.2],32);D(x-1.66,GL+1.9,z-.06,x+1.66,GL+2,z+.06,WDd,3)}
+  for(const[x,z,s,y]of[[8,35,1.1,0],[9.2,35.1,.9,0],[8.1,36.2,1,0],[8,35,.7,1.1]])crateP(Pp(x,z,0,GL+y),s,[.3,.26,.16]);
+  {const[a,b]=W(14,34);deco(a-.35,GL,b-.35,a+.35,GL+.5,b+.35,[.1,.1,.1],19);deco(a-.25,GL+.5,b-.25,a+.25,GL+.62,b+.25,[6,2.4,.6],5);lit(a,GL+1,b,6,[1.6,.7,.25],1)}
+  // char détruit dans le no man's land (celui du sud brûle encore)
+  {const x=18,z=4,Y=GL,P=Pp(x,z,1,Y),TK=[.2,.21,.17];ob(P,-1.8,0,-3.2,1.8,1.5,3.2,TK,19,true);ob(P,-2.1,0,-3.4,-1.6,1.1,3.4,[.1,.1,.09],19,true);ob(P,1.6,0,-3.4,2.1,1.1,3.4,[.1,.1,.09],19,true);
+   ob(P,-1.1,1.5,-1.4,1.1,2.4,1,TK,19,true);ob(P,-.12,1.85,1,.12,2.05,4.2,DK,19);ob(P,-1.85,.4,-3.3,1.85,.9,-3.15,DK,19);ob(P,-.6,1.5,-2.8,.6,1.65,-1.6,[.06,.05,.05],19);
+   if(S>0){Lt(x,Y+2.4,z,9,[1.8,.7,.25],1);D(x-.45,Y+1.5,z-.4,x+.35,Y+1.62,z+.3,[6,2,.5],5)}}
+  // arbres morts, barbelés, chevaux de frise
+  for(const[x,z,h]of[[-34,12.2,4.5],[-12,20.6,3.2],[26,23.4,5],[-36,30.6,4],[18,30.4,2.5],[34,2,3.6],[-28,-2,4.4]]){B(x-.17,GL,z-.17,x+.17,GL+h,z+.17,TR,3);D(x-.8,GL+h*.6,z-.07,x+.1,GL+h*.6+.12,z+.07,TR,3);D(x-.06,GL+h*.8,z-.06,x+.06,GL+h*.8+.1,z+.9,TR,3)}
+  for(let x=-36;x<=36;x+=3){if(x>-5&&x<5)continue;const z=9.7+((x*7)%3+3)%3*.25;D(x-.04,GL,z-.04,x+.04,GL+1.05,z+.04,TR,3);if(x<36&&(x<-8||x>-1))for(const y of[.35,.7,1])D(x,GL+y,z-.012,x+3,GL+y+.02,z+.012,[.07,.07,.07],19);D(x+.3,GL+.1,z-.4,x+2.7,GL+.12,z+.4,[.07,.07,.07],19)}
+  for(const x of[-13,-6.5,9]){const z=10.6;Sd(x-.7,GL,z-.35,x+.7,GL+.9,z+.35);for(const o of[-.45,0,.45]){D(x+o-.05,GL,z-.4,x+o+.05,GL+.95,z-.3,TR,3);D(x+o-.05,GL,z+.3,x+o+.05,GL+.95,z+.4,TR,3)}D(x-.75,GL+.42,z-.04,x+.75,GL+.52,z+.04,TR,3)}
+  // lèvres des cratères
+  for(const[x,z]of[[-30,6],[-22,4],[-12,8],[-4,6],[0,8],[10,6],[30,4],[34,8]])for(let k=0;k<6;k++){if(srnd()<.3)continue;const a=k/6*6.283+srnd()*.4,px=x+Math.cos(a)*1.35,pz=z+Math.sin(a)*1.35,e=.3+srnd()*.2;const[p,q]=W(px,pz);
+   const cx=Math.round(p/2)*2,cz=Math.round(q/2)*2;if(Math.abs(cx)>40||Math.abs(cz)>40||H[I(cx,cz)]!==GL)continue;box(p-e,GL,q-e,p+e,GL+.25+srnd()*.25,q+e,EA,36)}
+  // points d'apparition : au fond des tranchées et dans les abris
+  for(const[x,z]of[[-34,zs(-34)],[-24,zs(-24)],[-2,26],[16,zs(16)],[30,zs(30)],[-30,20],[12,22],[-15.6,28],[4.4,28],[-12,zf(-12)],[20,zf(20)]])spawns.push(W(x,z))
+ }
+ S=1;
+ // ---- ferme en ruine au centre : murs de pierre éventrés, un angle de l'étage tient encore (escalier de pierre), gravats
+ {const Y=GL,c=[.42,.39,.34],x0=-6,x1=6,z0=-3.6,z1=3.6;
+  const seg=(axis,cc,a0,a1,ops)=>{let cur=a0;const pc=(p,q,lo,hi)=>axis==='x'?box(p,lo,cc-.3,q,hi,cc+.3,c,17):box(cc-.3,lo,p,cc+.3,hi,q,c,17);
+   const cut=(a,b)=>{let p=a;while(p<b-.01){const q=Math.min(b,p+.9+srnd()*.9);pc(p,q,Y,Y+1.4+srnd()*3.2);p=q}};
+   for(const[a,b,lo,hi]of ops){cut(cur,a);if(lo>0)pc(a,b,Y,Y+lo);if(hi<5)pc(a,b,Y+hi,Y+hi+.5+srnd()*1.4);cur=b}cut(cur,a1)};
+  seg('x',z0,x0-.3,x1+.3,[[-4.4,-3,1,2.3],[-1,1,0,5],[3,4.4,1,2.3]]);seg('x',z1,x0-.3,x1+.3,[[-4.4,-3,1,2.3],[-1.6,.6,0,5],[2.6,4,1,2.3]]);
+  seg('z',x0,z0+.3,z1-.3,[[-1,.6,0,2.3],[1.6,2.8,1,2.3]]);seg('z',x1,z0+.3,z1-.3,[[-2.6,-1.4,1,2.3]]);
+  box(x0+.3,Y,-.2,-1,Y+2.3,.1,c,17);
+  box(1.2,Y+2.75,z0+.3,x1-.3,Y+2.9,-.6,WDd,3);for(let x=1.4;x<x1-.3;x+=.5)deco(x,Y+2.55,z0+.3,x+.18,Y+2.75,-.6,WD,3);deco(1.2,Y+2.9,-.68,x1-.3,Y+3.0,-.6,WDd,3);
+  stairs('z',2.6,-.6,4.3,5.6,0,Y+2.9,12,ST,17,true);navLevel(Y+2.9,1.2,-3.2,5.6,-.6);navLink([4.95,Y,3],[4.95,Y+2.9,-1.2]);
+  for(const[x,z,w,h]of[[-3.5,1.8,1.6,.6],[2.2,2.2,1.2,.45],[-4.8,-2.4,.9,.5],[.2,-2.6,1.1,.35]])box(x-w/2,Y,z-w/2,x+w/2,Y+h,z+w/2,[.36,.33,.29],18);
+  deco(-5.6,Y,-1.2,-.4,Y+.3,-.9,WDd,3);deco(-2.8,Y,.6,-2.5,Y+1.6,3.2,WDd,3);deco(-.5,Y+.3,1.6,3.6,Y+.55,1.85,WDd,3);tableP([-2.4,-1.8,1,Y],1.4,.8,.75,WD,3);
+  box(-5.7,Y,2.2,-4.3,Y+1.2,3.3,c,17);deco(-5.5,Y+1.2,2.4,-4.5,Y+1.3,3.1,[.08,.08,.08]);lit(-1.5,Y+.4,-.6,5,[1.6,.6,.2],1);deco(-1.8,Y,-.9,-1.2,Y+.15,-.3,[5,1.6,.3],5);
+  for(let k=0;k<8;k++){const x=x0+srnd()*(x1-x0),z=z0+srnd()*(z1-z0);deco(x-.3,Y,z-.3,x+.3,Y+.04+srnd()*.1,z+.3,c,18)}}
+ // haies mortes le long du chemin creux
+ for(const s of[-1,1])for(let x=15;x<=37;x+=1.4){const a=s*x,h=.4+srnd()*.5;for(const b of[1.3,-1.3])deco(a-.55,GL,b-.3,a+.55,GL+h*(b>0?1:.8),b+.3,[.1,.11,.07],31)}
+ navLevel(GL,-40,-40,40,40);navLevel(1.3,-40,-12,40,12);navLevel(1,-40,-2,40,2);navLevel(1.5,-40,-2,40,2);navLevel(.6,-4,-14,4,14);
+ // au loin : clocher en ruine, arbres morts, lueurs d'artillerie
+ deco(-58,GL,-12,-52,GL+16,-6,[.05,.05,.06],0);deco(-56.5,GL+16,-10.5,-53.5,GL+21,-7.5,[.05,.05,.06],0);deco(52,GL,4,60,GL+7,12,[.05,.05,.06],0);
+ for(let k=0;k<40;k++){const a=k/40*6.283,r=50+srnd()*14,x=Math.cos(a)*r,z=Math.sin(a)*r,h=3+srnd()*6;deco(x-.25,GL,z-.25,x+.25,GL+h,z+.25,[.05,.045,.04],3);deco(x-1,GL+h*.7,z-.1,x+.2,GL+h*.7+.15,z+.1,[.05,.045,.04],3)}
+ for(const[x,z]of[[-60,40],[66,-30],[20,-66],[-30,64]])deco(x-3,GL,z-3,x+3,GL+.3,z+3,[2.4,1,.35],5);
 }
 /*</TRENCH>*/
 /*<HOTEL>*/
@@ -1012,7 +1075,7 @@ const MAPS=[
  {n:'Dépôt industriel',build:mapDepot,d:'Entrepôt à rayonnages avec mezzanine, quai de chargement, bureaux, garage, parc à conteneurs sous un portique, château d\'eau. Longues lignes de tir dans la cour.',tag:'MIXTE · NUIT CLAIRE',fog:[.040,.048,.060],amb:[1,1,1],fd:.016},
  {n:'Hôpital abandonné',build:mapHopital,d:'Un hôpital de trois niveaux à l\'abandon : chambres, couloirs, escaliers, gravats, cour envahie par les herbes et parking aux voitures abandonnées.',tag:'CQB · BROUILLARD',fog:[.026,.046,.040],amb:[.85,1,.92],fd:.02,
   assets:['hop_map'],props:[{m:'hop_map',p:[0,0,0],r:0}],propo:{col:[1.25,1.25,1.2],spec:.05}},
- {n:'Tranchées',build:mapTranchees,d:'Deux réseaux de tranchées boisées : parapets de sacs de sable et banquettes de tir pour viser par-dessus, quatre abris, lanternes, no man\'s land troué d\'obus et barbelés.',tag:'EXTÉRIEUR · CRÉPUSCULE',fog:[.075,.052,.034],amb:[1.35,1.05,.78],fd:.020},
+ {n:'Tranchées',build:mapTranchees,d:'Front d\'hiver, de nuit, sous la neige. Tranchées de 2 m creusées dans le sol gelé : tranchée de tir à redans et banquettes, boyaux, sapes, abris enterrés, casemate de mitrailleuse, blockhaus de commandement. Au centre : ferme en ruine, chemin creux, cratères, chars détruits.',tag:'TRANCHÉES · NUIT D\'HIVER',fog:[.036,.044,.058],amb:[1.1,1.2,1.5],fd:.022,snow:1},
  {n:'Hôtel',build:mapHotel,d:'Hall à lustre, restaurant et bar, cuisines, salon, sept chambres meublées. Escalier de secours jusqu\'au toit, piscine, tennis, parking.',tag:'MIXTE · NÉONS',fog:[.052,.036,.060],amb:[1.12,.9,1.15],fd:.013},
  {n:'Front',build:mapFront,d:'Deux lignes de tranchées face à face, un no man\'s land criblé de trous d\'obus, deux maisons en ruine et des arbres morts. Sorties par les rampes.',tag:'TRANCHÉES · CRÉPUSCULE',fog:[.068,.050,.036],amb:[1.4,1.1,.85],fd:.018,
   assets:FR_ASSETS,hf:'fr_hf.bin',props:FRONT.props,propo:{col:[1.5,1.42,1.32],spec:.05}}];
@@ -1108,6 +1171,10 @@ function buildNav(){adj.length=0;NP.length=0;NAVX.warn.length=0;
  // étages : voisins à 2 m (droit et diagonale) du même niveau
  for(let i=NG*NG;i<nGrid;i++){if(!nodeOK[i])continue;const a=NP[i];for(let j=i+1;j<nGrid;j++){if(!nodeOK[j])continue;const b=NP[j];if(Math.abs(a[1]-b[1])>.05)continue;const dx=Math.abs(a[0]-b[0]),dz=Math.abs(a[2]-b[2]);
    if(dx<=2.01&&dz<=2.01&&dx+dz>.5&&clearSeg(a[0],a[2],b[0],b[2],a[1]))link(i,j)}}
+ // niveaux voisins à moins de 0,8 m d'écart (marche franchissable) : liés si un bot y passe
+ for(let i=NG*NG;i<nGrid;i++){if(!nodeOK[i])continue;const a=NP[i];const cand=[];for(let j=NG*NG;j<nGrid;j++){if(j===i||!nodeOK[j])continue;const b=NP[j];const dy=Math.abs(a[1]-b[1]);if(dy<.05||dy>.8||Math.abs(a[0]-b[0])>2.01||Math.abs(a[2]-b[2])>2.01)continue;cand.push(j)}
+  if(a[1]<.85){const gx=Math.round((a[0]+40)/2),gz=Math.round((a[2]+40)/2);for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const x=gx+dx,z=gz+dz;if(x<0||z<0||x>=NG||z>=NG)continue;const j=z*NG+x;if(nodeOK[j]&&Math.abs(NP[j][1]-a[1])>.05)cand.push(j)}}
+  for(const j of cand){if(adj[i].includes(j))continue;const b=NP[j];if(walkSim(a,b)||walkSim(b,a))link(i,j)}}
  // escaliers : tronçons validés par simulation, puis raccord de chaque point aux nœuds de grille proches du même niveau
  for(const L of NAVX.links){for(let k=0;k+1<L.length;k++){const a=NP[L[k].i],b=NP[L[k+1].i];if(walkSim(a,b)||walkSim(b,a))link(L[k].i,L[k+1].i);else NAVX.warn.push('tronçon '+a.map(v=>v.toFixed(1))+' -> '+b.map(v=>v.toFixed(1)))}
   for(const p of L){const a=NP[p.i];let n=0;for(let j=0;j<nGrid;j++){if(!nodeOK[j])continue;const b=NP[j];if(Math.abs(a[1]-b[1])>.3||Math.hypot(a[0]-b[0],a[2]-b[2])>2.3)continue;if(clearSeg(a[0],a[2],b[0],b[2],j<NG*NG?0:a[1])){link(p.i,j);n++}}}}
@@ -1192,6 +1259,8 @@ void main(){
  else if(t==31){float g=vn(uv*14.),k=vn(uv*37.+5.);alb*=(.3+2.3*g*k)*(.68+.55*fbm(uv*1.2));}
  else if(t==32){alb*=(.5+.8*fbm(vec2(uv.x*14.,uv.y*1.5)))*(.78+.4*vn(uv*50.));}
  else if(t==33){float l=abs(fract(fbm(uv*1.6)*7.)-.5);alb*=(.68+.5*fbm(uv*5.))*(.5+.5*smoothstep(.03,.11,l))*(.8+.35*h2(floor(uv*1.3)));alb*=mix(.6,1.,smoothstep(0.,.5,vP.y));}
+ else if(t==36){float f=fbm(uv*.6),g=vn(uv*60.);if(n.y>.5){alb=vec3(.74,.77,.84)*(.8+.22*f)*(.94+.1*g);alb=mix(alb,vec3(.32,.3,.3),smoothstep(.62,.8,fbm(uv*.35+9.))*.55);spec=.12+.5*step(.985,vn(uv*140.));}
+  else{float fr=smoothstep(.55,.95,(vP.y-mod(vP.y,.001))/2.1);alb=vec3(.16,.12,.085)*(.6+.6*fbm(uv*1.5))*(.85+.3*g);alb=mix(alb,vec3(.6,.62,.68),fr*.6*smoothstep(.4,.7,fbm(uv*3.)));}}
  else if(t==35){float f=fbm(uv*.9),g=vn(uv*30.);alb*=(.5+.7*f)*(.78+.44*g);float pud=smoothstep(.58,.66,fbm(uv*.45+3.));alb*=mix(1.,.45,pud);spec=mix(.04,.85,pud);}
  else if(t==7){vec2 tl=abs(fract(uv*.5)-.5);float seam=smoothstep(.0,.012,.5-max(tl.x,tl.y));alb*=(.72+.4*fbm(uv*2.))*(.55+.45*seam);spec=.14;}
  float zone=0.;vec3 q=vP+n*.08;
@@ -2387,6 +2456,9 @@ function render(dt){
  bloodDraw();mineDraw();
  for(const d of decals){if(!inSphere(d.p[0],d.p[1],d.p[2],.08))continue;const x=Math.abs(d.n[0])>.5,y=Math.abs(d.n[1])>.5;dyBox(d.p[0],d.p[1],d.p[2],x?.006:.035,y?.006:.035,!x&&!y?.006:.035,DEC_C,4)}
  for(const p of parts)if(inSphere(p.pos[0],p.pos[1],p.pos[2],p.s))dyBox(p.pos[0],p.pos[1],p.pos[2],p.s/2,p.s/2,p.s/2,p.col,p.em?5:4);
+ if(env.snow){const T=now,cx=camS.pos[0],cy=camS.pos[1],cz=camS.pos[2],SC=[.36,.37,.4];for(let i=0;i<420;i++){const a=Math.sin(i*12.9898)*43758.5453%1,b=Math.sin(i*78.233)*24634.6345%1,c=Math.sin(i*39.425)*13758.937%1,sp=.8+Math.abs(b)*.7;
+  const x=cx+((Math.abs(a)*28+T*.9+Math.sin(T*.7+i)*.3-cx)%28+28)%28-14,y=cy+((Math.abs(c)*12-T*sp-cy)%12+12)%12-4,z=cz+((Math.abs(b)*28+T*.35-cz)%28+28)%28-14;
+  if(!inSphere(x,y,z,.03)||zoneOf([x,y,z]))continue;dyBox(x,y,z,.011,.011,.011,SC,5)}}
  dyFlush();
  for(const tr of tracers){const d=sub(tr.b,tr.a),l=len(d);if(l<2||!inSphere((tr.a[0]+tr.b[0])/2,(tr.a[1]+tr.b[1])/2,(tr.a[2]+tr.b[2])/2,l/2))continue;const a=add(tr.a,mulS(d,.04)),b=add(tr.a,mulS(d,Math.min(1,.04+18/l)));cube(between(a,tr.b,.012,.012),[3,2.2,1.1],5)}
  debrisDraw();
@@ -2773,7 +2845,7 @@ $('iname').addEventListener('input',e=>{const v=e.target.value.trim().toUpperCas
 
 /* ---- plateau du menu : un opérateur posé dans la carte, filmé par une caméra lente ---- */
 // p : position (x,z) · y : orientation · o : décalage du cadrage (l'opérateur à droite du panneau) · d : distance · s : décalage latéral
-const STAGES=[{p:[1.8,1.8],y:-2.36,o:2.05,d:3.7,s:.9},{p:[8,24.6],y:Math.PI,o:1.95,d:3.3,s:.9},{p:[8,-2],y:0,o:2,d:3.6,s:.9},{p:[2,24.2],y:Math.PI,o:1.95,d:3.2,s:.9},{p:[-3,24],y:Math.PI/2,o:.35,d:3.6,s:.05}];
+const STAGES=[{p:[1.8,1.8],y:-2.36,o:2.05,d:3.7,s:.9},{p:[8,24.6],y:Math.PI,o:1.95,d:3.3,s:.9},{p:[-30,22],y:Math.PI,o:1.2,d:3.4,s:.3},{p:[2,24.2],y:Math.PI,o:1.95,d:3.2,s:.9},{p:[-3,24],y:Math.PI/2,o:.35,d:3.6,s:.05}];
 const menuOp={id:'menu-op',kind:'p',name:'',pos:[0,0,0],yaw:0,pitch:-.3,alive:true,spd:0,walk:0,crouch:0,fl:0,i:7,hp:100};
 function stageCam(t){const S=STAGES[curMap]||STAGES[0],op=menuOp;const g0=gY(S.p[0],S.p[1]);op.pos=[S.p[0],g0,S.p[1]];op.yaw=S.y;op.pitch=-.3+Math.sin(t*.37)*.025;
  const F=dirOf(S.y,0),Rr=rightOf(S.y),dd=S.d+Math.sin(t*.19)*.16,sd=S.s+Math.sin(t*.11)*.18,hh=g0+1.4+Math.sin(t*.15)*.035;
