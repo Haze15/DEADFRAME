@@ -78,6 +78,55 @@ B[:, [0, 3]] = B[:, [0, 3]] * R + lo[0]; B[:, [1, 4]] = B[:, [1, 4]] * RY + lo[1
 B = np.round(B, 2)
 print('boîtes', len(B))
 
+# --- escaliers : la voxélisation épaissit les murs et noie les marches. On retire les boîtes dans chaque cage d'escalier
+# et sur son palier, puis on pose des marches exactes, mesurées sur les girons en béton du modèle.
+Tall = P[IDX]
+nrm = np.cross(Tall[:, 1] - Tall[:, 0], Tall[:, 2] - Tall[:, 0])
+up = nrm[:, 1] / (np.linalg.norm(nrm, axis=1) + 1e-12) > .9
+cen = Tall.mean(1)
+mtl = np.array(names)[MAT[IDX[:, 0]]]
+def carve(B, v):
+    """soustrait la boîte v de chaque boîte de B (découpe en morceaux)"""
+    out = []
+    for b in B:
+        if not all(b[a] < v[a + 3] and b[a + 3] > v[a] for a in range(3)):
+            out.append(b); continue
+        b = list(b)
+        for a in range(3):
+            if b[a] < v[a]:
+                piece = list(b); piece[a + 3] = v[a]; out.append(piece); b[a] = v[a]
+            if b[a + 3] > v[a + 3]:
+                piece = list(b); piece[a] = v[a + 3]; out.append(piece); b[a + 3] = v[a + 3]
+    return out
+STAIRS = [  # zone de recherche des girons, volume dégagé (cage + palier)
+    ((13.8, 16.2, -10.2, -6.0), (14.3, .05, -9.7, 15.65, 6.75, -5.82)),
+    ((0, 0, 0, 0), (14.3, .05, -6.42, 17.4, 3.0, -5.76)),    # palier du bas de l'escalier A (mur épaissi par la voxélisation)
+    ((0, 0, 0, 0), (14.3, 3.45, -6.42, 17.4, 6.3, -5.76)),
+    ((0, 0, 0, 0), (-24.05, .05, -4.42, -22.9, 3.0, -3.3)),   # escalier B : accès par le nord au pied de la volée (bas du garde-corps)
+    ((0, 0, 0, 0), (-24.05, 3.45, -4.42, -22.9, 6.3, -3.3)),
+    ((-24.2, -20.0, -6.2, -4.0), (-24.05, .05, -5.7, -20.5, 6.75, -4.35)),
+]
+B = B.tolist()
+steps = []
+for (x0, x1, z0, z1), vol in STAIRS:
+    B = carve(B, vol)
+    s = up & (mtl == 'Beton') & (cen[:, 0] > x0) & (cen[:, 0] < x1) & (cen[:, 2] > z0) & (cen[:, 2] < z1) & (cen[:, 1] > .1) & (cen[:, 1] < 6.85)
+    Q = Tall[s]; ys = np.round(Q[:, :, 1].mean(1), 2)
+    for y in sorted(set(ys)):
+        q = Q[ys == y].reshape(-1, 3)
+        lo_, hi_ = q.min(0), q.max(0)
+        if (hi_[0] - lo_[0]) * (hi_[2] - lo_[2]) > 3:   # dalle d'étage, pas une marche
+            continue
+        thin = (hi_[0] - lo_[0]) < .35 or (hi_[2] - lo_[2]) < .35
+        if thin and min(hi_[0] - lo_[0], hi_[2] - lo_[2]) < .3 and max(hi_[0] - lo_[0], hi_[2] - lo_[2]) > 1.3:   # dessus de mur ou de garde-corps : plein jusqu'au sol de l'étage
+            base = 3.2 if y > 3.4 else 0
+            steps.append([round(lo_[0], 2), base, round(lo_[2], 2), round(hi_[0], 2), y, round(hi_[2], 2)]); continue
+        # marche : une volée par étage, l'une au-dessus de l'autre ; on garde 45 cm d'épaisseur pour laisser passer la tête dessous
+        steps.append([round(lo_[0], 2), max(0 if y < 3.4 else 3.2, y - .45), round(lo_[2], 2), round(hi_[0], 2), y, round(hi_[2], 2)])
+B = B + steps
+B = np.array(B)
+print('escaliers : marches', len(steps), '— boîtes', len(B))
+
 # apparitions : colonnes libres (0 à 2 m) au sol, dans la zone de navigation des bots (±38 m)
 def free(x, z, y0=0.1, y1=2.0, r=.45):
     i0, i1 = int((x - r - lo[0]) / R), int((x + r - lo[0]) / R) + 1

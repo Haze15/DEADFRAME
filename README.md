@@ -31,7 +31,11 @@ Le fichier `render.yaml` décrit le service : Render construit le serveur Go (le
 
 ## Cartes
 Dépôt industriel · Hôpital abandonné · Tranchées · Hôtel · Front — choix dans le menu (en multijoueur, c'est l'hôte qui choisit).
-- **Hôpital abandonné** : modèle 3D complet fourni (trois niveaux, cour, parking aux voitures abandonnées, arbres). Les collisions sont calculées depuis la géométrie du modèle (`tools/hopital.py` : cases de 20 × 10 × 20 cm fusionnées en boîtes) ; on enjambe les obstacles de 75 cm au plus. Les collisions passent par une grille de 4 m, ce qui garde les tirs et déplacements rapides malgré les 13 000 boîtes.
+- **Dépôt industriel** : entrepôt à rayonnages chargés (palettes, cartons, fûts), chariot élévateur, **mezzanine** accessible par un escalier (vue sur l'entrepôt, garde-corps qui couvre à moitié), quai de chargement avec remorque à quai, portique à conteneurs au-dessus du parc, château d'eau, bureaux meublés, garage avec pont élévateur, poste de garde avec barrière levante, clôture barbelée et silhouettes d'usines dans le brouillard.
+- **Tranchées** : parois coffrées en planches, **parapets bas en sacs de sable** sur la première ligne et **banquettes de tir** (50 cm) : debout dessus, on vise par-dessus les sacs ; accroupi, on est à couvert. On sort de la tranchée en sautant depuis la banquette. Lanternes le long des lignes, caisses de munitions, trous d'obus dans le no man's land, barbelés plus denses, deux canons de campagne à l'arrière.
+- **Hôtel** : hall à lustre et tapis, comptoir, salon et fauteuils, restaurant avec chaises et bar (tabourets, bouteilles), cuisine (fourneaux, hotte, plonge), salle de réunion, chambres meublées (lampes de chevet, commode et télévision, rideaux), couloir moquetté avec appliques et sorties de secours. **Escalier de secours** sur la façade est (cinq volées) jusqu'au **toit** : acrotère, édicule, climatiseurs, réservoir, antenne. Balcons en façade, transats et parasols autour de la piscine, filet de tennis, haies.
+- **Ombres** : chaque lampe de la carte projette des ombres (calculées une fois au chargement, réparties sur les premières images).
+- **Hôpital abandonné** : modèle 3D complet fourni (trois niveaux, cour, parking aux voitures abandonnées, arbres). Les collisions sont calculées depuis la géométrie du modèle (`tools/hopital.py` : cases de 20 × 10 × 20 cm fusionnées en boîtes) ; on enjambe les obstacles de 75 cm au plus (sans pouvoir escalader un mur marche après marche). Les deux escaliers mènent au premier étage. Les collisions passent par une grille de 4 m, ce qui garde les tirs et déplacements rapides malgré les 13 000 boîtes.
 
 ### Front (décor en modèles 3D, sol en relief)
 Deux lignes de tranchées face à face (coffrage en planches, caillebotis, parapets de sacs de sable, lanternes), reliées par des T, un croisement et un boyau vers l'arrière ; un no man's land de 34 trous d'obus avec flaques, deux maisons en ruine (un feu brûle dans chacune) et des arbres morts.
@@ -86,7 +90,10 @@ Limites : le pseudo n'est pas vérifié par le serveur de jeu (un joueur peut to
 Qualité « Automatique » : la résolution interne s'ajuste pour viser 60 i/s.
 
 **Champ de vision** : seul ce que la caméra voit est dessiné. La carte est découpée en secteurs de 12 m (les très grands blocs — sol, murs d'enceinte, toits — forment leur propre secteur) ; à chaque image, la pyramide de vision exacte de la caméra (champ, inclinaison, roulis, fisheye compris) est comparée aux boîtes des secteurs et des objets : personnages, drones, débris, particules, impacts, traçantes. Ce qui est hors champ n'est ni envoyé ni calculé par la carte graphique. Le pourcentage de carte dessiné s'affiche dans le coin de la caméra (« CHAMP »).
-- Les lumières ne sont pas filtrées ainsi : une lampe hors champ éclaire encore ce qui est visible. Elles sont limitées aux plus proches de la caméra.
+- **Lumières** : seules comptent celles dont la zone éclairée touche le champ de vision (une lampe derrière soi qui éclaire encore le mur d'en face reste prise) ; les plus proches d'abord, sans allocation à chaque image.
+- **Ombres** : calcul limité, pour chaque lampe, aux secteurs de la carte et aux morceaux des grands modèles à sa portée. Réglage **Ombres** dans Options › Affichage pour les couper sur les machines faibles.
+- **Grands modèles de décor** (hôpital, sol du Front) : découpés en cases de 8 m au chargement ; seules les cases dans le champ sont dessinées.
+- **Impacts et particules** : regroupés dans un seul tampon, un appel de dessin pour tous au lieu d'un par objet.
 - Les textures restent chargées : les retirer et les recharger à chaque mouvement de tête provoquerait des saccades ; le gain vient de ne pas dessiner.
 
 
@@ -114,7 +121,7 @@ GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o download/DEADFR
 ```
 
 ## Limites connues
-- Rendu stylisé (décors en blocs, textures procédurales, pas d'ombres portées).
+- Rendu stylisé (décors en blocs, textures procédurales). Ombres précalculées : seules les lampes de la carte en projettent, et seulement pour le décor fixe (pas les personnages, ni la lampe torche).
 - Front : le relief ne gère pas les surplombs (pas d'abri souterrain jouable) ; quelques effets posés à y = 0 (brûlures et feux d'explosion du drone) peuvent flotter au-dessus des tranchées. Carte plus lourde (~300 000 triangles visibles au maximum) : prévoir la qualité « Automatique » sur mobile.
 - Le soldat n'a pas de squelette d'origine : un squelette de 11 os est généré automatiquement (`tools/convert.py`) et animé par le jeu (marche, visée, accroupi) ; les épaules se déforment un peu.
 - Bras de l'AKM : l'export d'origine a des sommets de bras à une mauvaise échelle (corrigée à la conversion, bras droit en miroir). Les doigts gardent la prise de l'AKM sur toutes les armes ; seul l'AKS-74 a ses propres bras et animations.
