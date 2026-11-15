@@ -20,5 +20,7 @@ jobs:
         with: {name: DEADFRAME-ipa, path: DEADFRAME.ipa}
       - name: Release
         env: {GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"}
-        run: gh release create ipa-latest DEADFRAME.ipa --title "DEADFRAME.ipa" --notes "IPA non signé pour LiveContainer" --clobber 2>/dev/null || gh release upload ipa-latest DEADFRAME.ipa --clobber
+        run: |
+          gh release view ipa-latest >/dev/null 2>&1 || gh release create ipa-latest --title "DEADFRAME.ipa" --notes "IPA non signé pour LiveContainer"
+          gh release upload ipa-latest DEADFRAME.ipa --clobber
     permissions: {contents: write}
