@@ -91,7 +91,7 @@ Qualité « Automatique » : la résolution interne s'ajuste pour viser 60 i/s.
 
 **Champ de vision** : seul ce que la caméra voit est dessiné. La carte est découpée en secteurs de 12 m (les très grands blocs — sol, murs d'enceinte, toits — forment leur propre secteur) ; à chaque image, la pyramide de vision exacte de la caméra (champ, inclinaison, roulis, fisheye compris) est comparée aux boîtes des secteurs et des objets : personnages, drones, débris, particules, impacts, traçantes. Ce qui est hors champ n'est ni envoyé ni calculé par la carte graphique. Le pourcentage de carte dessiné s'affiche dans le coin de la caméra (« CHAMP »).
 - **Lumières** : seules comptent celles dont la zone éclairée touche le champ de vision (une lampe derrière soi qui éclaire encore le mur d'en face reste prise) ; les plus proches d'abord, sans allocation à chaque image.
-- **Ombres** : calcul limité, pour chaque lampe, aux secteurs de la carte et aux morceaux des grands modèles à sa portée. Réglage **Ombres** dans Options › Affichage pour les couper sur les machines faibles.
+- **Ombres** : calcul limité, pour chaque lampe, aux secteurs de la carte et aux morceaux des grands modèles à sa portée. Réglage **Ombres** dans SETTINGS → Affichage pour les couper sur les machines faibles.
 - **Grands modèles de décor** (hôpital, sol du Front) : découpés en cases de 8 m au chargement ; seules les cases dans le champ sont dessinées.
 - **Impacts et particules** : regroupés dans un seul tampon, un appel de dessin pour tous au lieu d'un par objet.
 - Les textures restent chargées : les retirer et les recharger à chaque mouvement de tête provoquerait des saccades ; le gain vient de ne pas dessiner.
