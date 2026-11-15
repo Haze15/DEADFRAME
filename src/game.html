@@ -1168,7 +1168,23 @@ function mapFront(){const F=FRONT;
   if(!fire){box(x-.06,y-.06,z-.06,x+.06,y+.1,z+.06,[6,3.4,1.2],5,false);box(x-.075,y+.1,z-.075,x+.075,y+.13,z+.075,COL.dark,4,false);box(x-.006,y+.13,z-.006,x+.006,y+.32,z+.006,COL.dark,4,false)}
   else for(let k=0;k<5;k++){const a=k*1.26;box(x+Math.cos(a)*.25-.04,y-.5,z+Math.sin(a)*.25-.04,x+Math.cos(a)*.25+.04,y-.5+.18+k%2*.12,z+Math.sin(a)*.25+.04,[7,2.6,.6],5,false)}}
  for(const s of F.spawns)spawns.push(s);
- TERR=TERRC['fr_hf.bin']||null}
+ TERR=TERRC['fr_hf.bin']||null;
+ // ---- aménagements ajoutés au relief : parapets de sacs, caillebotis, réseaux de barbelés, abris, épaves qui brûlent
+ let sd=11;const rn=()=>(sd=sd*16807%2147483647)/2147483647,G=(x,z)=>TERR?gY(x,z):0;
+ const BAG=[.34,.29,.19],WD=[.2,.14,.08],EA=[.17,.13,.09],IR=[.07,.07,.07];
+ for(const sz of[1,-1])for(let x=-31;x<31;x+=1.4){
+  for(const[o,h]of[[-1.65,.42],[1.75,.58]]){const z=sz*24.5+o;if(rn()<.12)continue;const g=G(x,z),w=.3,n=h>.5?3:2;
+   for(let L=0;L<n;L++)deco(x+L%2*.2,g+L*.19,z-w,x+1.3+L%2*.2,g+L*.19+.18,z+w,[BAG[0]*(.8+rn()*.4),BAG[1]*(.8+rn()*.4),BAG[2]*(.8+rn()*.4)],9)}
+  if((x*10|0)%3===0)deco(x,.12,sz*24.5-.55,x+1.1,.17,sz*24.5+.55,WD,3)}
+ // barbelés en quinconce dans le no man's land
+ for(const sz of[1,-1])for(let x=-34;x<=34;x+=3.2){if(Math.abs(x)<5)continue;const z=sz*(12+(x*5%3+3)%3*.5),g=G(x,z);
+  deco(x-.04,g,z-.04,x+.04,g+1.1,z+.04,WD,3);for(const y of[.35,.7,1])deco(x,g+y,z-.012,x+3.2,g+y+.02,z+.012,IR,19);deco(x+.3,g+.1,z-.4,x+2.9,g+.12,z+.4,IR,19)}
+ // abris de fortune : murets de sacs derrière lesquels s'abriter
+ for(const[x,z,r]of[[-18,8,0],[-6,-9,1],[7,10,0],[19,-8,1],[-28,-8,0],[30,9,1],[-10,16,1],[12,-15,0],[0,3,1],[-2,-3,0]]){const g=G(x,z),L=r?[.4,1.7]:[1.7,.4];
+  boxes.push([x-L[0],g,z-L[1],x+L[0],g+.8,z+L[1]]);for(let k=0;k<4;k++)deco(x-L[0]-.01,g+k*.2,z-L[1]-.01,x+L[0]+.01,g+k*.2+.19,z+L[1]+.01,[BAG[0]*(.85+k%2*.2),BAG[1]*(.85+k%2*.2),BAG[2]*(.85+k%2*.2)],9)}
+ // épaves en flammes
+ for(const[x,z]of[[-14,-6],[16,7],[3,-14],[-24,14]]){const g=G(x,z);box(x-.9,g,z-.5,x+.9,g+.7,z+.5,[.06,.05,.04],4,false);box(x-.5,g+.7,z-.4,x+.4,g+1.1,z+.4,[.07,.06,.05],4,false);
+  lights.push({p:[x,g+1.2,z],r:11,c:[1.6,.62,.2],z:0,fl:1});for(let k=0;k<4;k++){const a=k*1.6;box(x+Math.cos(a)*.3-.05,g+1.1,z+Math.sin(a)*.3-.05,x+Math.cos(a)*.3+.05,g+1.4+k%2*.25,z+Math.sin(a)*.3+.05,[7,2.4,.5],5,false)}}}
 const FR_ASSETS=["fr_T","fr_X","fr_arbre1","fr_arbre2","fr_arbre3","fr_arbre4","fr_caisses","fr_canon","fr_char","fr_droite","fr_frise","fr_nid","fr_rampe","fr_rampe_m","fr_ruine","fr_sol","fr_tronc"];
 const MAPS=[
  {n:'Dépôt industriel',build:mapDepot,d:'Gare de marchandises de nuit : rame de wagons et quai couvert, entrepôt à rayonnages avec mezzanine et passerelle, bureaux sur deux niveaux et toit, semi-remorque et station-service dans la cour, parc à conteneurs sous un portique (passage par les toits), atelier, cuves et tour d\'escalier.',tag:'MIXTE · NUIT CLAIRE',fog:[.040,.048,.060],amb:[1,1,1],fd:.016},
