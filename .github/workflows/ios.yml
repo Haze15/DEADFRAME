@@ -2,7 +2,7 @@ name: ios-ipa
 on:
   workflow_dispatch:
   push:
-    paths: ['ios/**', 'page/index.html', '.github/workflows/ios.yml']
+    paths: ['ios/**', 'ios/index.html', '.github/workflows/ios.yml']
 jobs:
   build:
     runs-on: macos-latest
@@ -12,9 +12,9 @@ jobs:
         run: |
           SDK=$(xcrun --sdk iphoneos --show-sdk-path)
           mkdir -p build/Payload/DEADFRAME.app/www
-          swiftc -O -sdk "$SDK" -target arm64-apple-ios15.0 ios/main.swift -o build/Payload/DEADFRAME.app/DEADFRAME
+          swiftc -O -sdk "$SDK" -target arm64-apple-ios15.0 -Xcc -isysroot -Xcc "$SDK" ios/main.swift -o build/Payload/DEADFRAME.app/DEADFRAME
           cp ios/Info.plist build/Payload/DEADFRAME.app/Info.plist
-          cp page/index.html build/Payload/DEADFRAME.app/www/index.html
+          cp ios/index.html build/Payload/DEADFRAME.app/www/index.html
           cd build && zip -qr ../DEADFRAME.ipa Payload
       - uses: actions/upload-artifact@v4
         with: {name: DEADFRAME-ipa, path: DEADFRAME.ipa}
